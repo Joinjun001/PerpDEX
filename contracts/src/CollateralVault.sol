@@ -13,12 +13,37 @@ contract CollateralVault is ReentrancyGuard {
     error ZeroAmount();
     error InsufficientBalance(uint256 available, uint256 requested);
     error UnsupportedTransferBehavior(uint256 expected, uint256 actual);
+    error InvalidSettlementExecutor();
+    error UnauthorizedSettlementExecutor(address caller);
+    error InvalidParticipant();
+    error InvalidTradeId();
+    error TradeAlreadySettled(bytes32 tradeId);
 
     mapping(address token => mapping(address user => uint256 amount)) private _balances;
     mapping(address token => uint256 amount) public totalLiability;
+    mapping(bytes32 tradeId => bool settled) public settledTrades;
+
+    address public immutable settlementExecutor;
 
     event Deposited(address indexed user, address indexed token, uint256 amount);
     event Withdrawn(address indexed user, address indexed token, uint256 amount);
+    event Settled(
+        bytes32 indexed tradeId,
+        address indexed token,
+        address indexed from,
+        address to,
+        uint256 amount
+    );
+
+    modifier onlySettlementExecutor() {
+        if (msg.sender != settlementExecutor) revert UnauthorizedSettlementExecutor(msg.sender);
+        _;
+    }
+
+    constructor(address settlementExecutor_) {
+        if (settlementExecutor_ == address(0)) revert InvalidSettlementExecutor();
+        settlementExecutor = settlementExecutor_;
+    }
 
     function deposit(address token, uint256 amount) external nonReentrant {
         if (amount == 0) revert ZeroAmount();
@@ -52,6 +77,27 @@ contract CollateralVault is ReentrancyGuard {
         IERC20(token).safeTransfer(msg.sender, amount);
 
         emit Withdrawn(msg.sender, token, amount);
+    }
+
+    function settle(address token, address from, address to, uint256 amount, bytes32 tradeId)
+        external
+        onlySettlementExecutor
+    {
+        if (amount == 0) revert ZeroAmount();
+        if (from == address(0) || to == address(0) || from == to) revert InvalidParticipant();
+        if (tradeId == bytes32(0)) revert InvalidTradeId();
+        if (settledTrades[tradeId]) revert TradeAlreadySettled(tradeId);
+
+        uint256 available = _balances[token][from];
+        if (available < amount) revert InsufficientBalance(available, amount);
+
+        settledTrades[tradeId] = true;
+        unchecked {
+            _balances[token][from] = available - amount;
+            _balances[token][to] += amount;
+        }
+
+        emit Settled(tradeId, token, from, to, amount);
     }
 
     function balanceOf(address token, address user) external view returns (uint256) {

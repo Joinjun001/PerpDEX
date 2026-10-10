@@ -37,9 +37,10 @@ contract CollateralVaultTest is Test {
 
     address internal alice = makeAddr("alice");
     address internal bob = makeAddr("bob");
+    address internal executor = makeAddr("executor");
 
     function setUp() public {
-        vault = new CollateralVault();
+        vault = new CollateralVault(executor);
         token = new MockERC20();
         token.mint(alice, 1_000 ether);
         token.mint(bob, 1_000 ether);
@@ -140,5 +141,116 @@ contract CollateralVaultTest is Test {
         uint256 liability = vault.totalLiability(address(token));
         assertEq(vault.balanceOf(address(token), alice), liability);
         assertEq(token.balanceOf(address(vault)), liability);
+    }
+
+    function test_RevertWhenSettlementExecutorIsZero() public {
+        vm.expectRevert(CollateralVault.InvalidSettlementExecutor.selector);
+        new CollateralVault(address(0));
+    }
+
+    function test_SettleMovesOnlyInternalBalances() public {
+        vm.prank(alice);
+        vault.deposit(address(token), 100 ether);
+
+        bytes32 tradeId = keccak256("trade-1");
+        uint256 liabilityBefore = vault.totalLiability(address(token));
+        uint256 vaultTokensBefore = token.balanceOf(address(vault));
+
+        vm.prank(executor);
+        vault.settle(address(token), alice, bob, 35 ether, tradeId);
+
+        assertEq(vault.balanceOf(address(token), alice), 65 ether);
+        assertEq(vault.balanceOf(address(token), bob), 35 ether);
+        assertEq(vault.totalLiability(address(token)), liabilityBefore);
+        assertEq(token.balanceOf(address(vault)), vaultTokensBefore);
+        assertTrue(vault.settledTrades(tradeId));
+    }
+
+    function test_RevertWhenUnauthorizedCallerSettles() public {
+        bytes32 tradeId = keccak256("trade-unauthorized");
+
+        vm.prank(alice);
+        vm.expectRevert(
+            abi.encodeWithSelector(CollateralVault.UnauthorizedSettlementExecutor.selector, alice)
+        );
+        vault.settle(address(token), alice, bob, 1 ether, tradeId);
+    }
+
+    function test_RevertWhenTradeIdIsReplayed() public {
+        vm.prank(alice);
+        vault.deposit(address(token), 100 ether);
+
+        bytes32 tradeId = keccak256("trade-replay");
+        vm.startPrank(executor);
+        vault.settle(address(token), alice, bob, 10 ether, tradeId);
+        vm.expectRevert(
+            abi.encodeWithSelector(CollateralVault.TradeAlreadySettled.selector, tradeId)
+        );
+        vault.settle(address(token), alice, bob, 10 ether, tradeId);
+        vm.stopPrank();
+    }
+
+    function test_RevertWhenSettlementBalanceIsInsufficient() public {
+        vm.prank(alice);
+        vault.deposit(address(token), 5 ether);
+
+        bytes32 tradeId = keccak256("trade-insufficient");
+        vm.prank(executor);
+        vm.expectRevert(
+            abi.encodeWithSelector(CollateralVault.InsufficientBalance.selector, 5 ether, 6 ether)
+        );
+        vault.settle(address(token), alice, bob, 6 ether, tradeId);
+
+        assertFalse(vault.settledTrades(tradeId));
+    }
+
+    function test_RevertWhenSettlementAmountIsZero() public {
+        vm.prank(executor);
+        vm.expectRevert(CollateralVault.ZeroAmount.selector);
+        vault.settle(address(token), alice, bob, 0, keccak256("trade-zero-amount"));
+    }
+
+    function test_RevertWhenSettlementParticipantIsZeroAddress() public {
+        vm.startPrank(executor);
+        vm.expectRevert(CollateralVault.InvalidParticipant.selector);
+        vault.settle(address(token), address(0), bob, 1 ether, keccak256("trade-zero-from"));
+
+        vm.expectRevert(CollateralVault.InvalidParticipant.selector);
+        vault.settle(address(token), alice, address(0), 1 ether, keccak256("trade-zero-to"));
+        vm.stopPrank();
+    }
+
+    function test_RevertWhenSettlementTransfersToSelf() public {
+        vm.prank(executor);
+        vm.expectRevert(CollateralVault.InvalidParticipant.selector);
+        vault.settle(address(token), alice, alice, 1 ether, keccak256("trade-self"));
+    }
+
+    function test_RevertWhenTradeIdIsZero() public {
+        vm.prank(executor);
+        vm.expectRevert(CollateralVault.InvalidTradeId.selector);
+        vault.settle(address(token), alice, bob, 1 ether, bytes32(0));
+    }
+
+    function testFuzz_SettlementPreservesTotalLiability(uint96 depositAmount, uint96 settleAmount)
+        public
+    {
+        depositAmount = uint96(bound(depositAmount, 1, 1_000 ether));
+        settleAmount = uint96(bound(settleAmount, 1, depositAmount));
+
+        vm.prank(alice);
+        vault.deposit(address(token), depositAmount);
+        uint256 liabilityBefore = vault.totalLiability(address(token));
+
+        bytes32 tradeId = keccak256(abi.encode(depositAmount, settleAmount));
+        vm.prank(executor);
+        vault.settle(address(token), alice, bob, settleAmount, tradeId);
+
+        assertEq(vault.totalLiability(address(token)), liabilityBefore);
+        assertEq(
+            vault.balanceOf(address(token), alice) + vault.balanceOf(address(token), bob),
+            liabilityBefore
+        );
+        assertEq(token.balanceOf(address(vault)), liabilityBefore);
     }
 }

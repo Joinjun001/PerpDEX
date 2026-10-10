@@ -6,15 +6,15 @@
 - 브랜치: `main`
 - 기준: 실제 소스 코드와 Git 상태를 최우선으로 판단
 - 현재 마일스톤: **M1 — 온체인 자금 보관·정산 기반**
-- 현재 TASK: **M1-T2 — Settlement Executor와 내부 잔액 정산**
+- 현재 TASK: **M1-T3 — 자산 Allowlist, Pause, 역할 기반 보안 제어**
 - 상태: In Progress
 
 ## 현재 TASK 문서
 
-- `docs/tasks/M1-T2-settlement/SPEC.md`
-- `docs/tasks/M1-T2-settlement/TODO.md`
-- `docs/tasks/M1-T2-settlement/RESULT.md`
-- `docs/tasks/M1-T2-settlement/QA.md`
+- `docs/tasks/M1-T3-security-controls/SPEC.md`
+- `docs/tasks/M1-T3-security-controls/TODO.md`
+- `docs/tasks/M1-T3-security-controls/RESULT.md`
+- `docs/tasks/M1-T3-security-controls/QA.md`
 
 ## 저장소 복원 결과
 
