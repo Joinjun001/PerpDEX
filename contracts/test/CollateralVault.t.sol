@@ -383,6 +383,69 @@ contract CollateralVaultTest is Test {
         vault.settle(address(token), alice, bob, 1 ether, bytes32(0));
     }
 
+    function testFuzz_WithdrawBalanceBoundary(uint96 depositAmount, bool overBalance) public {
+        depositAmount = uint96(bound(depositAmount, 1, 1_000 ether));
+        uint256 withdrawAmount = uint256(depositAmount) + (overBalance ? 1 : 0);
+
+        vm.prank(alice);
+        vault.deposit(address(token), depositAmount);
+
+        if (overBalance) {
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    CollateralVault.InsufficientBalance.selector, depositAmount, withdrawAmount
+                )
+            );
+            vm.prank(alice);
+            vault.withdraw(address(token), withdrawAmount);
+
+            assertEq(vault.balanceOf(address(token), alice), depositAmount);
+            assertEq(vault.totalLiability(address(token)), depositAmount);
+            assertEq(token.balanceOf(address(vault)), depositAmount);
+        } else {
+            vm.prank(alice);
+            vault.withdraw(address(token), withdrawAmount);
+
+            assertEq(vault.balanceOf(address(token), alice), 0);
+            assertEq(vault.totalLiability(address(token)), 0);
+            assertEq(token.balanceOf(address(vault)), 0);
+        }
+    }
+
+    function testFuzz_SettlementBalanceBoundary(uint96 depositAmount, bool overBalance) public {
+        depositAmount = uint96(bound(depositAmount, 1, 1_000 ether));
+        uint256 settleAmount = uint256(depositAmount) + (overBalance ? 1 : 0);
+        bytes32 tradeId = keccak256(abi.encode("boundary-settlement", depositAmount, overBalance));
+
+        vm.prank(alice);
+        vault.deposit(address(token), depositAmount);
+
+        if (overBalance) {
+            vm.expectRevert(
+                abi.encodeWithSelector(
+                    CollateralVault.InsufficientBalance.selector, depositAmount, settleAmount
+                )
+            );
+            vm.prank(executor);
+            vault.settle(address(token), alice, bob, settleAmount, tradeId);
+
+            assertEq(vault.balanceOf(address(token), alice), depositAmount);
+            assertEq(vault.balanceOf(address(token), bob), 0);
+            assertEq(vault.totalLiability(address(token)), depositAmount);
+            assertFalse(vault.settledTrades(tradeId));
+        } else {
+            vm.prank(executor);
+            vault.settle(address(token), alice, bob, settleAmount, tradeId);
+
+            assertEq(vault.balanceOf(address(token), alice), 0);
+            assertEq(vault.balanceOf(address(token), bob), depositAmount);
+            assertEq(vault.totalLiability(address(token)), depositAmount);
+            assertTrue(vault.settledTrades(tradeId));
+        }
+
+        assertEq(token.balanceOf(address(vault)), depositAmount);
+    }
+
     function testFuzz_SettlementPreservesTotalLiability(uint96 depositAmount, uint96 settleAmount)
         public
     {

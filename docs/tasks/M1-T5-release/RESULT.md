@@ -19,3 +19,9 @@
 - 두 사용자 내부 잔액의 합이 항상 `totalLiability`와 일치하고, Vault가 실제 보유한 토큰 잔액도 동일한지 검증한다.
 - Foundry invariant 실행 결과 256 runs / 128,000 calls 동안 revert 없이 불변식이 유지됐다.
 - 검증: 전체 `test` 33 passed / 0 failed, `build` 성공.
+
+## 2026-10-15 — Fuzz 경계 테스트 보강
+
+- withdraw와 settlement에 대해 사용 가능한 잔액과 정확히 같은 금액, 그리고 잔액보다 1 wei 큰 금액의 경계를 fuzz로 반복 검증했다.
+- 정확한 잔액까지는 정상 처리되고, 1 wei 초과 요청은 `InsufficientBalance`로 거부되며 상태가 보존되는지 확인했다.
+- 검증: 전체 `test` 35 passed / 0 failed, `build` 성공.
