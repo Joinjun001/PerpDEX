@@ -5,7 +5,7 @@
 - [x] asset allowlist 구현
 - [x] pause/unpause 구현
 - [x] delist 후 withdraw 허용 검증
-- [ ] 권한별 접근 제어 테스트
+- [x] 권한별 접근 제어 테스트
 - [ ] pause 회귀 테스트
 - [ ] 기존 18개 테스트 수정 및 회귀
 - [ ] fmt/build/test

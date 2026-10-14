@@ -8,8 +8,8 @@
 - 현재 마일스톤: **M1 — 온체인 자금 보관·정산 기반**
 - 현재 TASK: **M1-T3 — 자산 Allowlist, Pause, 역할 기반 보안 제어**
 - 상태: In Progress
-- 최근 완료: `SETTLEMENT_ROLE` 전환, asset allowlist, pause/unpause, delist 후 withdraw 허용 검증
-- 다음 미완료 항목: 권한별 접근 제어 테스트
+- 최근 완료: `SETTLEMENT_ROLE` 전환, asset allowlist, pause/unpause, delist 후 withdraw 허용 검증, 권한별 접근 제어 테스트
+- 다음 미완료 항목: pause 회귀 테스트
 
 ## 현재 TASK 문서
 

@@ -55,3 +55,10 @@
 - allowlist에서 제거된 자산도 기존 사용자가 보유한 내부 잔액을 출금할 수 있는지 회귀 테스트를 추가했다.
 - `withdraw()`는 allowlist 상태와 독립적으로 동작하므로 컨트랙트 로직 변경 없이 요구사항을 충족함을 확인했다.
 - 검증: `test` 24 passed / 0 failed, `build` 성공.
+
+## 2026-10-15 — 권한별 접근 제어 테스트
+
+- `ASSET_MANAGER_ROLE`이 없는 사용자의 allowlist 변경이 거부되는 테스트를 추가했다.
+- `PAUSER_ROLE`이 없는 사용자의 pause 호출이 거부되는 테스트를 추가했다.
+- `DEFAULT_ADMIN_ROLE`이 `SETTLEMENT_ROLE`을 부여·회수할 수 있고, 회수 후에는 정산이 거부되는 회귀 테스트를 추가했다.
+- 검증: `test` 27 passed / 0 failed, `build` 성공.

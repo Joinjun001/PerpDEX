@@ -177,6 +177,18 @@ contract CollateralVaultTest is Test {
         assertFalse(vault.paused());
     }
 
+    function test_RevertWhenUnauthorizedCallerPauses() public {
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
+                alice,
+                vault.PAUSER_ROLE()
+            )
+        );
+        vm.prank(alice);
+        vault.pause();
+    }
+
     function test_AssetManagerCanUpdateAllowlist() public {
         MockERC20 otherToken = new MockERC20();
 
@@ -185,6 +197,20 @@ contract CollateralVaultTest is Test {
         assertTrue(vault.isAssetAllowed(address(otherToken)));
         vault.setAssetAllowed(address(otherToken), false);
         assertFalse(vault.isAssetAllowed(address(otherToken)));
+    }
+
+    function test_RevertWhenUnauthorizedCallerUpdatesAllowlist() public {
+        MockERC20 otherToken = new MockERC20();
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
+                alice,
+                vault.ASSET_MANAGER_ROLE()
+            )
+        );
+        vm.prank(alice);
+        vault.setAssetAllowed(address(otherToken), true);
     }
 
     function test_RevertWhenDepositingUnsupportedAsset() public {
@@ -242,6 +268,34 @@ contract CollateralVaultTest is Test {
         );
         vm.prank(alice);
         vault.settle(address(token), alice, bob, 1 ether, tradeId);
+    }
+
+    function test_AdminCanGrantAndRevokeSettlementRole() public {
+        address replacementExecutor = makeAddr("replacement-executor");
+        bytes32 grantedTradeId = keccak256("trade-granted-role");
+        bytes32 revokedTradeId = keccak256("trade-revoked-role");
+
+        vault.grantRole(vault.SETTLEMENT_ROLE(), replacementExecutor);
+        assertTrue(vault.hasRole(vault.SETTLEMENT_ROLE(), replacementExecutor));
+
+        vm.prank(alice);
+        vault.deposit(address(token), 10 ether);
+
+        vm.prank(replacementExecutor);
+        vault.settle(address(token), alice, bob, 1 ether, grantedTradeId);
+
+        vault.revokeRole(vault.SETTLEMENT_ROLE(), replacementExecutor);
+        assertFalse(vault.hasRole(vault.SETTLEMENT_ROLE(), replacementExecutor));
+
+        vm.expectRevert(
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
+                replacementExecutor,
+                vault.SETTLEMENT_ROLE()
+            )
+        );
+        vm.prank(replacementExecutor);
+        vault.settle(address(token), alice, bob, 1 ether, revokedTradeId);
     }
 
     function test_RevertWhenTradeIdIsReplayed() public {
