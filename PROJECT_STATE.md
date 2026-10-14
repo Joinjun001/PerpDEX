@@ -5,19 +5,19 @@
 - 프로젝트: PerpDEX
 - 브랜치: `main`
 - 기준: 실제 소스 코드와 Git 상태를 최우선으로 판단
-- 현재 마일스톤: **M1 — 온체인 자금 보관·정산 기반**
-- 현재 TASK: **M1-T5 — 통합 검증, invariant/fuzz 보강, CI 및 M1 릴리스 정리**
-- 상태: Completed
-- 최근 완료: M1-T5 전체 요구사항, 최종 test/build 검증, RESULT / QA 및 로컬 commit 정리
-- 다음 미완료 항목: M2 세부 TASK 분해 및 첫 TASK 시작
+- 현재 마일스톤: **M2 — Off-chain Order API & Matching MVP**
+- 현재 TASK: **M2-T1 — 주문 도메인 모델, 입력 검증 및 상태 머신 기반**
+- 상태: In Progress
+- 최근 완료: M1 전체 완료, M2를 5개 TASK로 세분화, 주문 도메인 타입 및 런타임 입력 검증 구현
+- 다음 미완료 항목: 주문 상태 모델과 허용 전이 구현
 - 사람 확인 필요: Sepolia 실제 broadcast 배포는 수동으로 수행한다. 원격 push는 AutoPilot 작업에서 제외한다.
 
 ## 현재 TASK 문서
 
-- `docs/tasks/M1-T5-release/SPEC.md`
-- `docs/tasks/M1-T5-release/TODO.md`
-- `docs/tasks/M1-T5-release/RESULT.md`
-- `docs/tasks/M1-T5-release/QA.md`
+- `docs/tasks/M2-T1-order-domain/SPEC.md`
+- `docs/tasks/M2-T1-order-domain/TODO.md`
+- `docs/tasks/M2-T1-order-domain/RESULT.md`
+- `docs/tasks/M2-T1-order-domain/QA.md`
 
 ## 저장소 복원 결과
 

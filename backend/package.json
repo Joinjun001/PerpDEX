@@ -1,0 +1,9 @@
+{
+  "name": "perpdex-backend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --experimental-strip-types --test test/order.test.ts",
+    "build": "node --experimental-strip-types --check src/orders/order.ts && node --experimental-strip-types --check test/order.test.ts"
+  }
+}
