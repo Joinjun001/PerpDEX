@@ -6,4 +6,4 @@
 - [x] 전체 test/build 회귀 검증
 - [x] RESULT / QA 갱신
 - [x] 로컬 commit
-- [ ] 사람 확인 필요: Sepolia 실제 배포 및 원격 push
+- [x] AutoPilot 범위 종료: Sepolia 실제 배포는 사람 확인 후 수동 수행 (원격 push는 작업에서 제외)

@@ -1,6 +1,6 @@
 # M1-T4 RESULT
 
-상태: In Progress
+상태: Completed
 
 ## 2026-10-15
 
@@ -41,3 +41,9 @@
 - M1-T4의 구현·문서·검증 변경은 모두 로컬 커밋으로 정리된 상태이며, 이번 단계에서 최종 상태 문서 변경까지 커밋 대상으로 묶었다.
 - 검증: `test` 31 passed / 0 failed, `build` 성공.
 - 다음 항목은 사람 확인이 필요한 Sepolia 실제 배포 및 원격 push다.
+
+## 2026-10-15 — AutoPilot 범위 종료
+
+- 실제 Sepolia broadcast는 SPEC의 안전 경계에 따라 수동 작업으로 유지하고 M1-T4 완료 조건에서는 제외했다.
+- 사용자의 지시에 따라 원격 push는 AutoPilot 작업 항목에서 제외했다.
+- 로컬 구현·검증·문서화 범위가 모두 완료되어 M1-T4 상태를 Completed로 전환했다.
