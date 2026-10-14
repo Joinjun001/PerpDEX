@@ -23,3 +23,9 @@
 - `contracts/test/DeployCollateralVault.t.sol`을 추가해 `DeployCollateralVault` 스크립트를 Foundry 테스트 환경에서 직접 실행했다.
 - `SETTLEMENT_EXECUTOR` 환경 변수를 테스트에서 주입하고 배포된 컨트랙트의 bytecode 존재 여부와 초기 `SETTLEMENT_ROLE` 부여를 확인했다.
 - 검증: 전체 `test` 31 passed / 0 failed, `build` 성공.
+
+## 2026-10-15 — 전체 test/build 회귀 검증
+
+- M1-T4 배포 스크립트와 로컬 배포 테스트 추가 이후 전체 Foundry 테스트를 다시 실행했다.
+- 기존 `CollateralVault` 테스트 30개와 배포 경로 테스트 1개가 모두 통과했다.
+- 검증: `test` 31 passed / 0 failed, `build` 성공.

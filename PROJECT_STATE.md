@@ -8,8 +8,8 @@
 - 현재 마일스톤: **M1 — 온체인 자금 보관·정산 기반**
 - 현재 TASK: **M1-T4 — 배포 스크립트 및 Sepolia 준비**
 - 상태: In Progress
-- 최근 완료: M1-T3 완료 및 수동 push, `CollateralVault` Foundry 배포 스크립트 작성, Sepolia 환경 변수 예시 및 배포 명령 문서화, 로컬 배포 경로 검증
-- 다음 미완료 항목: 전체 test/build 회귀 검증
+- 최근 완료: M1-T3 완료 및 수동 push, `CollateralVault` Foundry 배포 스크립트 작성, Sepolia 환경 변수 예시 및 배포 명령 문서화, 로컬 배포 경로 검증, 전체 test/build 회귀 검증
+- 다음 미완료 항목: RESULT / QA 갱신
 - 사람 확인 필요: Sepolia 실제 broadcast 배포와 원격 push는 AutoPilot에서 수행하지 않는다.
 
 ## 현재 TASK 문서
