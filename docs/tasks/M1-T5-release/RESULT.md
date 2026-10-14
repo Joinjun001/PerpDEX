@@ -38,3 +38,10 @@
 - M1-T5의 통합 테스트, stateful invariant, fuzz 경계 테스트, Foundry CI 구성 이후 전체 테스트 스위트를 다시 실행했다.
 - 전체 `test` 35 passed / 0 failed, invariant 256 runs / 128,000 calls / 0 reverts를 확인했다.
 - `build`도 성공하여 현재 M1 온체인 코드와 테스트가 회귀 없이 유지됨을 확인했다.
+
+## 2026-10-15 — RESULT / QA 정리
+
+- M1-T5의 통합 테스트, 회계 invariant, fuzz 경계 검증, Foundry CI 및 전체 회귀 결과를 최종 정리했다.
+- QA 상태를 `Passed`로 갱신하고 M1-T5 SPEC 요구사항 1~6이 모두 검증됐음을 기록했다.
+- 검증 기준은 전체 `test` 35 passed / 0 failed, invariant 256 runs / 128,000 calls / 0 reverts, `build` 성공이다.
+- 다음 남은 항목은 로컬 commit 정리다.
