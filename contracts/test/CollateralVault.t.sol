@@ -74,6 +74,22 @@ contract CollateralVaultTest is Test {
         assertEq(token.balanceOf(address(vault)), 60 ether);
     }
 
+    function test_DelistedAssetCanStillBeWithdrawn() public {
+        vm.prank(alice);
+        vault.deposit(address(token), 100 ether);
+
+        vault.setAssetAllowed(address(token), false);
+        assertFalse(vault.isAssetAllowed(address(token)));
+
+        vm.prank(alice);
+        vault.withdraw(address(token), 40 ether);
+
+        assertEq(vault.balanceOf(address(token), alice), 60 ether);
+        assertEq(vault.totalLiability(address(token)), 60 ether);
+        assertEq(token.balanceOf(alice), 940 ether);
+        assertEq(token.balanceOf(address(vault)), 60 ether);
+    }
+
     function test_UserBalancesAreIsolated() public {
         vm.prank(alice);
         vault.deposit(address(token), 70 ether);
