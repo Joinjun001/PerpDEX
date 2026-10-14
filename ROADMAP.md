@@ -10,7 +10,7 @@
 | M1-T2 | 권한 있는 settlement executor와 원자적 내부 잔액 이전 | Completed |
 | M1-T3 | 자산 allowlist, pause, 역할 기반 관리 및 보안 회귀 테스트 | Completed |
 | M1-T4 | 배포 스크립트, Sepolia 환경변수/설정 및 로컬 배포 검증 | Completed |
-| M1-T5 | 통합 테스트, invariant/fuzz 보강, GitHub Actions CI 및 M1 릴리스 정리 | In Progress |
+| M1-T5 | 통합 테스트, invariant/fuzz 보강, GitHub Actions CI 및 M1 릴리스 정리 | Completed |
 
 ## M2 — Off-chain Order API & Matching MVP
 

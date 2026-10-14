@@ -1,6 +1,6 @@
 # M1-T5 RESULT
 
-상태: In Progress
+상태: Completed
 
 ## 2026-10-15
 
@@ -45,3 +45,9 @@
 - QA 상태를 `Passed`로 갱신하고 M1-T5 SPEC 요구사항 1~6이 모두 검증됐음을 기록했다.
 - 검증 기준은 전체 `test` 35 passed / 0 failed, invariant 256 runs / 128,000 calls / 0 reverts, `build` 성공이다.
 - 다음 남은 항목은 로컬 commit 정리다.
+
+## 2026-10-15 — M1-T5 완료
+
+- 최종 test/build 검증 후 상태 문서 변경을 로컬 commit 대상으로 정리했다.
+- 검증: 전체 `test` 35 passed / 0 failed, invariant 256 runs / 128,000 calls / 0 reverts, `build` 성공.
+- 원격 push는 AutoPilot 작업 범위에서 제외하고 M1-T5를 Completed로 전환한다.

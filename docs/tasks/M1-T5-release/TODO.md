@@ -6,4 +6,4 @@
 - [x] GitHub Actions Foundry CI 구성
 - [x] 전체 test/build 회귀 검증
 - [x] RESULT / QA 갱신
-- [ ] 로컬 commit 정리
+- [x] 로컬 commit 정리
