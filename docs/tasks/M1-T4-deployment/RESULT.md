@@ -17,3 +17,9 @@
 - 루트 README에 `.env` 준비 방법과 `DeployCollateralVault` Sepolia 배포 명령을 문서화했다.
 - 실제 `--broadcast` 배포는 사람 확인 후 수동으로만 수행하도록 안전 경계를 명시했다.
 - 검증: `test` 30 passed / 0 failed, `build` 성공.
+
+## 2026-10-15 — 로컬 배포 경로 검증
+
+- `contracts/test/DeployCollateralVault.t.sol`을 추가해 `DeployCollateralVault` 스크립트를 Foundry 테스트 환경에서 직접 실행했다.
+- `SETTLEMENT_EXECUTOR` 환경 변수를 테스트에서 주입하고 배포된 컨트랙트의 bytecode 존재 여부와 초기 `SETTLEMENT_ROLE` 부여를 확인했다.
+- 검증: 전체 `test` 31 passed / 0 failed, `build` 성공.
