@@ -41,3 +41,11 @@
 - 기존 정상 경로와 fee-on-transfer 테스트가 allowlist 전제에서 동작하도록 테스트 설정을 갱신했다.
 - allowlist 토글, 미지원 자산 deposit 차단, 미지원 자산 settlement 차단 테스트를 추가했다.
 - 검증: `forge fmt --check`, `forge build`, `forge test` 성공. 22 passed / 0 failed.
+
+## 2026-10-15 — Pause/Unpause 구현
+
+- OpenZeppelin `Pausable`을 `CollateralVault`에 적용했다.
+- `PAUSER_ROLE` 보유자가 호출할 수 있는 `pause()`와 `unpause()`를 추가했다.
+- pause 상태에서는 `deposit`, `withdraw`, `settle`이 실행되지 않도록 `whenNotPaused`를 적용했다.
+- pause 상태 토글이 정상 동작하는 기본 테스트를 추가했다.
+- 검증: `test` 23 passed / 0 failed, `build` 성공, `git diff --check` 성공.

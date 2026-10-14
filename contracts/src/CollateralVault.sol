@@ -4,11 +4,12 @@ pragma solidity ^0.8.20;
 import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
+import {Pausable} from "openzeppelin-contracts/contracts/utils/Pausable.sol";
 import {AccessControl} from "openzeppelin-contracts/contracts/access/AccessControl.sol";
 
 /// @title CollateralVault
 /// @notice PerpDEX 사용자의 ERC-20 collateral을 보관하고 내부 잔액을 관리한다.
-contract CollateralVault is ReentrancyGuard, AccessControl {
+contract CollateralVault is ReentrancyGuard, Pausable, AccessControl {
     using SafeERC20 for IERC20;
 
     bytes32 public constant SETTLEMENT_ROLE = keccak256("SETTLEMENT_ROLE");
@@ -56,7 +57,15 @@ contract CollateralVault is ReentrancyGuard, AccessControl {
         emit AssetAllowedUpdated(token, allowed);
     }
 
-    function deposit(address token, uint256 amount) external nonReentrant {
+    function pause() external onlyRole(PAUSER_ROLE) {
+        _pause();
+    }
+
+    function unpause() external onlyRole(PAUSER_ROLE) {
+        _unpause();
+    }
+
+    function deposit(address token, uint256 amount) external nonReentrant whenNotPaused {
         if (!isAssetAllowed[token]) revert UnsupportedAsset(token);
         if (amount == 0) revert ZeroAmount();
 
@@ -75,7 +84,7 @@ contract CollateralVault is ReentrancyGuard, AccessControl {
         emit Deposited(msg.sender, token, amount);
     }
 
-    function withdraw(address token, uint256 amount) external nonReentrant {
+    function withdraw(address token, uint256 amount) external nonReentrant whenNotPaused {
         if (amount == 0) revert ZeroAmount();
 
         uint256 available = _balances[token][msg.sender];
@@ -94,6 +103,7 @@ contract CollateralVault is ReentrancyGuard, AccessControl {
     function settle(address token, address from, address to, uint256 amount, bytes32 tradeId)
         external
         onlyRole(SETTLEMENT_ROLE)
+        whenNotPaused
     {
         if (!isAssetAllowed[token]) revert UnsupportedAsset(token);
         if (amount == 0) revert ZeroAmount();

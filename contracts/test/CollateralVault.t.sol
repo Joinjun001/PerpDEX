@@ -153,6 +153,14 @@ contract CollateralVaultTest is Test {
         assertTrue(vault.hasRole(vault.SETTLEMENT_ROLE(), executor));
     }
 
+    function test_PauserCanPauseAndUnpause() public {
+        assertFalse(vault.paused());
+        vault.pause();
+        assertTrue(vault.paused());
+        vault.unpause();
+        assertFalse(vault.paused());
+    }
+
     function test_AssetManagerCanUpdateAllowlist() public {
         MockERC20 otherToken = new MockERC20();
 
