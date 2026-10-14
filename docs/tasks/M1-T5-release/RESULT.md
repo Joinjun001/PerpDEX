@@ -25,3 +25,10 @@
 - withdraw와 settlement에 대해 사용 가능한 잔액과 정확히 같은 금액, 그리고 잔액보다 1 wei 큰 금액의 경계를 fuzz로 반복 검증했다.
 - 정확한 잔액까지는 정상 처리되고, 1 wei 초과 요청은 `InsufficientBalance`로 거부되며 상태가 보존되는지 확인했다.
 - 검증: 전체 `test` 35 passed / 0 failed, `build` 성공.
+
+## 2026-10-15 — GitHub Actions Foundry CI 구성
+
+- `.github/workflows/foundry.yml`을 추가해 `main` push 및 pull request에서 Foundry 검증을 실행하도록 구성했다.
+- `actions/checkout@v4`에서 submodule을 재귀적으로 가져오고 `foundry-rs/foundry-toolchain@v1`으로 stable Foundry를 설치한다.
+- `contracts` 작업 디렉터리에서 `forge build`, `forge test`를 순서대로 실행하도록 구성했다.
+- 로컬 검증: 전체 `test` 35 passed / 0 failed, `build` 성공.
