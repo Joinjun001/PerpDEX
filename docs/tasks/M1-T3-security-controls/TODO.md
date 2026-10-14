@@ -1,6 +1,6 @@
 # M1-T3 TODO
 
-- [ ] `AccessControl` 역할 모델 도입
+- [x] `AccessControl` 역할 모델 도입
 - [ ] settlement 권한을 `SETTLEMENT_ROLE`로 전환
 - [ ] asset allowlist 구현
 - [ ] pause/unpause 구현

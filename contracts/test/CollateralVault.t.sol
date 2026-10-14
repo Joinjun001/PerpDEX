@@ -143,6 +143,13 @@ contract CollateralVaultTest is Test {
         assertEq(token.balanceOf(address(vault)), liability);
     }
 
+    function test_ConstructorAssignsInitialRoles() public view {
+        assertTrue(vault.hasRole(vault.DEFAULT_ADMIN_ROLE(), address(this)));
+        assertTrue(vault.hasRole(vault.ASSET_MANAGER_ROLE(), address(this)));
+        assertTrue(vault.hasRole(vault.PAUSER_ROLE(), address(this)));
+        assertTrue(vault.hasRole(vault.SETTLEMENT_ROLE(), executor));
+    }
+
     function test_RevertWhenSettlementExecutorIsZero() public {
         vm.expectRevert(CollateralVault.InvalidSettlementExecutor.selector);
         new CollateralVault(address(0));

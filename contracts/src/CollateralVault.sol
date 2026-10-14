@@ -4,11 +4,16 @@ pragma solidity ^0.8.20;
 import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 import {ReentrancyGuard} from "openzeppelin-contracts/contracts/utils/ReentrancyGuard.sol";
+import {AccessControl} from "openzeppelin-contracts/contracts/access/AccessControl.sol";
 
 /// @title CollateralVault
 /// @notice PerpDEX 사용자의 ERC-20 collateral을 보관하고 내부 잔액을 관리한다.
-contract CollateralVault is ReentrancyGuard {
+contract CollateralVault is ReentrancyGuard, AccessControl {
     using SafeERC20 for IERC20;
+
+    bytes32 public constant SETTLEMENT_ROLE = keccak256("SETTLEMENT_ROLE");
+    bytes32 public constant ASSET_MANAGER_ROLE = keccak256("ASSET_MANAGER_ROLE");
+    bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 
     error ZeroAmount();
     error InsufficientBalance(uint256 available, uint256 requested);
@@ -43,6 +48,11 @@ contract CollateralVault is ReentrancyGuard {
     constructor(address settlementExecutor_) {
         if (settlementExecutor_ == address(0)) revert InvalidSettlementExecutor();
         settlementExecutor = settlementExecutor_;
+
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(ASSET_MANAGER_ROLE, msg.sender);
+        _grantRole(PAUSER_ROLE, msg.sender);
+        _grantRole(SETTLEMENT_ROLE, settlementExecutor_);
     }
 
     function deposit(address token, uint256 amount) external nonReentrant {
