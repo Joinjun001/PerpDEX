@@ -8,8 +8,8 @@
 - 현재 마일스톤: **M1 — 온체인 자금 보관·정산 기반**
 - 현재 TASK: **M1-T5 — 통합 검증, invariant/fuzz 보강, CI 및 M1 릴리스 정리**
 - 상태: In Progress
-- 최근 완료: M1-T4 자동화 범위 완료 및 로컬 검증 정리, M1 핵심 deposit → settle → withdraw 통합 테스트 추가
-- 다음 미완료 항목: 회계 invariant 테스트 보강
+- 최근 완료: M1-T4 자동화 범위 완료 및 로컬 검증 정리, M1 핵심 deposit → settle → withdraw 통합 테스트 추가, 회계 invariant 테스트 보강
+- 다음 미완료 항목: fuzz 경계 테스트 보강
 - 사람 확인 필요: Sepolia 실제 broadcast 배포는 수동으로 수행한다. 원격 push는 AutoPilot 작업에서 제외한다.
 
 ## 현재 TASK 문서
