@@ -7,7 +7,7 @@
 - [x] delist 후 withdraw 허용 검증
 - [x] 권한별 접근 제어 테스트
 - [x] pause 회귀 테스트
-- [ ] 기존 18개 테스트 수정 및 회귀
+- [x] 기존 18개 테스트 수정 및 회귀
 - [ ] fmt/build/test
 - [ ] RESULT / QA 갱신
 - [ ] commit / push

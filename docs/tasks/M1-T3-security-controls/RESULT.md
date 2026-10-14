@@ -77,3 +77,9 @@
 - pause 상태에서 `deposit`, `withdraw`, `settle`이 모두 `Pausable.EnforcedPause`로 거부되는 회귀 테스트를 추가했다.
 - 이전 차단 기록은 이력으로 유지하고, 동일 TODO를 정상 구현·검증했다.
 - 검증: `test` 30 passed / 0 failed, `build` 성공.
+
+## 2026-10-15 — 기존 테스트 회귀 검증 완료
+
+- M1-T3 변경 이후 전체 테스트 스위트를 다시 실행해 기존 입금·출금·정산 동작의 회귀 여부를 확인했다.
+- 기존 테스트는 allowlist, 역할, pause 전제를 반영해 앞선 단계에서 필요한 수정을 마쳤으며, 현재 전체 30개 테스트가 모두 통과한다.
+- 검증: `test` 30 passed / 0 failed, `build` 성공.
