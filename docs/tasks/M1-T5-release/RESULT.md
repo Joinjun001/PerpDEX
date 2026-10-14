@@ -32,3 +32,9 @@
 - `actions/checkout@v4`에서 submodule을 재귀적으로 가져오고 `foundry-rs/foundry-toolchain@v1`으로 stable Foundry를 설치한다.
 - `contracts` 작업 디렉터리에서 `forge build`, `forge test`를 순서대로 실행하도록 구성했다.
 - 로컬 검증: 전체 `test` 35 passed / 0 failed, `build` 성공.
+
+## 2026-10-15 — 전체 test/build 회귀 검증
+
+- M1-T5의 통합 테스트, stateful invariant, fuzz 경계 테스트, Foundry CI 구성 이후 전체 테스트 스위트를 다시 실행했다.
+- 전체 `test` 35 passed / 0 failed, invariant 256 runs / 128,000 calls / 0 reverts를 확인했다.
+- `build`도 성공하여 현재 M1 온체인 코드와 테스트가 회귀 없이 유지됨을 확인했다.
