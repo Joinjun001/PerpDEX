@@ -9,3 +9,11 @@
 - Foundry `Script`의 broadcast 경로에서 `CollateralVault`를 배포하도록 구성했다.
 - 검증: `test` 30 passed / 0 failed, `build` 성공.
 - 다음 항목: Sepolia 환경 변수 예시 및 배포 명령 문서화.
+
+## 2026-10-15 — Sepolia 환경 설정 및 배포 명령 문서화
+
+- 루트 `.env.example`에 `SEPOLIA_RPC_URL`, `DEPLOYER_PRIVATE_KEY`, `SETTLEMENT_EXECUTOR` 예시를 추가했다.
+- 실제 private key나 RPC secret 대신 명확한 placeholder만 기록했다.
+- 루트 README에 `.env` 준비 방법과 `DeployCollateralVault` Sepolia 배포 명령을 문서화했다.
+- 실제 `--broadcast` 배포는 사람 확인 후 수동으로만 수행하도록 안전 경계를 명시했다.
+- 검증: `test` 30 passed / 0 failed, `build` 성공.
