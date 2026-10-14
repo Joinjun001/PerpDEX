@@ -8,6 +8,6 @@
 - [x] 권한별 접근 제어 테스트
 - [x] pause 회귀 테스트
 - [x] 기존 18개 테스트 수정 및 회귀
-- [ ] fmt/build/test
+- [x] fmt/build/test
 - [ ] RESULT / QA 갱신
 - [ ] commit / push
