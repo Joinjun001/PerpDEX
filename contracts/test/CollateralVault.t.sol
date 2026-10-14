@@ -4,6 +4,7 @@ pragma solidity ^0.8.20;
 import {Test} from "forge-std/Test.sol";
 import {ERC20} from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 import {IAccessControl} from "openzeppelin-contracts/contracts/access/IAccessControl.sol";
+import {Pausable} from "openzeppelin-contracts/contracts/utils/Pausable.sol";
 import {CollateralVault} from "../src/CollateralVault.sol";
 
 contract MockERC20 is ERC20 {
@@ -175,6 +176,34 @@ contract CollateralVaultTest is Test {
         assertTrue(vault.paused());
         vault.unpause();
         assertFalse(vault.paused());
+    }
+
+    function test_RevertWhenPausedDeposit() public {
+        vault.pause();
+
+        vm.expectRevert(Pausable.EnforcedPause.selector);
+        vm.prank(alice);
+        vault.deposit(address(token), 1 ether);
+    }
+
+    function test_RevertWhenPausedWithdraw() public {
+        vm.prank(alice);
+        vault.deposit(address(token), 10 ether);
+        vault.pause();
+
+        vm.expectRevert(Pausable.EnforcedPause.selector);
+        vm.prank(alice);
+        vault.withdraw(address(token), 1 ether);
+    }
+
+    function test_RevertWhenPausedSettlement() public {
+        vm.prank(alice);
+        vault.deposit(address(token), 10 ether);
+        vault.pause();
+
+        vm.expectRevert(Pausable.EnforcedPause.selector);
+        vm.prank(executor);
+        vault.settle(address(token), alice, bob, 1 ether, keccak256("paused-settlement"));
     }
 
     function test_RevertWhenUnauthorizedCallerPauses() public {

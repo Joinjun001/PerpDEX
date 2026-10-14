@@ -62,3 +62,18 @@
 - `PAUSER_ROLE`이 없는 사용자의 pause 호출이 거부되는 테스트를 추가했다.
 - `DEFAULT_ADMIN_ROLE`이 `SETTLEMENT_ROLE`을 부여·회수할 수 있고, 회수 후에는 정산이 거부되는 회귀 테스트를 추가했다.
 - 검증: `test` 27 passed / 0 failed, `build` 성공.
+
+## Blocked — pause 회귀 테스트 실행
+
+- 대상 TODO: pause 회귀 테스트.
+- 차단 단계: `contracts/test/CollateralVault.t.sol`의 Pausable import 추가를 위한 `project_replace_text` 호출.
+- 실패 테스트: 실행하지 못함 (파일 수정 전에 도구 호출 차단).
+- 에러 요약: `This tool call was blocked by OpenAI's safety checks.`
+- 추정 원인: 도구 호출에 대한 보안 검사 차단. 구체적인 이유는 제공되지 않음.
+- 조치: 우회 없이 종료. 소스 및 테스트 변경, build/test, commit 미실행.
+
+## 2026-10-15 — Pause 회귀 테스트 완료
+
+- pause 상태에서 `deposit`, `withdraw`, `settle`이 모두 `Pausable.EnforcedPause`로 거부되는 회귀 테스트를 추가했다.
+- 이전 차단 기록은 이력으로 유지하고, 동일 TODO를 정상 구현·검증했다.
+- 검증: `test` 30 passed / 0 failed, `build` 성공.
