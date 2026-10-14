@@ -19,17 +19,18 @@ contract CollateralVault is ReentrancyGuard, AccessControl {
     error InsufficientBalance(uint256 available, uint256 requested);
     error UnsupportedTransferBehavior(uint256 expected, uint256 actual);
     error InvalidSettlementExecutor();
-    error UnauthorizedSettlementExecutor(address caller);
+    error InvalidAsset();
+    error UnsupportedAsset(address token);
     error InvalidParticipant();
     error InvalidTradeId();
     error TradeAlreadySettled(bytes32 tradeId);
 
     mapping(address token => mapping(address user => uint256 amount)) private _balances;
     mapping(address token => uint256 amount) public totalLiability;
+    mapping(address token => bool allowed) public isAssetAllowed;
     mapping(bytes32 tradeId => bool settled) public settledTrades;
 
-    address public immutable settlementExecutor;
-
+    event AssetAllowedUpdated(address indexed token, bool allowed);
     event Deposited(address indexed user, address indexed token, uint256 amount);
     event Withdrawn(address indexed user, address indexed token, uint256 amount);
     event Settled(
@@ -40,14 +41,8 @@ contract CollateralVault is ReentrancyGuard, AccessControl {
         uint256 amount
     );
 
-    modifier onlySettlementExecutor() {
-        if (msg.sender != settlementExecutor) revert UnauthorizedSettlementExecutor(msg.sender);
-        _;
-    }
-
     constructor(address settlementExecutor_) {
         if (settlementExecutor_ == address(0)) revert InvalidSettlementExecutor();
-        settlementExecutor = settlementExecutor_;
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(ASSET_MANAGER_ROLE, msg.sender);
@@ -55,7 +50,14 @@ contract CollateralVault is ReentrancyGuard, AccessControl {
         _grantRole(SETTLEMENT_ROLE, settlementExecutor_);
     }
 
+    function setAssetAllowed(address token, bool allowed) external onlyRole(ASSET_MANAGER_ROLE) {
+        if (token == address(0)) revert InvalidAsset();
+        isAssetAllowed[token] = allowed;
+        emit AssetAllowedUpdated(token, allowed);
+    }
+
     function deposit(address token, uint256 amount) external nonReentrant {
+        if (!isAssetAllowed[token]) revert UnsupportedAsset(token);
         if (amount == 0) revert ZeroAmount();
 
         IERC20 asset = IERC20(token);
@@ -91,8 +93,9 @@ contract CollateralVault is ReentrancyGuard, AccessControl {
 
     function settle(address token, address from, address to, uint256 amount, bytes32 tradeId)
         external
-        onlySettlementExecutor
+        onlyRole(SETTLEMENT_ROLE)
     {
+        if (!isAssetAllowed[token]) revert UnsupportedAsset(token);
         if (amount == 0) revert ZeroAmount();
         if (from == address(0) || to == address(0) || from == to) revert InvalidParticipant();
         if (tradeId == bytes32(0)) revert InvalidTradeId();

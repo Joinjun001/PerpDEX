@@ -1,8 +1,8 @@
 # M1-T3 TODO
 
 - [x] `AccessControl` 역할 모델 도입
-- [ ] settlement 권한을 `SETTLEMENT_ROLE`로 전환
-- [ ] asset allowlist 구현
+- [x] settlement 권한을 `SETTLEMENT_ROLE`로 전환
+- [x] asset allowlist 구현
 - [ ] pause/unpause 구현
 - [ ] delist 후 withdraw 허용 검증
 - [ ] 권한별 접근 제어 테스트

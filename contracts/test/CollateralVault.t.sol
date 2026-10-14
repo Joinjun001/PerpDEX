@@ -3,6 +3,7 @@ pragma solidity ^0.8.20;
 
 import {Test} from "forge-std/Test.sol";
 import {ERC20} from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+import {IAccessControl} from "openzeppelin-contracts/contracts/access/IAccessControl.sol";
 import {CollateralVault} from "../src/CollateralVault.sol";
 
 contract MockERC20 is ERC20 {
@@ -42,6 +43,7 @@ contract CollateralVaultTest is Test {
     function setUp() public {
         vault = new CollateralVault(executor);
         token = new MockERC20();
+        vault.setAssetAllowed(address(token), true);
         token.mint(alice, 1_000 ether);
         token.mint(bob, 1_000 ether);
 
@@ -108,6 +110,7 @@ contract CollateralVaultTest is Test {
 
     function test_RevertForFeeOnTransferDeposit() public {
         FeeOnTransferToken feeToken = new FeeOnTransferToken();
+        vault.setAssetAllowed(address(feeToken), true);
         feeToken.mint(alice, 100 ether);
 
         vm.startPrank(alice);
@@ -150,6 +153,36 @@ contract CollateralVaultTest is Test {
         assertTrue(vault.hasRole(vault.SETTLEMENT_ROLE(), executor));
     }
 
+    function test_AssetManagerCanUpdateAllowlist() public {
+        MockERC20 otherToken = new MockERC20();
+
+        assertFalse(vault.isAssetAllowed(address(otherToken)));
+        vault.setAssetAllowed(address(otherToken), true);
+        assertTrue(vault.isAssetAllowed(address(otherToken)));
+        vault.setAssetAllowed(address(otherToken), false);
+        assertFalse(vault.isAssetAllowed(address(otherToken)));
+    }
+
+    function test_RevertWhenDepositingUnsupportedAsset() public {
+        MockERC20 otherToken = new MockERC20();
+
+        vm.expectRevert(
+            abi.encodeWithSelector(CollateralVault.UnsupportedAsset.selector, address(otherToken))
+        );
+        vm.prank(alice);
+        vault.deposit(address(otherToken), 1 ether);
+    }
+
+    function test_RevertWhenSettlingUnsupportedAsset() public {
+        MockERC20 otherToken = new MockERC20();
+
+        vm.expectRevert(
+            abi.encodeWithSelector(CollateralVault.UnsupportedAsset.selector, address(otherToken))
+        );
+        vm.prank(executor);
+        vault.settle(address(otherToken), alice, bob, 1 ether, keccak256("unsupported-asset"));
+    }
+
     function test_RevertWhenSettlementExecutorIsZero() public {
         vm.expectRevert(CollateralVault.InvalidSettlementExecutor.selector);
         new CollateralVault(address(0));
@@ -176,10 +209,14 @@ contract CollateralVaultTest is Test {
     function test_RevertWhenUnauthorizedCallerSettles() public {
         bytes32 tradeId = keccak256("trade-unauthorized");
 
-        vm.prank(alice);
         vm.expectRevert(
-            abi.encodeWithSelector(CollateralVault.UnauthorizedSettlementExecutor.selector, alice)
+            abi.encodeWithSelector(
+                IAccessControl.AccessControlUnauthorizedAccount.selector,
+                alice,
+                vault.SETTLEMENT_ROLE()
+            )
         );
+        vm.prank(alice);
         vault.settle(address(token), alice, bob, 1 ether, tradeId);
     }
 
