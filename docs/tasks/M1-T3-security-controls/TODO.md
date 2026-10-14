@@ -10,4 +10,4 @@
 - [x] 기존 18개 테스트 수정 및 회귀
 - [x] fmt/build/test
 - [x] RESULT / QA 갱신
-- [ ] commit / push
+- [x] commit / push

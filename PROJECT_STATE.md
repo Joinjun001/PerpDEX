@@ -6,18 +6,18 @@
 - 브랜치: `main`
 - 기준: 실제 소스 코드와 Git 상태를 최우선으로 판단
 - 현재 마일스톤: **M1 — 온체인 자금 보관·정산 기반**
-- 현재 TASK: **M1-T3 — 자산 Allowlist, Pause, 역할 기반 보안 제어**
+- 현재 TASK: **M1-T4 — 배포 스크립트 및 Sepolia 준비**
 - 상태: In Progress
-- 최근 완료: `SETTLEMENT_ROLE` 전환, asset allowlist, pause/unpause, delist 후 withdraw 허용 검증, 권한별 접근 제어 테스트, pause 회귀 테스트, 기존 테스트 회귀 검증, 최종 test/build 검증, RESULT / QA 갱신
-- 다음 미완료 항목: commit / push
-- 사람 확인 필요: 원격 push는 AutoPilot 금지 항목이므로 수행하지 않는다. 로컬 commit까지만 자동 처리한다.
+- 최근 완료: M1-T3 완료 및 수동 push, `CollateralVault` Foundry 배포 스크립트 작성
+- 다음 미완료 항목: Sepolia 환경 변수 예시 및 배포 명령 문서화
+- 사람 확인 필요: Sepolia 실제 broadcast 배포와 원격 push는 AutoPilot에서 수행하지 않는다.
 
 ## 현재 TASK 문서
 
-- `docs/tasks/M1-T3-security-controls/SPEC.md`
-- `docs/tasks/M1-T3-security-controls/TODO.md`
-- `docs/tasks/M1-T3-security-controls/RESULT.md`
-- `docs/tasks/M1-T3-security-controls/QA.md`
+- `docs/tasks/M1-T4-deployment/SPEC.md`
+- `docs/tasks/M1-T4-deployment/TODO.md`
+- `docs/tasks/M1-T4-deployment/RESULT.md`
+- `docs/tasks/M1-T4-deployment/QA.md`
 
 ## 저장소 복원 결과
 
