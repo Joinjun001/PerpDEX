@@ -5,6 +5,8 @@ import {
   OrderStateTransitionError,
   OrderValidationError,
   canTransitionOrderStatus,
+  canonicalOrderPayload,
+  createDeterministicOrderId,
   transitionOrderStatus,
   validateCreateOrder,
 } from "../src/orders/order.ts";
@@ -119,4 +121,24 @@ test("terminal and backward order status transitions are rejected", () => {
       `expected ${from} -> ${to} to be rejected`,
     );
   }
+});
+
+test("canonical payload uses normalized values and fixed field order", () => {
+  const order = validateCreateOrder(validOrder(), NOW);
+
+  assert.equal(
+    canonicalOrderPayload(order),
+    "perpdex-order-v1:0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:ETH-USDC:BUY:2500000000:1000000000000000000:0:2000000300",
+  );
+});
+
+test("deterministic order ID is stable and changes with canonical fields", () => {
+  const order = validateCreateOrder(validOrder(), NOW);
+  const sameOrder = validateCreateOrder({ ...validOrder() }, NOW);
+  const nextNonce = validateCreateOrder({ ...validOrder(), nonce: "1" }, NOW);
+
+  const orderId = createDeterministicOrderId(order);
+  assert.match(orderId, /^0x[0-9a-f]{64}$/);
+  assert.equal(orderId, createDeterministicOrderId(sameOrder));
+  assert.notEqual(orderId, createDeterministicOrderId(nextNonce));
 });

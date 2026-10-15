@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 export const ORDER_SIDES = ["BUY", "SELL"] as const;
 
 export type OrderSide = (typeof ORDER_SIDES)[number];
@@ -54,6 +56,28 @@ export interface CreateOrderInput {
 }
 
 export interface OrderInput extends CreateOrderInput {}
+
+const ORDER_CANONICAL_VERSION = "perpdex-order-v1";
+
+export function canonicalOrderPayload(order: OrderInput): string {
+  return [
+    ORDER_CANONICAL_VERSION,
+    order.account,
+    order.market,
+    order.side,
+    order.price,
+    order.quantity,
+    order.nonce,
+    order.expiresAt.toString(),
+  ].join(":");
+}
+
+export function createDeterministicOrderId(order: OrderInput): string {
+  const digest = createHash("sha256")
+    .update(canonicalOrderPayload(order), "utf8")
+    .digest("hex");
+  return `0x${digest}`;
+}
 
 export class OrderValidationError extends Error {
   readonly field: keyof CreateOrderInput;

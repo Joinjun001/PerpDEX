@@ -22,3 +22,11 @@
 - `FILLED`, `CANCELED`, `EXPIRED`를 terminal state로 두고 역전이·동일 상태 전이를 거부하도록 `canTransitionOrderStatus`와 `transitionOrderStatus`를 구현했다.
 - 허용 전이와 terminal/backward 전이 거부 단위 테스트를 추가했다.
 - 검증: backend `test` 5 passed / 0 failed, backend `build` 성공, Foundry `test` 35 passed / 0 failed, Foundry `build` 성공.
+
+## 2026-10-15 — canonical payload 및 deterministic order ID 구현
+
+- 정규화된 주문 필드를 고정 순서로 직렬화하는 `canonicalOrderPayload`를 추가하고 `perpdex-order-v1` 버전 prefix를 포함했다.
+- 외부 패키지 없이 Node.js `crypto`의 SHA-256을 사용해 `0x` prefix 32-byte deterministic order ID를 생성하는 `createDeterministicOrderId`를 구현했다.
+- 동일한 canonical 주문은 항상 같은 ID를 만들고 nonce 등 식별 필드가 달라지면 다른 ID가 생성되는 단위 테스트를 추가했다.
+- 이 order ID는 Off-chain 식별용이며 EIP-712 서명 digest는 M2-T2에서 별도로 구현한다.
+- 검증: backend `test` 7 passed / 0 failed, backend `build` 성공, Foundry `test` 35 passed / 0 failed, Foundry `build` 성공.
