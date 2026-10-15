@@ -23,6 +23,13 @@
 - 허용 전이와 terminal/backward 전이 거부 단위 테스트를 추가했다.
 - 검증: backend `test` 5 passed / 0 failed, backend `build` 성공, Foundry `test` 35 passed / 0 failed, Foundry `build` 성공.
 
+## Blocked — 미커밋 canonical order ID 변경 검증
+
+- 미커밋 변경: `backend/src/orders/order.ts`, `backend/test/order.test.ts`에 canonical payload 및 SHA-256 기반 deterministic order ID와 관련 테스트가 추가되어 있다. 기존 변경을 우선 검증했으며 새 TODO는 시작하지 않았다.
+- Foundry `build` 성공, `test` 35 passed / 0 failed.
+- backend 검증 요청 `backend-build`는 `허용되지 않은 check입니다: backend-build`로 도구에서 거부되었다. 거부된 작업을 다른 명령으로 우회하지 않았으므로 backend build/test는 이번 실행에서 확인하지 못했다.
+- 추정 원인: 등록된 `project_run_check` 허용 목록에 요청한 backend 검증 이름이 없음. 검증이 완료되지 않아 TODO 완료 처리와 commit을 보류했다. backend 검증용 사전 등록 check가 확인된 후 이어서 진행해야 한다.
+
 ## 2026-10-15 — canonical payload 및 deterministic order ID 구현
 
 - 정규화된 주문 필드를 고정 순서로 직렬화하는 `canonicalOrderPayload`를 추가하고 `perpdex-order-v1` 버전 prefix를 포함했다.
