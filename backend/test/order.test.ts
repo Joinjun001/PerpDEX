@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  OrderStateTransitionError,
   OrderValidationError,
+  canTransitionOrderStatus,
+  transitionOrderStatus,
   validateCreateOrder,
 } from "../src/orders/order.ts";
 
@@ -75,4 +78,45 @@ test("arbitrarily large integer strings remain exact", () => {
   assert.equal(order.price, huge);
   assert.equal(order.quantity, huge);
   assert.equal(order.nonce, huge);
+});
+
+test("order status allows only forward lifecycle transitions", () => {
+  const allowed = [
+    ["OPEN", "PARTIALLY_FILLED"],
+    ["OPEN", "FILLED"],
+    ["OPEN", "CANCELED"],
+    ["OPEN", "EXPIRED"],
+    ["PARTIALLY_FILLED", "FILLED"],
+    ["PARTIALLY_FILLED", "CANCELED"],
+    ["PARTIALLY_FILLED", "EXPIRED"],
+  ] as const;
+
+  for (const [from, to] of allowed) {
+    assert.equal(canTransitionOrderStatus(from, to), true);
+    assert.equal(transitionOrderStatus(from, to), to);
+  }
+});
+
+test("terminal and backward order status transitions are rejected", () => {
+  const rejected = [
+    ["OPEN", "OPEN"],
+    ["PARTIALLY_FILLED", "OPEN"],
+    ["PARTIALLY_FILLED", "PARTIALLY_FILLED"],
+    ["FILLED", "OPEN"],
+    ["FILLED", "CANCELED"],
+    ["CANCELED", "OPEN"],
+    ["EXPIRED", "OPEN"],
+  ] as const;
+
+  for (const [from, to] of rejected) {
+    assert.equal(canTransitionOrderStatus(from, to), false);
+    assert.throws(
+      () => transitionOrderStatus(from, to),
+      (error: unknown) =>
+        error instanceof OrderStateTransitionError &&
+        error.from === from &&
+        error.to === to,
+      `expected ${from} -> ${to} to be rejected`,
+    );
+  }
 });

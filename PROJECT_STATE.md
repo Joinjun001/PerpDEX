@@ -8,8 +8,8 @@
 - 현재 마일스톤: **M2 — Off-chain Order API & Matching MVP**
 - 현재 TASK: **M2-T1 — 주문 도메인 모델, 입력 검증 및 상태 머신 기반**
 - 상태: In Progress
-- 최근 완료: M1 전체 완료, M2를 5개 TASK로 세분화, 주문 도메인 타입 및 런타임 입력 검증 구현
-- 다음 미완료 항목: 주문 상태 모델과 허용 전이 구현
+- 최근 완료: M1 전체 완료, M2를 5개 TASK로 세분화, 주문 도메인 타입 및 런타임 입력 검증 구현, 주문 상태 모델과 허용 전이 구현
+- 다음 미완료 항목: canonical payload 및 deterministic order ID 구현
 - 사람 확인 필요: Sepolia 실제 broadcast 배포는 수동으로 수행한다. 원격 push는 AutoPilot 작업에서 제외한다.
 
 ## 현재 TASK 문서

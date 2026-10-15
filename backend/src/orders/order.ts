@@ -2,6 +2,47 @@ export const ORDER_SIDES = ["BUY", "SELL"] as const;
 
 export type OrderSide = (typeof ORDER_SIDES)[number];
 
+export const ORDER_STATUSES = [
+  "OPEN",
+  "PARTIALLY_FILLED",
+  "FILLED",
+  "CANCELED",
+  "EXPIRED",
+] as const;
+
+export type OrderStatus = (typeof ORDER_STATUSES)[number];
+
+const ALLOWED_ORDER_STATUS_TRANSITIONS: Readonly<Record<OrderStatus, readonly OrderStatus[]>> = {
+  OPEN: ["PARTIALLY_FILLED", "FILLED", "CANCELED", "EXPIRED"],
+  PARTIALLY_FILLED: ["FILLED", "CANCELED", "EXPIRED"],
+  FILLED: [],
+  CANCELED: [],
+  EXPIRED: [],
+};
+
+export class OrderStateTransitionError extends Error {
+  readonly from: OrderStatus;
+  readonly to: OrderStatus;
+
+  constructor(from: OrderStatus, to: OrderStatus) {
+    super(`invalid order status transition: ${from} -> ${to}`);
+    this.name = "OrderStateTransitionError";
+    this.from = from;
+    this.to = to;
+  }
+}
+
+export function canTransitionOrderStatus(from: OrderStatus, to: OrderStatus): boolean {
+  return ALLOWED_ORDER_STATUS_TRANSITIONS[from].includes(to);
+}
+
+export function transitionOrderStatus(from: OrderStatus, to: OrderStatus): OrderStatus {
+  if (!canTransitionOrderStatus(from, to)) {
+    throw new OrderStateTransitionError(from, to);
+  }
+  return to;
+}
+
 export interface CreateOrderInput {
   account: string;
   market: string;
