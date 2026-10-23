@@ -21,5 +21,5 @@
 | M2-T1 | 주문 도메인 모델, 입력 검증 및 상태 머신 기반 | Completed |
 | M2-T2 | EIP-712 주문 서명 검증, nonce 및 replay 방지 | Completed (로컬 검증; 실서버 QA 이관) |
 | M2-T3 | Order REST API와 주문 저장/조회/취소 흐름 | Completed (로컬 HTTP/PGlite; 운영 DB QA 이관) |
-| M2-T4 | 가격-시간 우선 Matching Engine 및 부분 체결 | Ready (최초 TASK 계획 완료) |
+| M2-T4 | 가격-시간 우선 Matching Engine 및 부분 체결 | In Progress (A 순수 코어 구현·검증; B DB 연동 미구현) |
 | M2-T5 | 매칭 결과 settlement 연동, 통합 테스트 및 M2 릴리스 정리 | Planned |

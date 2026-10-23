@@ -127,3 +127,11 @@ HTTP 경로는 `/api/orders/cancel`을 정적 라우트로 먼저 인식하여 `
 - 주문·취소의 **만료된 서명 요청**은 기존 검증 정책대로 `400`; 만료 후 복구를 위해 인증을 생략하지 않습니다.
 - 이 기능을 실제 PostgreSQL에 사용하려면 운영자가 별도 승인 후 `npm run db:migrate`로 **003 마이그레이션**을 먼저 적용해야 합니다. 과거 003 도입 이전에 성공한 취소에는 영수증이 없으므로 재전송을 성공으로 추정하지 않습니다.
 - 이 개발 실행에서는 실제 운영 DB 마이그레이션과 배포를 수행하지 않았습니다. `npm test`는 신규 PGlite/loopback HTTP 테스트 및 기존 회귀를 포함합니다.
+
+## M2-T4-A 순수 Matching Engine
+
+`src/matching/engine.ts`의 `matchIncomingOrder(incomingOrder, restingOrders, nowSeconds)`는 가격·시간 우선 체결 후보를 계산합니다. 매수는 최저 매도 호가부터, 매도는 최고 매수 호가부터 매칭하며 같은 가격은 `arrivalSequence`가 작은(먼저 서버가 접수한) 주문을 우선합니다. 체결 가격은 **기존 메이커의 지정가**입니다.
+
+주문은 `BookOrder` 타입으로 전달하며 정규화된 market/side/주문 ID, `price`, `quantity`, `filledQuantity`(`uint256` 10진 문자열), 상태·만료시각, 서버 지정 `arrivalSequence`(1 이상의 정수 문자열)가 필요합니다. 함수는 입력을 변경하지 않으며 `fills`, 새 `incoming`·`resting` 상태, `totalFilled` 및 `remainingQuantity`를 반환합니다. 유효하지 않은 상태/정수/접수 순서 중복은 거부합니다.
+
+**현재는 실제 거래 실행 기능이 아니라 순수 계산 코어입니다.** `arrivalSequence`는 SQL의 `created_at` 타임스탬프와 독립된 단조 순서 키로 DB에 저장해야 합니다(M2-T4-B). 동시 요청을 원자적으로 직렬화하고 잔량을 DB 트랜잭션으로 갱신하기 전까지는 오프체인 체결 엔진을 실운영할 수 없습니다.

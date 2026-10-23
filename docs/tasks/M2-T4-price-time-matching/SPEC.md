@@ -18,3 +18,14 @@ M2-T3에서 검증한 EIP-712 서명 주문 저장 기반 위에 재현 가능�
 
 ## 주의
 M2-T3의 `orders.created_at`만으로는 동시각 주문의 접수 순서가 충분히 정의되지 않는다. 영속 오더북 구현 전에 안정적인 tie-breaker를 설계해야 한다.
+
+## M2-T4-A 구현 계약 (9회차)
+
+- `backend/src/matching/engine.ts`에서 `matchIncomingOrder(incomingOrder, restingOrders, nowSeconds)`를 제공하는 **부작용 없는 순수 함수**. DB 조회/갱신, RPC, 거래 실행·정산을 수행하지 않는다.
+- 입력은 `BookOrder(orderId,market,side,price,quantity,filledQuantity,status,expiresAt,arrivalSequence)`. 가격/수량/체결수량은 canonical unsigned base-10 문자열(`uint256` 범위). `arrivalSequence`는 서버 부여 단조 증가 정수의 문자열(`1..2^63-1`), 사용자 서명 Nonce나 타임스탬프와 다르다.
+- 동일 시장·가격의 매도 오더는 더 낮은 호가 우선, 동일 가격 FIFO(`arrivalSequence ASC`). 매수 오더는 더 높은 호가 우선, 동일 가격 FIFO. 메이커(기존 주문)의 호가로 체결한다.
+- 호가 교차되지 않거나 같은 side/다른 시장인 경우 거래 없음. 취소·만료·완전 체결된 주문과 현재 시각 이상으로 만료된 주문은 체결 대상 제외.
+- OPEN은 체결량 0, PARTIALLY_FILLED는 `0 < filled < quantity`, FILLED는 `filled == quantity` 제약. 불변식 위반 입력은 명시적 오류로 거부한다. CANCELED/EXPIRED는 기존 체결량을 보존하고 대상에서 제외한다.
+- `MatchResult`: 변경 없는 입력은 복사하고, 체결된 주문만 새 상태/체결량 계산; `fills`는 maker/taker/order side/시장/메이커 체결가격/체결수량 반환. `totalFilled`는 이번 호출에서 추가 체결된 수량, `remainingQuantity`는 주문의 남은 수량.
+- `arrivalSequence`가 같은 시장에서 중복되면 FIFO를 추측하지 않고 오류로 거부한다. 같은 시장 orderId도 중복 거부.
+- **후속 필수:** 서버 DB가 발급한 유일·단조 증가 접수 키를 영속화하고 DB 트랜잭션 안에서 이를 사용해 매칭 결과를 일괄 저장해야 함. 독립 프로세스/네트워크 환경의 일관성, 계정 자가체결 제한, 체결가/수수료/위험관리, 체결 이벤트와 정산은 아직 범위 밖.

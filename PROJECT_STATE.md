@@ -6,10 +6,10 @@
 - 브랜치: `main`
 - 기준: 실제 소스 코드와 Git 상태를 최우선으로 판단
 - 현재 마일스톤: **M2 — Off-chain Order API & Matching MVP**
-- 현재 TASK: **M2-T4-A — 가격·시간 우선 Matching Engine 순수 코어** (다음 작업)
-- 상태: Ready (M2-T3 로컬 구현·HTTP/PGlite 67/67 QA 완료, M2-T4-A 순수 매칭 코어 착수 예정)
-- 최근 완료: M1 전체 및 M2-T1/T2/T3 로컬 완료; M2-T3 주문 생성·조회·취소 HTTP 및 서명 기반 영속 재전송 멱등성 구현, 백엔드 67/67 테스트·TypeScript 타입 검사 통과 (2026-10-24). 운영 PostgreSQL QA는 별도 이관
-- 다음 미완료 항목: M2-T4-A 순수 가격·시간 우선 오더북/부분 체결 엔진 구현 및 결정적 테스트 → M2-T4-B DB 정합성·체결 저장. 운영 PostgreSQL 멀티프로세스/003 운영 마이그레이션은 환경·승인 준비 시 별도 수행
+- 현재 TASK: **M2-T4 — Matching Engine / M2-T4-B 영속 오더북 및 원자적 체결** (다음 작업)
+- 상태: In Progress (M2-T4-A 순수 매칭 코어 구현·전체 백엔드 81개 회귀 테스트 및 TypeScript 검사 통과, 다음 M2-T4-B DB 연동)
+- 최근 완료: M1 전체 및 M2-T1/T2/T3 로컬 완료. M2-T4-A 가격·시간 우선 순수 Matching Engine, FIFO·부분 체결·BigInt 불변식 14개 신규 테스트 구현. 백엔드 전체 81/81 통과 및 TypeScript 검사 성공 (2026-10-24). 운영 PostgreSQL QA 별도 이관
+- 다음 미완료 항목: M2-T4-B PostgreSQL 접수 순서 키(동시 타임스탬프 충돌 방지) 및 영속 오더북/트랜잭션 체결·수량 불변식 구현 → M2-T4-C API 통합. 운영 PostgreSQL 멀티프로세스·003 운영 마이그레이션은 환경/승인 준비 시 수행
 - 사람 확인 필요: 실제 PostgreSQL 서버/CLI/Docker가 없어 운영 환경의 DB 다중 연결·멀티프로세스 검증은 미실행. `forge`가 없어 Foundry 회귀 미실행. DB 실제 마이그레이션·API 배포·Sepolia broadcast는 승인 없이 수행하지 않음. 원격 push는 AutoPilot 작업에서 제외한다.
 
 ## 현재 TASK 문서
@@ -17,7 +17,7 @@
 - M2-T1 결과: `docs/tasks/M2-T1-order-domain/RESULT.md`, `QA.md` (완료)
 - M2-T2 로컬 완료: `docs/tasks/M2-T2-eip712-auth/{SPEC,TODO,RESULT,QA}.md` (운영 실서버 QA 이관)
 - M2-T3 로컬 완료: `docs/tasks/M2-T3-order-api/{SPEC,TODO,RESULT,QA}.md` (운영 DB QA 이관)
-- 다음 M2-T4-A: `docs/tasks/M2-T4-price-time-matching/{SPEC,TODO,RESULT,QA}.md`
+- 현재 M2-T4: `docs/tasks/M2-T4-price-time-matching/{SPEC,TODO,RESULT,QA}.md` (A 코어 구현, B DB 연동 예정)
 
 ## 저장소 복원 결과
 
