@@ -12,6 +12,7 @@ const pool = new Pool({ connectionString: databaseUrl });
 const migrations = [
   "../sql/001_order_nonces.sql",
   "../sql/002_orders.sql",
+  "../sql/003_order_cancel_receipts.sql",
 ];
 
 try {
@@ -23,7 +24,7 @@ try {
       await client.query(await readFile(filepath, "utf8"));
     }
     await client.query("COMMIT");
-    process.stdout.write("order nonce and order schema migrations applied\n");
+    process.stdout.write("order nonce, order, and cancellation receipt schema migrations applied\n");
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;

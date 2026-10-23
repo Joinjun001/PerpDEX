@@ -1,6 +1,6 @@
 # M2-T3 RESULT
 
-상태: In Progress
+상태: Completed (로컬 구현 및 PGlite/HTTP QA; 운영 PostgreSQL 검증 미실행)
 
 ## 2026-10-24 — 시작
 - 기준 Git: `adabd3f`, 작업 트리 깨끗함.
@@ -54,3 +54,23 @@
 - `npm test`: **58 passed / 0 failed**, 기존 50개 + HTTP 취소 테스트 8개.
 - `--test-concurrency=1` 순차 실행 유지. DB 업데이트 제약 테스트는 앞서 취소된 다른 주문을 방해하지 않도록 목표 nonce에만 제약 적용한 뒤 재검증 완료.
 - 실제 PostgreSQL 서버, 외부 공개 API와 멀티프로세스/네트워크 E2E는 **미검증**. 배포/운영 DB 마이그레이션 미수행.
+
+## 2026-10-24 — 재전송 멱등성 구현 및 로컬 검증 (8회차)
+
+- Git 시작 상태: clean, 직전 로컬 커밋 `2477e83`.
+- `backend/src/orders/idempotency.ts`: 저장된 원본 주문·정확한 서명·서버 설정 도메인을 재확인한 뒤 안전한 생성 재전송을 판정. 취소 영수증의 계정/nonce/기한/서명과 저장 결과를 조회하여 취소 재전송을 판정.
+- `backend/sql/003_order_cancel_receipts.sql`: 영속적 취소 증거 테이블 추가; 기존 `001`·`002` 마이그레이션은 수정하지 않음. `scripts/migrate.ts`가 명시적 수동 실행 시 `003`을 추가하도록 갱신.
+- `cancelSignedOrder`: Nonce/주문 상태 변경과 취소 영수증 INSERT를 같은 DB 트랜잭션으로 커밋.
+- `POST /api/orders`: 동일 유효 서명·주문 재전송이면 `200,replayed:true`; 실제 저장된 현 상태 사용. 변조된 요청은 원래 409, 위조 서명은 401.
+- `POST /api/orders/cancel`: 원본과 서명·기한이 일치하는 취소 요청만 `200,replayed:true` 및 영수증에 저장된 원래 결과 반환. 다른 취소/종료 주문은 원래 409 유지.
+- 신규 `backend/test/idempotency-http.test.ts` 테스트 9개: 응답 유실 복구 모사, 주문 상태 변경 후 재요청, 동일 Nonce 변조·위조 거부/다른 계정 분리, 동시 동일 생성 10회, 취소 영수증/잔량 보존, 사전 취소 멱등성, 동시 취소 8회, receipt INSERT SQL 오류 전체 rollback, 디스크 PGlite 닫기·재개방 후 생성·취소 재전송.
+- 기존 테스트 중 중복 전송 기대 결과가 정책상 `409→200`으로 변경된 두 곳을 갱신했으며, 경합 테스트는 원본 주문 커밋 여부에 따라 안전한 재전송과 신규 주문 거부를 구별하도록 수정.
+- PGlite 및 localhost HTTP에서만 검증. 운영 PostgreSQL 다중 연결/프로세스, 실제 운영 DB 스키마 적용·배포·원격 Push·사용자 개인키는 수행하지 않음.
+
+### 8회차 최종 로컬 완료 판정
+
+- `cd backend && npm run build`: TypeScript `tsc --noEmit` **통과**.
+- `cd backend && npm test`: 전체 **67 passed / 0 failed** (`--test-concurrency=1`).
+- M2-T3 범위: 서명 주문 생성·단건/목록 조회·인증된 취소·영속 재전송 복구 구현 및 HTTP/PGlite 회귀 통과.
+- 상태: **로컬 기능 개발·검증 완료**. 운영 PostgreSQL 다중 연결/멀티프로세스 실서버, 운영 DB의 003 마이그레이션, 외부 배포/접근 제어는 미실행. 상용 서비스 준비 완료를 의미하지 않음.
+- 다음: M2-T4-A 결정적 순수 가격·시간 우선 매칭 코어 구현.

@@ -70,7 +70,7 @@ async function row(nonce:string) {
 before(async()=>{
   db=new PGlite();
   await db.waitReady;
-  for(const file of ["../sql/001_order_nonces.sql","../sql/002_orders.sql"]) {
+  for(const file of ["../sql/001_order_nonces.sql","../sql/002_orders.sql","../sql/003_order_cancel_receipts.sql"]) {
     await db.exec(await readFile(fileURLToPath(new URL(file,import.meta.url)),"utf8"));
   }
   ({instance:server,origin:url}=await listen());
@@ -92,8 +92,8 @@ test("POST /api/orders/cancel verifies EIP-712 owner and updates order + nonce a
   assert.equal(details.status,200);
   assert.equal((await details.json() as {order:{status:string}}).order.status,"CANCELED");
   const replay=await cancel(req);
-  assert.equal(replay.status,409);
-  assert.equal((await replay.json() as {error:{code:string}}).error.code,"CANCEL_CONFLICT");
+  assert.equal(replay.status,200);
+  assert.deepEqual(await replay.json(),{status:"CANCELED",orderExists:true,remainingQuantity:"100",replayed:true});
 });
 
 test("signed pre-cancel prevents any subsequent order acceptance",async()=>{
@@ -190,7 +190,14 @@ test("simultaneous signed cancel and order creation cannot leave OPEN + CANCELED
   assert.equal(r?.nonce_status,"CANCELED");
   assert.ok(r?.order_status===null || r?.order_status==="CANCELED");
   const again=await post("/api/orders",{order:input,signature:await orderSignature(input)});
-  assert.equal(again.status,409);
+  if (acceptance.status === 201) {
+    // Original create committed before cancellation: this is a verified retry.
+    assert.equal(again.status,200);
+    assert.equal((await again.json() as {status:string}).status,"CANCELED");
+  } else {
+    // Pre-cancellation won the nonce race: no original order to replay.
+    assert.equal(again.status,409);
+  }
 });
 
 test("database update failure rolls back cancel to preserve original active order",async()=>{

@@ -13,6 +13,7 @@ import { ORDER_STATUSES } from "../orders/order.ts";
 import { cancelSignedOrder, OrderCancellationConflictError } from "../orders/cancel-order.ts";
 import { CancelValidationError, InvalidCancelSignatureError } from "../orders/cancel-signature.ts";
 import type { CancelOrderInput } from "../orders/cancel-signature.ts";
+import { PostgresIdempotencyReceipts } from "../orders/idempotency.ts";
 
 const MAX_BODY_BYTES = 64 * 1024;
 
@@ -133,6 +134,7 @@ export function createOrderHttpHandler(input: {
 }) {
   const trustedDomain = validateOrderSigningDomain(input.trustedDomain);
   const store = new PostgresOrderStore(input.readDatabase);
+  const receipts = new PostgresIdempotencyReceipts(input.readDatabase);
   return async (request: IncomingMessage, response: ServerResponse): Promise<void> => {
     try {
       const url = new URL(request.url ?? "/", "http://localhost");
@@ -151,8 +153,15 @@ export function createOrderHttpHandler(input: {
         if (url.search) throw new InvalidQueryError();
         const payload = await parseBody(request);
         const { cancel, signature } = validatedCancelRequest(payload);
-        const result = await cancelSignedOrder(cancel, signature, trustedDomain, input.transactions);
-        sendJson(response, 200, result);
+        try {
+          const result = await cancelSignedOrder(cancel, signature, trustedDomain, input.transactions);
+          sendJson(response, 200, result);
+        } catch (error) {
+          if (!(error instanceof OrderCancellationConflictError)) throw error;
+          const prior = await receipts.retryCancel(cancel, signature, trustedDomain);
+          if (!prior) throw error;
+          sendJson(response, 200, {...prior, replayed: true});
+        }
         return;
       }
       if (detail) {
@@ -182,12 +191,15 @@ export function createOrderHttpHandler(input: {
       if (url.search) throw new InvalidQueryError();
       const payload = await parseBody(request);
       const { order, signature } = validatedRequest(payload);
-      const accepted = await acceptSignedOrder(order, signature, trustedDomain, input.transactions);
-      sendJson(response, 201, {
-        orderId: accepted.orderId,
-        status: "OPEN",
-        order: accepted.order,
-      });
+      try {
+        const accepted = await acceptSignedOrder(order, signature, trustedDomain, input.transactions);
+        sendJson(response, 201, { orderId: accepted.orderId, status: "OPEN", order: accepted.order });
+      } catch (error) {
+        if (!(error instanceof NonceAlreadyUsedError)) throw error;
+        const prior = await receipts.retryCreate(order, signature, trustedDomain);
+        if (!prior) throw error;
+        sendJson(response, 200, {...prior, replayed: true});
+      }
     } catch (error) {
       if (error instanceof BodyTooLargeError) {
         sendJson(response, 413, { error: { code: "PAYLOAD_TOO_LARGE", message: "request body too large" } });

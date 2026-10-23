@@ -4,6 +4,7 @@ import type { OrderSigningDomainInput } from "./signature.ts";
 import type { OrderTransactionManager } from "./order-transactions.ts";
 import { PostgresNonceRegistry } from "./nonce-registry.ts";
 import { PostgresOrderStore } from "./order-store.ts";
+import { PostgresIdempotencyReceipts } from "./idempotency.ts";
 
 export class OrderCancellationConflictError extends Error {
   constructor() {
@@ -45,12 +46,15 @@ export async function cancelSignedOrder(
       throw new OrderCancellationConflictError();
     }
     const orders = new PostgresOrderStore(db);
+    const receipts = new PostgresIdempotencyReceipts(db);
     const key = { account: request.account, nonce: request.nonce, domain: trustedDomain };
     const canceled = await orders.cancelActive(key);
     if (canceled) {
       const remaining = BigInt(canceled.quantity) - BigInt(canceled.filled_quantity);
       if (remaining < 0n) throw new Error("stored order has invalid filled quantity");
-      return { status: "CANCELED", orderExists: true, remainingQuantity: remaining.toString() };
+      const result: CancelResult = { status: "CANCELED", orderExists: true, remainingQuantity: remaining.toString() };
+      await receipts.recordCancel(request,signature,trustedDomain,result);
+      return result;
     }
     const existing = await orders.findByNonce(key);
     if (existing !== null) {
@@ -58,6 +62,8 @@ export async function cancelSignedOrder(
       throw new OrderCancellationConflictError();
     }
     // A signed cancellation before order creation reserves the nonce permanently.
-    return { status: "CANCELED", orderExists: false, remainingQuantity: null };
+    const result: CancelResult = { status: "CANCELED", orderExists: false, remainingQuantity: null };
+    await receipts.recordCancel(request,signature,trustedDomain,result);
+    return result;
   });
 }

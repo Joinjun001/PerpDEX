@@ -14,7 +14,7 @@ import type { OrderTransactionManager } from "../src/orders/order-transactions.t
 const DOMAIN = { chainId:11155111, verifyingContract:"0x1111111111111111111111111111111111111111" };
 const wallet = privateKeyToAccount(generatePrivateKey());
 const attacker = privateKeyToAccount(generatePrivateKey());
-const migrationUrls = [ "../sql/001_order_nonces.sql", "../sql/002_orders.sql" ];
+const migrationUrls = [ "../sql/001_order_nonces.sql", "../sql/002_orders.sql", "../sql/003_order_cancel_receipts.sql" ];
 
 function anOrder(nonce: string, account: string = wallet.address) {
   return { account, nonce, market:"ETH-USDC", side:"BUY" as const, price:"10000",

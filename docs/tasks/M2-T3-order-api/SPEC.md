@@ -39,3 +39,14 @@
 - 잘못된 취소 데이터/만료 deadline은 `400 INVALID_CANCEL`; 잘못된 JSON·불필요한 도메인은 `400 INVALID_ORDER`; 위조·다른 소유자·다른 서명 도메인은 `401 INVALID_CANCEL_SIGNATURE`; 중복 취소·FILLED/EXPIRED 주문은 `409 CANCEL_CONFLICT`; SQL 실패는 `500 INTERNAL_ERROR`.
 - Content-Type과 64KiB 본문 크기 제한은 주문 생성 POST와 동일하게 적용한다.
 - 기존 `cancelSignedOrder`가 nonce tombstone과 주문 상태를 동일 트랜잭션에서 변경한다. 부분 체결 주문은 체결 수량을 보존한다.
+
+## 8회차 — HTTP 재전송 멱등성 정책
+
+- 서버가 Nonce 충돌을 확인한 경우에도 **재인증을 먼저 수행**하고 저장된 원본 증거를 확인한다. 단순히 같은 Nonce라는 이유만으로 성공을 반환하지 않는다.
+- 주문 생성: 최초 성공 `201`; **동일한 EIP-712 서명, 정규화된 주문 필드, 동일 account/chainId/verifyingContract/nonce**가 DB에 존재하면 재전송 `200` 및 `replayed:true`. 응답 `status`는 현재 저장 상태를 반환하므로, 재전송으로 기존 FILLED/CANCELED 주문이 OPEN으로 보이지 않는다. 다른 주문·서명은 `409 NONCE_CONFLICT`, 위조 서명은 `401 INVALID_SIGNATURE`.
+- 주문 취소: 최초 성공 `200`; `003_order_cancel_receipts.sql`로 저장된 `(chainId,verifyingContract,account,nonce,deadline,signature,orderExists,remainingQuantity)` 증거가 **정확히 일치**하면 `200,replayed:true`. 최초 취소 당시 잔량을 반환하며 재시도로 상태를 바꾸지 않는다. 증거가 없거나 새 서명·deadline 변경은 `409 CANCEL_CONFLICT`.
+- 취소 영수증 INSERT와 Nonce·주문 상태 변경은 **한 트랜잭션**에서 실행되어야 한다. INSERT 실패 시 전부 rollback.
+- 주문/취소 기한이 이미 지난 요청은 최초 서명 검증 규칙을 유지하여 `400`으로 거부하며, 기한 만료 후 자동 성공 복구는 하지 않는다.
+- 이전 DB에서 영수증 마이그레이션 전에 승인된 취소는 기존 서명 증거가 없으므로 **안전하게 409**를 유지한다.
+- `003` 마이그레이션은 기존 SQL 변경 없이 신규 테이블만 만들고, 운영 DB 반영은 명시적인 수동 승인 후 수행한다.
+- 동일 서명의 동시 재전송은 DB 고유키·트랜잭션 직렬화로 한 번만 커밋되고 나머지는 검증된 재전송 결과를 받는다. 외부 PostgreSQL 다중 프로세스 통합 시험은 별도.

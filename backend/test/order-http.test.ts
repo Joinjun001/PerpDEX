@@ -82,9 +82,11 @@ test("POST /api/orders creates a persisted signed order and nonce atomically",as
   assert.equal(stored.rows.length,1);
   assert.deepEqual(stored.rows[0],{status:"OPEN",nonce_status:"USED"});
   const duplicate=await post({order:input,signature});
-  assert.equal(duplicate.status,409);
-  const conflict=await duplicate.json() as {error:{code:string}};
-  assert.equal(conflict.error.code,"NONCE_CONFLICT");
+  assert.equal(duplicate.status,200);
+  const replay=await duplicate.json() as {orderId:string;status:string;replayed:boolean};
+  assert.equal(replay.orderId,json.orderId);
+  assert.equal(replay.status,"OPEN");
+  assert.equal(replay.replayed,true);
 });
 
 test("invalid runtime fields and past expiration return 400 without reserving nonce",async()=>{

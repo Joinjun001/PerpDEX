@@ -1,6 +1,6 @@
 # M2-T3 QA
 
-상태: In Progress
+상태: Passed (로컬 HTTP/PGlite 67 tests; 운영 PostgreSQL 검증 별도)
 
 - 구현 예정: HTTP 입력 유효성·서명·Nonce 중복·DB 실패 응답.
 - 운영 PostgreSQL 서버 및 다중 프로세스는 현재 환경에서 실행 불가. PGlite의 embedded PostgreSQL 엔진으로 검증한 결과와 구분한다.
@@ -43,3 +43,20 @@
 - 서명 취소 API HTTP/PGlite 신규 테스트 **8개 통과**.
 - 서버 설정 기반 도메인 고정, EIP-712 위조/타 사용자 거부, 사전 취소, 중복·종료 상태 보호, 부분 체결 잔량 보존, 생성-취소 동시 경합, DB 오류 시 롤백 및 내부 SQL 비노출을 확인.
 - 운영 PostgreSQL과 다중 프로세스는 미검증. HTTP 응답 유실 및 재전송 idempotency는 미구현.
+
+## 2026-10-24 — 멱등성 및 응답 유실 복구 QA (8회차)
+
+- 주문 생성 원본 성공 201 → 동일 서명 재전송 200/replayed; 다른 서명·변조된 같은 Nonce 409, 타 지갑 위조 401.
+- 기존 주문이 부분 체결·취소 상태일 때 재전송 응답은 현재 상태를 표시. 체결과 취소 동작을 재수행하지 않는다.
+- 취소 성공 후 receipt 영속 저장, 동일 취소 재전송 200/replayed, 서명·deadline 변경 충돌 409. 사전 취소 동일 서명 재전송도 안전하게 복구.
+- 동시 생성 10개에서 최초 커밋 1개·멱등성 재전송 9개, 동시 취소 8개에서 receipt 1건만 커밋.
+- 취소 receipt INSERT SQL 실패 시 Nonce/주문 동시 rollback 확인. 영속 DB 재개방 후 동일 주문 생성·취소 재전송 확인.
+- 만료된 요청의 허용 범위 확장 없음; 인증·Nonce 소유자·도메인 보호는 기존 정책 유지.
+- PostgreSQL PGlite 기반 검증, 외부 운영 DB 멀티프로세스·실배포 미실행. `forge` 미구비로 온체인 회귀 별도.
+
+### 8회차 로컬 최종 QA
+
+- `npm run build`: 통과. `npm test`: **67 tests, 67 passed, 0 failed**.
+- 신규 재전송 테스트 9개: 인증·도메인 검증, 동일 서명 성공 복구, 동시 중복 처리, 변조 및 타 계정 구분, 취소 기록 영속성, 기록 INSERT 오류 rollback, DB 재시작 복구.
+- 운영 PostgreSQL 다중 프로세스 및 실제 배포, Foundry 통합 회귀는 **미실행**. 실제 결제/키/정산 자금 작업 없음. QA 범위는 로컬 HTTP/PGlite.
+- M2-T3 **로컬 QA Passed / 운영 환경 검증 별도 이관**.
