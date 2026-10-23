@@ -1,6 +1,6 @@
 # M2-T4 RESULT
 
-상태: In Progress — M2-T4-A 순수 매칭 코어 구현 완료, M2-T4-B DB/동시성 개발 대기
+상태: In Progress — M2-T4-A/B 로컬 구현 완료, M2-T4-C API 통합 및 운영 PostgreSQL 검증 미완료
 
 ## 2026-10-24
 - M2-T3의 로컬 테스트 및 재전송 멱등성 구현 완료 이후 시작 준비.
@@ -19,3 +19,23 @@
 - `backend/test/matching-engine.test.ts` 신규 14개 테스트: 매수·매도 호가 우선, 같은 가격 FIFO, 가격·시간 우선 순서, 무체결, 시장 분리, 취소/만료/완전체결 제외, 부분 체결, BigInt 높은 정밀도, 입력 불변/결정성, 중복 데이터 거부, invalid 값 거부, 120개 결정적 시드 기반 수량 합계 불변식.
 - `npm run build` TypeScript 타입 검사 통과, 신규 테스트 `14 passed / 0 failed`. 전체 `npm test` **81 passed / 0 failed** (`--test-concurrency=1`).
 - **미구현:** DB에 영속 순서 키 부여 및 원자적 체결/부분 체결 업데이트, 사용자별 자가체결 방지 정책, 실제 시장 API 연결, 정산 및 실서버 검증. 원격 Push·DB 마이그레이션·온체인 정산은 수행하지 않음.
+
+## 2026-10-24 — M2-T4-B PostgreSQL 영속 오더북·원자적 체결 (10회차)
+
+- 시작 Git: `main` clean, 직전 커밋 `bc7d3d9`.
+- `backend/sql/004_order_book.sql`: chainId/verifyingContract/market 분리 카운터, 기존 인증 주문을 참조하는 오더북 엔트리 및 고유 admission sequence, 메이커·테이커 복합 외래키를 가진 체결원장 신규 생성. 기존 마이그레이션 001~003은 수정하지 않음.
+- `backend/src/matching/postgres-book.ts`:
+  - `registerSignedOrderInBook`: EIP-712 인증 후 영속 저장된 주문만 등록. 카운터 행 잠금으로 접수 순서 부여, 중복 등록 시 같은 sequence 반환, 시장별/도메인별 독립 카운터.
+  - `matchRegisteredOrder`: 시장 행 잠금으로 같은 시장 매칭 직렬화, ORDER BY admission sequence·주문행 `FOR UPDATE`, 취소·만료 및 늦게 등록된/같은 계정 주문 제외, 순수 코어 재사용.
+  - 체결된 메이커/테이커 수량·상태를 DB 원본 상태 조건과 함께 UPDATE, fill 원장 INSERT까지 전부 하나의 트랜잭션에서 원자적 커밋 또는 롤백.
+- `backend/scripts/migrate.ts`에 004를 **수동 실행 목록으로만** 추가; 실행·배포하지 않음.
+- `backend/test/postgres-matching.test.ts`: 시장별 동시 등록·고유 순서 및 중복 등록 불변, 가격/시간 우선 및 부분 체결 원장, 비교차·미등록·타 시장/자가체결 제외, 취소 완료 메이커 제외, BigInt 정밀도, 체결 INSERT 강제 실패 후 전체 롤백 및 재시도, 동일 테이커 매칭 동시 실행에서 체결 1회, 취소-매칭 경합 일관성, 디스크 DB 재개방 시 순서/잔량/원장 유지 등 **10개** 테스트.
+- 매칭 등록/실행은 내부 호출로만 구현. 공개 REST 주문 생성에 자동 연결되지 않았으므로 M2-T4-C에서 인증 도메인·트랜잭션 경계를 통합해야 함.
+- 실제 운영 PostgreSQL 멀티 프로세스/연결 및 DB 마이그레이션, 실배포, 온체인 정산, 원격 push는 미실행.
+
+### 10회차 최종 검증 및 후속
+
+- 전체 `npm run build` 타입 검사 성공, `npm test` **91/91 통과**.
+- M2-T4-B는 내부 DB 매칭 서비스·PGlite 기준 완료. 아직 주문 접수 REST API와 같은 트랜잭션으로 매칭을 실행하는 기능은 없음.
+- 다음 M2-T4-C는 주문 생성 → 검증된 DB 저장 → 시장별 잠금/순서 배정 → 매칭·체결 상태/원장 저장을 안전한 단일 경계로 통합하고, API E2E·취소 경합·재시도·재시작을 검증한다.
+- 운영 PostgreSQL, 온체인 정산, 배포, 실제 자격증명/개인키, 원격 Push 작업은 수행하지 않았다.

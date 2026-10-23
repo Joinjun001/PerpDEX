@@ -13,6 +13,7 @@ const migrations = [
   "../sql/001_order_nonces.sql",
   "../sql/002_orders.sql",
   "../sql/003_order_cancel_receipts.sql",
+  "../sql/004_order_book.sql",
 ];
 
 try {

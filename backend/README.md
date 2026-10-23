@@ -135,3 +135,11 @@ HTTP 경로는 `/api/orders/cancel`을 정적 라우트로 먼저 인식하여 `
 주문은 `BookOrder` 타입으로 전달하며 정규화된 market/side/주문 ID, `price`, `quantity`, `filledQuantity`(`uint256` 10진 문자열), 상태·만료시각, 서버 지정 `arrivalSequence`(1 이상의 정수 문자열)가 필요합니다. 함수는 입력을 변경하지 않으며 `fills`, 새 `incoming`·`resting` 상태, `totalFilled` 및 `remainingQuantity`를 반환합니다. 유효하지 않은 상태/정수/접수 순서 중복은 거부합니다.
 
 **현재는 실제 거래 실행 기능이 아니라 순수 계산 코어입니다.** `arrivalSequence`는 SQL의 `created_at` 타임스탬프와 독립된 단조 순서 키로 DB에 저장해야 합니다(M2-T4-B). 동시 요청을 원자적으로 직렬화하고 잔량을 DB 트랜잭션으로 갱신하기 전까지는 오프체인 체결 엔진을 실운영할 수 없습니다.
+
+## M2-T4-B PostgreSQL 영속 오더북·체결
+
+- `sql/004_order_book.sql`: `order_book_counters`(시장별 잠금/접수 번호), `order_book_entries`(인증된 저장 주문에 대한 순서 키), `order_fills`(체결 원장) 생성.
+- `src/matching/postgres-book.ts`: `registerSignedOrderInBook({account,nonce},trustedDomain,transactionManager)`는 이미 서명 검증을 거쳐 저장된 주문만 오더북에 등록합니다. 서버 신뢰 도메인+시장 별 카운터 행을 `FOR UPDATE` 잠가 트랜잭션 커밋 순서대로 admission sequence를 발급합니다. 동일 주문 재등록은 같은 값을 반환합니다.
+- `matchRegisteredOrder({account,nonce},trustedDomain,transactionManager)`는 시장 카운터와 등록 주문행을 잠근 상태에서 순수 `matchIncomingOrder`로 계산하고 **메이커·테이커 filled_quantity/status 및 체결 원장 INSERT를 한 트랜잭션**으로 처리합니다. DB 오류는 전체 롤백합니다.
+- API의 기존 `POST /api/orders` 호출은 **아직 오더북 등록이나 자동 매칭을 수행하지 않습니다**. 매칭 서비스는 내부 개발 API이며, REST 접수부터 매칭까지 끊김 없는 흐름은 M2-T4-C에서 구현할 예정입니다.
+- 현 단계에서 멀티프로세스 운영 PostgreSQL 환경은 없으므로 `004`의 실제 서버 적용·배포를 하지 않았습니다. `npm test`는 PGlite를 통해 동시 매칭, 취소 경합, 강제 DB 오류 롤백, 재시작 후 순서/잔량 보존을 검증합니다. 체결 결과의 온체인 정산은 별도 M2-T5 범위입니다.
