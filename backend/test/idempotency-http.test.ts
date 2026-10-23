@@ -25,7 +25,7 @@ let number=50000;
 async function database(path?:string) {
   const instance=new PGlite(path);
   await instance.waitReady;
-  for(const file of ["001_order_nonces","002_orders","003_order_cancel_receipts"]) {
+  for(const file of ["001_order_nonces","002_orders","003_order_cancel_receipts","004_order_book"]) {
     await instance.exec(await readFile(fileURLToPath(new URL(`../sql/${file}.sql`,import.meta.url)),"utf8"));
   }
   return instance;

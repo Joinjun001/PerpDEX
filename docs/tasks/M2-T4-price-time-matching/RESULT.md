@@ -1,6 +1,6 @@
 # M2-T4 RESULT
 
-상태: In Progress — M2-T4-A/B 로컬 구현 완료, M2-T4-C API 통합 및 운영 PostgreSQL 검증 미완료
+상태: In Progress — M2-T4-A/B/C 로컬 구현 완료, M2-T4-D 정산 입력 형식/최종 QA 및 운영 PostgreSQL 검증 미완료
 
 ## 2026-10-24
 - M2-T3의 로컬 테스트 및 재전송 멱등성 구현 완료 이후 시작 준비.
@@ -39,3 +39,14 @@
 - M2-T4-B는 내부 DB 매칭 서비스·PGlite 기준 완료. 아직 주문 접수 REST API와 같은 트랜잭션으로 매칭을 실행하는 기능은 없음.
 - 다음 M2-T4-C는 주문 생성 → 검증된 DB 저장 → 시장별 잠금/순서 배정 → 매칭·체결 상태/원장 저장을 안전한 단일 경계로 통합하고, API E2E·취소 경합·재시도·재시작을 검증한다.
 - 운영 PostgreSQL, 온체인 정산, 배포, 실제 자격증명/개인키, 원격 Push 작업은 수행하지 않았다.
+
+## 2026-10-24 — M2-T4-C 주문 API 자동 매칭 연동 (11회차)
+
+- 시작: `main` 작업 트리 clean, 직전 로컬 커밋 `29004f2`, ROADMAP 기준 첫 미완료 기능은 M2-T4-C.
+- `backend/src/matching/accept-and-match.ts` 신규: 서버 인증 서명 → Nonce → 주문 저장 → 시장 등록 → 순수 엔진 매칭 → 상태·체결원장 저장을 기존 `OrderTransactionManager.withTransaction` 한 번에 연결. 중간 단계 SQL 오류는 전체 rollback.
+- `backend/src/matching/postgres-book.ts`: 이미 트랜잭션에 바인딩된 `SqlRunner`를 받는 등록/매칭 메서드를 노출하며, 기존 독립 서비스 호출에는 트랜잭션 래퍼를 유지. 순수 가격·시간 엔진/체결 정책은 변경하지 않음.
+- `backend/src/http/create-order-http.ts`: POST 주문 저장 직후 자동 등록·매칭, 생성 응답 201에 최종 status, filledQuantity, remainingQuantity, arrivalSequence, fills 포함. GET/취소/인증 재전송 코드는 기존 의미 유지.
+- 기존 HTTP 테스트의 PGlite 초기화에 003/004 스키마를 포함하여 현재 필수 API 마이그레이션을 반영. `backend/test/order-matching-http.test.ts` 신규 **6개 테스트**: HTTP FIFO 부분 체결, 동시 주문 유동성 보존, 동일 계정 자가체결 방지, 취소-체결 경합, 원장 저장 강제 오류 후 신규 주문·Nonce·등록 전부 롤백 및 재시도, 디스크 DB 종료·재시작 후 원장/잔량 보존.
+- TypeScript `npm run build` 통과, 신규 API 매칭 테스트 **6/6 통과**, 백엔드 전체 `npm test` **97/97 통과**.
+- 스키마 004는 운영 DB에 적용하지 않음. 실 PostgreSQL 다중 연결/멀티프로세스·Foundry·배포/실정산·원격 push 미실행. 기능은 PGlite 테스트 환경 기준 검증됨.
+- 다음: M2-T4-D 체결 결과를 M2-T5 온체인 정산에 넘길 입력 계약, 전체 TASK QA/회귀 및 누락된 불변식 검증.

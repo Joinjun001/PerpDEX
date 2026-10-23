@@ -51,16 +51,17 @@ async function lockMarket(db:SqlRunner, chainId:number, contract:string, market:
 /**
  * Explicit book admission. MUST be invoked for an already persisted, signed
  * order. Book registration (not untrusted HTTP arrival time) defines price/time
- * priority until M2-T4-C integrates this operation with accepted orders.
+ * priority. The public POST API integrates this operation via one transaction.
  */
-export async function registerSignedOrderInBook(
+export async function registerSignedOrderInBookWithRunner(
   key:StoredOrderKey, trustedDomain:OrderSigningDomainInput,
-  transactions:OrderTransactionManager,
+  db:SqlRunner,
   nowSeconds=Math.floor(Date.now()/1000),
 ):Promise<{market:string;arrivalSequence:string}> {
   const [chainId,contract,account,nonce]=identity(key,trustedDomain);
   if(!Number.isSafeInteger(nowSeconds))throw new OrderBookStateError("invalid current time");
-  return transactions.withTransaction(async db=>{
+  // Must be supplied a transaction-bound SqlRunner by its caller.
+  {
     // Immutable order data can be read before the market lock. No row lock is
     // taken here, avoiding inverted lock order with matching/cancellation.
     const found=await db.query(
@@ -104,7 +105,15 @@ export async function registerSignedOrderInBook(
       [chainId,contract,market,account,nonce,record.order_id,arrivalSequence],
     );
     return {market,arrivalSequence};
-  });
+  }
+}
+
+export async function registerSignedOrderInBook(
+  key:StoredOrderKey, trustedDomain:OrderSigningDomainInput,
+  transactions:OrderTransactionManager,
+  nowSeconds=Math.floor(Date.now()/1000),
+):Promise<{market:string;arrivalSequence:string}> {
+  return transactions.withTransaction(db => registerSignedOrderInBookWithRunner(key,trustedDomain,db,nowSeconds));
 }
 
 export interface MatchCommitResult {
@@ -120,16 +129,17 @@ export interface MatchCommitResult {
  * fill ledger, all in ONE transaction. Never expose as an unauthenticated API.
  * Registered, earlier makers only; distinct accounts exclude direct self-trades.
  */
-export async function matchRegisteredOrder(
+export async function matchRegisteredOrderWithRunner(
   key:StoredOrderKey,trustedDomain:OrderSigningDomainInput,
-  transactions:OrderTransactionManager,
+  db:SqlRunner,
   nowSeconds=Math.floor(Date.now()/1000),
 ):Promise<MatchCommitResult> {
   const [chainId,contract,account,nonce]=identity(key,trustedDomain);
   if(!Number.isSafeInteger(nowSeconds) || nowSeconds<0)
     throw new OrderBookStateError("invalid current time");
 
-  return transactions.withTransaction(async db=>{
+  // The caller owns the enclosing transaction and its commit/rollback.
+  {
     const entry=await db.query(
       `SELECT market FROM order_book_entries
        WHERE chain_id=$1 AND verifying_contract=$2 AND account=$3 AND nonce=$4`,
@@ -200,5 +210,13 @@ export async function matchRegisteredOrder(
     }
     return {market,incoming:computed.incoming,fills:computed.fills,
       totalFilled:computed.totalFilled,remainingQuantity:computed.remainingQuantity};
-  });
+  }
+}
+
+export async function matchRegisteredOrder(
+  key:StoredOrderKey,trustedDomain:OrderSigningDomainInput,
+  transactions:OrderTransactionManager,
+  nowSeconds=Math.floor(Date.now()/1000),
+):Promise<MatchCommitResult> {
+  return transactions.withTransaction(db => matchRegisteredOrderWithRunner(key,trustedDomain,db,nowSeconds));
 }

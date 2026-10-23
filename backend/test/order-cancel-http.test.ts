@@ -70,7 +70,7 @@ async function row(nonce:string) {
 before(async()=>{
   db=new PGlite();
   await db.waitReady;
-  for(const file of ["../sql/001_order_nonces.sql","../sql/002_orders.sql","../sql/003_order_cancel_receipts.sql"]) {
+  for(const file of ["../sql/001_order_nonces.sql","../sql/002_orders.sql","../sql/003_order_cancel_receipts.sql","../sql/004_order_book.sql"]) {
     await db.exec(await readFile(fileURLToPath(new URL(file,import.meta.url)),"utf8"));
   }
   ({instance:server,origin:url}=await listen());

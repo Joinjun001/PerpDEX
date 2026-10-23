@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { validateOrderSigningDomain } from "../orders/signature.ts";
 import type { OrderSigningDomainInput } from "../orders/signature.ts";
-import { acceptSignedOrder } from "../orders/accept-order.ts";
+import { acceptAndMatchSignedOrder } from "../matching/accept-and-match.ts";
 import type { OrderTransactionManager } from "../orders/order-transactions.ts";
 import type { CreateOrderInput } from "../orders/order.ts";
 import { OrderValidationError } from "../orders/order.ts";
@@ -192,8 +192,15 @@ export function createOrderHttpHandler(input: {
       const payload = await parseBody(request);
       const { order, signature } = validatedRequest(payload);
       try {
-        const accepted = await acceptSignedOrder(order, signature, trustedDomain, input.transactions);
-        sendJson(response, 201, { orderId: accepted.orderId, status: "OPEN", order: accepted.order });
+        const accepted = await acceptAndMatchSignedOrder(order, signature, trustedDomain, input.transactions);
+        sendJson(response, 201, {
+          orderId: accepted.orderId, status: accepted.matching.incoming.status,
+          order: accepted.order,
+          filledQuantity: accepted.matching.incoming.filledQuantity,
+          remainingQuantity: accepted.matching.remainingQuantity,
+          arrivalSequence: accepted.registration.arrivalSequence,
+          fills: accepted.matching.fills,
+        });
       } catch (error) {
         if (!(error instanceof NonceAlreadyUsedError)) throw error;
         const prior = await receipts.retryCreate(order, signature, trustedDomain);

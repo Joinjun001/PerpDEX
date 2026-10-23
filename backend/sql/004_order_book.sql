@@ -1,5 +1,5 @@
 -- M2-T4-B: durable book admission order and execution ledger.
--- Book admission is explicit. Existing HTTP orders are NOT auto-admitted until M2-T4-C.
+-- Admission is explicit for internal callers; POST /api/orders now admits/matches atomically.
 -- A per-domain/market counter ROW LOCK serializes sequence allocation and matching.
 -- Unlike nextval(), counter updates roll back, and higher committed sequences
 -- cannot overtake lower committed sequences on the same market.

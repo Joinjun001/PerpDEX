@@ -1,9 +1,8 @@
 # M2-T4 QA
 
-상태: In Progress — M2-T4-A/B 로컬 테스트 전체 91/91 통과, M2-T4-C API 및 운영 PostgreSQL 다중 프로세스 검증 미완료
+상태: In Progress — M2-T4-A/B/C 로컬 완료, M2-T4-D 및 실제 PostgreSQL 다중 연결 운영 QA 미완료
 
 - M2-T3 로컬 최종 회귀: npm run build 통과, npm test 67/67 통과 (2026-10-24).
-- 매칭 엔진 자체 테스트는 아직 없음. 구현 완료로 처리하지 않는다.
 - 실제 운영 PostgreSQL, Foundry, 배포 검증은 별도 작업.
 
 ## 2026-10-24 — M2-T4-A 코어 QA
@@ -24,3 +23,10 @@
 - `cd backend && npm test` (`--test-concurrency=1`) → **91 passed / 0 failed**, 기존 81개 + 신규 PGlite 오더북 10개.
 - 내부 영속 매칭 API의 DB 행 잠금·동시성, 취소 경합, 원장 외래키, SQL 오류 롤백 및 데이터베이스 재개방을 검증했다.
 - 운영 PostgreSQL 서버/다중 연결·프로세스 검증은 실행할 도구가 없어 **미검증**. 기존 주문 생성 REST API에서 오더북 자동 등록·체결을 수행하는 연동도 **미구현**.
+
+## 2026-10-24 — M2-T4-C API 통합 QA (11회차)
+
+- 신규 `order-matching-http.test.ts` 6/6: HTTP 자동 호가 등록·교차·동가 FIFO/부분 체결, 동시 두 구매자의 메이커 잔량 보존, 같은 계정 매매 제외, 인증된 취소와 체결 생성 경합, 체결원장 오류시 주문/Nonce/접수 기록 통째 롤백 및 동일 서명 재시도, PGlite 재시작 후 기존 체결/잔량 영속성 및 접수 순서 유지.
+- 기존 생성/취소/조회/멱등성 테스트는 실제 API 의존성에 따라 SQL 001~004를 로컬 적용하도록 변경. 모든 비밀키는 메모리에서 생성한 테스트 임시 계정만 사용.
+- `cd backend && npm run build` (`tsc --noEmit`) 성공, `cd backend && npm test` 전체 **97 passed / 0 failed** (`--test-concurrency=1`), 기존 91개와 신규 HTTP 통합 6개.
+- **운영 한계:** 로컬 HTTP/PGlite 기반 테스트이며, 운영 PostgreSQL 다중 세션/프로세스 잠금, 004 실마이그레이션, Foundry, 온체인 정산, 실제 배포는 검증하지 않았다.
