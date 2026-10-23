@@ -8,9 +8,9 @@
 - 현재 마일스톤: **M2 — Off-chain Order API & Matching MVP**
 - 현재 TASK: **M2-T2 — EIP-712 주문 서명 검증, nonce 및 replay 방지**
 - 상태: In Progress
-- 최근 완료: M1 전체, M2-T1 완료; M2-T2 EIP-712 Typed Data 생성 및 EOA 서명 검증 구현, 백엔드 17 tests 통과, build 검사 성공 (2026-10-24)
-- 다음 미완료 항목: 영속적이고 원자적인 nonce 사용·취소 및 replay 방지 기능 구현(동시 요청/서버 재시작 테스트 포함)
-- 사람 확인 필요: 현재 환경에서 `forge`가 없어 Foundry 회귀 미실행. Sepolia 실제 broadcast 배포는 수동으로 수행한다. 원격 push는 AutoPilot 작업에서 제외한다.
+- 최근 완료: M1 전체, M2-T1 완료; M2-T2 EIP-712 EOA 서명 검증 및 PostgreSQL NonceRegistry/Replay 차단 구현, PGlite 테스트 포함 백엔드 23개 테스트 통과, TypeScript 타입 검사 성공 (2026-10-24)
+- 다음 미완료 항목: M2-T2 인증·Nonce 계층의 운영 PostgreSQL 통합 검증 및 REST API의 주문 삽입과 Nonce 소비를 하나의 DB 트랜잭션으로 연결, 인증된 취소 요청 구현
+- 사람 확인 필요: 실제 PostgreSQL 서버/CLI/Docker가 현재 환경에 없어 서버 환경의 통합·멀티프로세스 검증은 미실행. `forge`가 없어 Foundry 회귀 미실행. Sepolia 실제 broadcast 배포 및 DB 운영 마이그레이션은 수동으로 수행한다. 원격 push는 AutoPilot 작업에서 제외한다.
 
 ## 현재 TASK 문서
 

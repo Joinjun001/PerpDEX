@@ -21,7 +21,7 @@ function fixture() {
   const order = {
     account: account.address,
     market: "ETH-USDC",
-    side: "BUY",
+    side: "BUY" as const,
     price: "2500000000",
     quantity: "1000000000000000000",
     nonce: "43",
@@ -60,7 +60,7 @@ test("EOA signed order verifies and unsigned payload mutations fail", async () =
     { ...order, nonce: "44" },
     { ...order, expiresAt: NOW + 3601 },
   ]) {
-    assert.equal(await verifyOrderSignature(changed, DOMAIN, sig, NOW), false);
+    assert.equal(await verifyOrderSignature(changed as typeof order, DOMAIN, sig, NOW), false);
   }
 });
 
