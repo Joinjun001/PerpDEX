@@ -94,3 +94,26 @@ npm run db:migrate
 ## 테스트 안정화
 
 PGlite는 파일별로 독립 PostgreSQL 엔진을 초기화하므로, 리소스가 제한된 홈서버에서 모든 테스트 파일을 동시에 실행하면 프로세스가 SIGKILL로 종료될 수 있습니다. `npm test`는 `--test-concurrency=1`로 **테스트 파일을 순차 실행**하도록 설정했습니다. 각 파일 내부에서 수행하는 동시 요청·Nonce 경합 테스트는 그대로 유지됩니다.
+
+## M2-T3 인증된 주문 취소 API (7회차)
+
+`POST /api/orders/cancel`을 추가했습니다. 예시 요청:
+
+```json
+{
+  "cancel": {
+    "account": "0x1111111111111111111111111111111111111111",
+    "nonce": "7",
+    "deadline": 1800000000
+  },
+  "signature": "0x<CancelOrder typed-data에 대한 지갑 서명>"
+}
+```
+
+이 서명은 주문 생성용 `Order`와 구분되는 `CancelOrder` EIP-712 타입의 서명이며 **예시 값만으로 유효한 취소 요청을 만들 수는 없습니다.** chainId와 verifyingContract는 클라이언트 요청에서 지정할 수 없고 서버 구성을 사용합니다.
+
+정상 취소 시 HTTP 200 `{status:"CANCELED",orderExists:true,remainingQuantity:"60"}`처럼 반환합니다. 주문 생성 이전 서명 취소는 `orderExists:false, remainingQuantity:null`을 반환하여 해당 nonce를 영구 예약합니다. 잘못된 취소 요청·기한 만료 400, 위조 서명 401, 중복 취소·완료 주문 409, DB 내부 문제는 상세가 제거된 500으로 처리합니다. 이미 체결된 수량은 변경하지 않습니다.
+
+HTTP 경로는 `/api/orders/cancel`을 정적 라우트로 먼저 인식하여 `/api/orders/:orderId`와 구분합니다. 본문에 서명 도메인을 끼워 넣으면 400으로 거부합니다.
+
+**미완료:** 전송 성공 후 응답이 유실되어 같은 요청이 재도착하는 경우의 idempotency 정책, 운영 PostgreSQL 멀티프로세스 검증, 실제 외부 공개용 보호 정책과 배포.

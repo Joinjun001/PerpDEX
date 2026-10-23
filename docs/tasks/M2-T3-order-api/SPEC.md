@@ -29,3 +29,13 @@
 - SQL 정렬: `created_at DESC, account ASC, nonce ASC`. `LIMIT limit + 1`로 `hasMore` 계산. offset 방식은 동시 삽입 시 스냅샷 간 페이지 겹침 가능성이 있으므로 후속 cursor 검토 항목.
 - 응답 단건 `{order}`, 목록 `{items,hasMore,limit,offset}`. account, orderId, nonce, market, side, price, quantity, filledQuantity, expiresAt, status, createdAt만 노출; DB 원본 서명은 반환하지 않음. price/quantity/filledQuantity는 문자열 유지.
 - 데이터베이스 내부 오류는 500 INTERNAL_ERROR; 보안 오류 상세는 응답에 노출하지 않음. 외부 공개용 접근 제어·rate limit과 비공개 주문 정책은 별도 운영 보안 검토.
+
+## EIP-712 인증된 주문 취소 HTTP 계약 (7회차)
+
+- `POST /api/orders/cancel`: 바디 `{"cancel":{"account":"0x...","nonce":"7","deadline":1790000000},"signature":"0x..."}` 형식. 별도 EIP-712 타입 `CancelOrder(account,nonce,deadline)` 서명을 반드시 검증한다.
+- `chainId`, `verifyingContract`은 신뢰된 서버 구성에서만 주입하며, 요청 바디의 최상위 또는 취소 객체 안에 `domain`을 포함하면 400으로 거부한다.
+- 정적 경로 `/api/orders/cancel`은 `/api/orders/:orderId`보다 먼저 처리하여 라우팅 충돌을 방지한다. GET 요청은 405 Allow: POST.
+- 성공(200) 응답: `{status:"CANCELED",orderExists:boolean,remainingQuantity:string|null}`. 기존 주문이 없다면 유효한 사전 취소로 Nonce tombstone을 기록하고 orderExists=false.
+- 잘못된 취소 데이터/만료 deadline은 `400 INVALID_CANCEL`; 잘못된 JSON·불필요한 도메인은 `400 INVALID_ORDER`; 위조·다른 소유자·다른 서명 도메인은 `401 INVALID_CANCEL_SIGNATURE`; 중복 취소·FILLED/EXPIRED 주문은 `409 CANCEL_CONFLICT`; SQL 실패는 `500 INTERNAL_ERROR`.
+- Content-Type과 64KiB 본문 크기 제한은 주문 생성 POST와 동일하게 적용한다.
+- 기존 `cancelSignedOrder`가 nonce tombstone과 주문 상태를 동일 트랜잭션에서 변경한다. 부분 체결 주문은 체결 수량을 보존한다.

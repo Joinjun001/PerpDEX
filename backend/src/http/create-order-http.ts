@@ -10,6 +10,9 @@ import { InvalidOrderSignatureError } from "../orders/order-auth.ts";
 import { PostgresOrderStore } from "../orders/order-store.ts";
 import type { SqlRunner } from "../orders/nonce-registry.ts";
 import { ORDER_STATUSES } from "../orders/order.ts";
+import { cancelSignedOrder, OrderCancellationConflictError } from "../orders/cancel-order.ts";
+import { CancelValidationError, InvalidCancelSignatureError } from "../orders/cancel-signature.ts";
+import type { CancelOrderInput } from "../orders/cancel-signature.ts";
 
 const MAX_BODY_BYTES = 64 * 1024;
 
@@ -108,6 +111,17 @@ function validatedRequest(payload: Record<string, unknown>): {order: CreateOrder
   return { order: payload.order as CreateOrderInput, signature: payload.signature };
 }
 
+function validatedCancelRequest(payload: Record<string, unknown>): { cancel: CancelOrderInput; signature: string } {
+  // Reject untrusted signing domains explicitly, rather than silently ignoring them.
+  if (Object.hasOwn(payload, "domain") ||
+      !payload.cancel || typeof payload.cancel !== "object" || Array.isArray(payload.cancel) ||
+      Object.hasOwn(payload.cancel, "domain") ||
+      typeof payload.signature !== "string") {
+    throw new InvalidJsonBodyError();
+  }
+  return { cancel: payload.cancel as CancelOrderInput, signature: payload.signature };
+}
+
 /**
  * Pure HTTP adapter. Does not listen on a port until the explicit server entrypoint runs.
  * trustedDomain MUST originate from backend configuration, not request JSON.
@@ -122,9 +136,23 @@ export function createOrderHttpHandler(input: {
   return async (request: IncomingMessage, response: ServerResponse): Promise<void> => {
     try {
       const url = new URL(request.url ?? "/", "http://localhost");
-      const detail = /^\/api\/orders\/([^/]+)$/.exec(url.pathname);
-      if (url.pathname !== "/api/orders" && !detail) {
+      const cancelRoute = url.pathname === "/api/orders/cancel";
+      // The static cancellation route must take precedence over :orderId.
+      const detail = cancelRoute ? null : /^\/api\/orders\/([^/]+)$/.exec(url.pathname);
+      if (url.pathname !== "/api/orders" && !detail && !cancelRoute) {
         sendJson(response, 404, { error: { code: "NOT_FOUND", message: "route not found" } });
+        return;
+      }
+      if (cancelRoute) {
+        if (request.method !== "POST") {
+          sendJson(response, 405, { error: { code: "METHOD_NOT_ALLOWED", message: "POST required" } }, { Allow: "POST" });
+          return;
+        }
+        if (url.search) throw new InvalidQueryError();
+        const payload = await parseBody(request);
+        const { cancel, signature } = validatedCancelRequest(payload);
+        const result = await cancelSignedOrder(cancel, signature, trustedDomain, input.transactions);
+        sendJson(response, 200, result);
         return;
       }
       if (detail) {
@@ -167,9 +195,15 @@ export function createOrderHttpHandler(input: {
         sendJson(response, 415, { error: { code: "UNSUPPORTED_MEDIA_TYPE", message: "application/json required" } });
       } else if (error instanceof InvalidQueryError) {
         sendJson(response, 400, { error: { code: "INVALID_QUERY", message: "invalid query parameters" } });
+      } else if (error instanceof CancelValidationError) {
+        sendJson(response, 400, { error: { code: "INVALID_CANCEL", message: "invalid cancel request" } });
       } else if (error instanceof InvalidJsonBodyError || error instanceof OrderValidationError ||
                  error instanceof NonceValidationError || error instanceof RangeError) {
         sendJson(response, 400, { error: { code: "INVALID_ORDER", message: "invalid order request" } });
+      } else if (error instanceof InvalidCancelSignatureError) {
+        sendJson(response, 401, { error: { code: "INVALID_CANCEL_SIGNATURE", message: "invalid EIP-712 cancel signature" } });
+      } else if (error instanceof OrderCancellationConflictError) {
+        sendJson(response, 409, { error: { code: "CANCEL_CONFLICT", message: "order cannot be canceled" } });
       } else if (error instanceof InvalidOrderSignatureError) {
         sendJson(response, 401, { error: { code: "INVALID_SIGNATURE", message: "invalid EIP-712 signature" } });
       } else if (error instanceof NonceAlreadyUsedError) {

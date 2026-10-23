@@ -36,3 +36,21 @@
 - `npm test`: **50/50 통과, 실패 0**.
 - 초기 전체 병렬 테스트 중 PGlite 프로세스 2개가 SIGKILL 종료. 독립된 신규 API 테스트는 6/6 통과했으며, PGlite 다중 프로세스 메모리 경합을 피하도록 `npm test`에 `--test-concurrency=1` 적용 후 **기존 전체 테스트까지 50개 모두 통과**.
 - 거래 엔진 및 운영 PG 실서버 E2E는 변경하거나 실행하지 않았음.
+
+## 2026-10-24 — EIP-712 주문 취소 HTTP 엔드포인트 (7회차)
+
+- 기준 Git 작업 트리 clean, 이전 커밋 `7be8537` 확인 후 시작.
+- `backend/src/http/create-order-http.ts`에서 POST `/api/orders/cancel` 정적 경로를 `:orderId`보다 먼저 매칭. 요청 타입 `{cancel, signature}`, 중첩·최상위 도메인 거부.
+- 내부에서 `cancelSignedOrder`를 재사용하여 EIP-712 서명 검사 뒤 동일 PostgreSQL 트랜잭션에서 Nonce 및 주문 상태 변경. 로직 재구현 없이 인증 진입점만 추가.
+- HTTP 오류 매핑: 만료·부정확한 취소 입력 400, 위조 서명 401, 중복 취소·종료 상태 409, 내부 DB 장애 500. SQL 내부 오류 내용은 클라이언트에 반환하지 않음.
+- `backend/test/order-cancel-http.test.ts` 신규 8개 테스트: 정상 취소, 사전 취소 후 주문 생성 차단, 타인·위조·다른 Chain ID/컨트랙트 거부, 만료·잘못된 도메인·Content-Type·본문 크기 제한, 부분 체결 잔량 보존, FILLED/EXPIRED 거부, 생성-취소 동시 요청, 주문 UPDATE 제약 오류 시 트랜잭션 롤백 및 재시도, 내부 DB 장애 에러 비노출.
+- 해당 테스트 **8개 통과**, `npm run build` 통과. 전체 `npm test` 회귀 결과는 최종 검증 로그를 기준으로 갱신.
+- 운영 PostgreSQL/멀티프로세스, 실제 배포 및 운영 DB 마이그레이션은 수행하지 않음. 사용한 서명 계정은 테스트 전용으로 매 실행에 생성됨.
+- 남은 M2-T3 작업: 네트워크 실패 후 주문 생성·취소 재전송에 대한 idempotency 정책 및 회귀, 로컬 TASK 최종 QA.
+
+### 7회차 전체 회귀 판정
+
+- `npm run build`: **성공** (`tsc --noEmit`).
+- `npm test`: **58 passed / 0 failed**, 기존 50개 + HTTP 취소 테스트 8개.
+- `--test-concurrency=1` 순차 실행 유지. DB 업데이트 제약 테스트는 앞서 취소된 다른 주문을 방해하지 않도록 목표 nonce에만 제약 적용한 뒤 재검증 완료.
+- 실제 PostgreSQL 서버, 외부 공개 API와 멀티프로세스/네트워크 E2E는 **미검증**. 배포/운영 DB 마이그레이션 미수행.

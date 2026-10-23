@@ -26,3 +26,20 @@
 - TypeScript 검사 `tsc --noEmit` 성공.
 - 병렬 PGlite 메모리 경합에 따른 SIGKILL은 test runner 파일 순차 실행으로 해소. 비즈니스 로직 회귀 실패는 아님.
 - 아직 미검증: 실운영 PostgreSQL 다중 프로세스, 인증된 HTTP 취소 API, POST 재시도 idempotency.
+
+## 2026-10-24 — HTTP 주문 취소 인증 회귀 (7회차)
+
+- 신규 HTTP/PGlite 테스트 `backend/test/order-cancel-http.test.ts`: **8 passed / 0 failed**.
+- 정상 소유자 서명 취소(200), 사전 취소로 미생성 주문 Nonce 영구 차단(200), 동일 요청 재전송 충돌(409) 확인.
+- 위조 서명·타 사용자·변조된 nonce·다른 Chain ID/verifyingContract 서명은 401. 만료/형식 위반은 400, 종료 주문은 409. 사용자 도메인 입력을 명시적으로 거부.
+- `OPEN` 및 `PARTIALLY_FILLED` 취소에서 `filled_quantity`를 보존하고 잔량 반환, `FILLED`/`EXPIRED` 거부.
+- 생성·취소 동시 요청 후 사용된 Nonce에 활성 OPEN 주문이 남지 않음을 확인. SQL CHECK 오류에 따른 취소 실패 500 이후 Nonce·주문 상태 동시 롤백 및 정상 재시도 확인.
+- SQL 비밀 내용·연결 정보 등의 오류는 500 일반 에러로 응답. 상세 비노출 확인.
+- 실제 운영 PostgreSQL 서버 및 여러 API 프로세스 동시 실행은 환경에 부재하여 미검증. PGlite 내장 PostgreSQL을 활용한 테스트와 구분.
+
+### 7회차 회귀 결론
+
+- TypeScript **통과** / 백엔드 전체 **58 passed, 0 failed**.
+- 서명 취소 API HTTP/PGlite 신규 테스트 **8개 통과**.
+- 서버 설정 기반 도메인 고정, EIP-712 위조/타 사용자 거부, 사전 취소, 중복·종료 상태 보호, 부분 체결 잔량 보존, 생성-취소 동시 경합, DB 오류 시 롤백 및 내부 SQL 비노출을 확인.
+- 운영 PostgreSQL과 다중 프로세스는 미검증. HTTP 응답 유실 및 재전송 idempotency는 미구현.
