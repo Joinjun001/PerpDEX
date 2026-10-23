@@ -3,7 +3,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node --experimental-strip-types --test test/order.test.ts",
-    "build": "node --experimental-strip-types --check src/orders/order.ts && node --experimental-strip-types --check test/order.test.ts"
+    "test": "node --experimental-strip-types --test test/*.test.ts",
+    "build": "node --experimental-strip-types --check src/orders/order.ts && node --experimental-strip-types --check src/orders/signature.ts && node --experimental-strip-types --check test/order.test.ts && node --experimental-strip-types --check test/signature.test.ts"
+  },
+  "dependencies": {
+    "viem": "2.57.10"
   }
 }

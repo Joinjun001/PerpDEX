@@ -6,16 +6,16 @@
 - 브랜치: `main`
 - 기준: 실제 소스 코드와 Git 상태를 최우선으로 판단
 - 현재 마일스톤: **M2 — Off-chain Order API & Matching MVP**
-- 현재 TASK: **M2-T2 — EIP-712 주문 서명 검증, nonce 및 replay 방지** (다음 작업)
-- 상태: Ready / Planned
-- 최근 완료: M1 전체, M2-T1 주문 도메인·상태 전이·canonical order ID 및 단위 테스트 9개 통과, 백엔드 빌드 성공 (2026-10-24)
-- 다음 미완료 항목: M2-T2 TASK 문서(SPEC/TODO/RESULT/QA) 작성 후 EIP-712 typed-data 도메인 정의, 서명자 검증 및 주문 재사용 방지 구현
+- 현재 TASK: **M2-T2 — EIP-712 주문 서명 검증, nonce 및 replay 방지**
+- 상태: In Progress
+- 최근 완료: M1 전체, M2-T1 완료; M2-T2 EIP-712 Typed Data 생성 및 EOA 서명 검증 구현, 백엔드 17 tests 통과, build 검사 성공 (2026-10-24)
+- 다음 미완료 항목: 영속적이고 원자적인 nonce 사용·취소 및 replay 방지 기능 구현(동시 요청/서버 재시작 테스트 포함)
 - 사람 확인 필요: 현재 환경에서 `forge`가 없어 Foundry 회귀 미실행. Sepolia 실제 broadcast 배포는 수동으로 수행한다. 원격 push는 AutoPilot 작업에서 제외한다.
 
 ## 현재 TASK 문서
 
 - M2-T1 결과: `docs/tasks/M2-T1-order-domain/RESULT.md`, `QA.md` (완료)
-- 다음 TASK M2-T2: `docs/tasks/M2-T2-eip712-auth/{SPEC,TODO,RESULT,QA}.md`를 첫 작업에서 생성
+- 현재 M2-T2: `docs/tasks/M2-T2-eip712-auth/{SPEC,TODO,RESULT,QA}.md`
 
 ## 저장소 복원 결과
 
