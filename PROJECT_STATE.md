@@ -6,16 +6,17 @@
 - 브랜치: `main`
 - 기준: 실제 소스 코드와 Git 상태를 최우선으로 판단
 - 현재 마일스톤: **M2 — Off-chain Order API & Matching MVP**
-- 현재 TASK: **M2-T2 — EIP-712 주문 서명 검증, nonce 및 replay 방지**
-- 상태: In Progress
-- 최근 완료: M1 전체, M2-T1 완료; M2-T2 EIP-712 주문·취소 서명 검증, PostgreSQL NonceRegistry와 원자적 주문 INSERT 및 서명 기반 취소 서비스 구현. PGlite 포함 백엔드 37개 테스트 및 TypeScript 타입 검사 통과 (2026-10-24)
-- 다음 미완료 항목: M2-T2의 운영 PostgreSQL 멀티프로세스 검증(환경 준비 시), 인증·취소 계층 QA 최종 점검. 이어서 M2-T3 REST API 생성·조회·취소 엔드포인트 및 서버 고정 서명 도메인 연결
-- 사람 확인 필요: 실제 PostgreSQL 서버/CLI/Docker가 현재 환경에 없어 서버 환경의 통합·멀티프로세스 검증은 미실행. `forge`가 없어 Foundry 회귀 미실행. Sepolia 실제 broadcast 배포 및 DB 운영 마이그레이션은 수동으로 수행한다. 원격 push는 AutoPilot 작업에서 제외한다.
+- 현재 TASK: **M2-T3 — Order REST API와 주문 저장/조회/취소 흐름**
+- 상태: In Progress (M2-T3 주문 생성 POST API 구현·검증, 조회·취소 API 미완료)
+- 최근 완료: M1 전체, M2-T1 완료; M2-T2 EIP-712 서명/Nonce/취소의 로컬 개발·검증 완료(운영 PostgreSQL 멀티프로세스 QA 후속 이관). M2-T3 POST /api/orders 구현, localhost HTTP+PGlite 통합 포함 전체 44개 테스트 통과, TypeScript 타입 검사 통과 (2026-10-24)
+- 다음 미완료 항목: M2-T3 주문 조회/목록 API → EIP-712 인증 취소 API → HTTP 재전송 idempotency 정책·상태 오류 처리 → M2-T3 최종 회귀. 실제 PostgreSQL 다중 연결 검증은 환경 준비 후 별도 진행
+- 사람 확인 필요: 실제 PostgreSQL 서버/CLI/Docker가 없어 운영 환경의 DB 다중 연결·멀티프로세스 검증은 미실행. `forge`가 없어 Foundry 회귀 미실행. DB 실제 마이그레이션·API 배포·Sepolia broadcast는 승인 없이 수행하지 않음. 원격 push는 AutoPilot 작업에서 제외한다.
 
 ## 현재 TASK 문서
 
 - M2-T1 결과: `docs/tasks/M2-T1-order-domain/RESULT.md`, `QA.md` (완료)
-- 현재 M2-T2: `docs/tasks/M2-T2-eip712-auth/{SPEC,TODO,RESULT,QA}.md`
+- M2-T2 로컬 완료: `docs/tasks/M2-T2-eip712-auth/{SPEC,TODO,RESULT,QA}.md` (운영 실서버 QA 이관)
+- 현재 M2-T3: `docs/tasks/M2-T3-order-api/{SPEC,TODO,RESULT,QA}.md`
 
 ## 저장소 복원 결과
 

@@ -5,7 +5,8 @@
   "scripts": {
     "test": "node --experimental-strip-types --test test/*.test.ts",
     "build": "tsc --noEmit",
-    "db:migrate": "node --experimental-strip-types scripts/migrate.ts"
+    "db:migrate": "node --experimental-strip-types scripts/migrate.ts",
+    "start": "node --experimental-strip-types src/http/server.ts"
   },
   "dependencies": {
     "pg": "8.16.3",

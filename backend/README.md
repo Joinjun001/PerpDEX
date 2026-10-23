@@ -1,9 +1,11 @@
-# PerpDEX Backend — 주문 Nonce 저장소
+# PerpDEX Backend — 주문 인증 및 REST API
 
 ## 구성
 
 - `src/orders/nonce-registry.ts`: PostgreSQL 기반 Nonce 영속 저장/중복 거부/취소/만료 전이
 - `src/orders/order-auth.ts`: EIP-712 검증 후 Nonce 예약을 수행하는 인증 경계
+- `src/http/create-order-http.ts`: 서명 주문 생성 POST API, JSON 입력 제한, HTTP 오류 매핑
+- `src/http/server.ts`: 명시적 실행 시에만 로컬 바인딩하는 PostgreSQL 연결 서버
 - `src/orders/accept-order.ts`: 서명 확인 → Nonce 예약 → 주문 INSERT를 단일 트랜잭션에서 실행하는 서비스
 - `src/orders/cancel-signature.ts`: 별도 EIP-712 CancelOrder(account, nonce, deadline) 서명 검증
 - `src/orders/cancel-order.ts`: 취소 서명 검증 → Nonce 봉인 → 주문 취소를 단일 트랜잭션에서 실행
@@ -13,6 +15,7 @@
 - `sql/002_orders.sql`: 주문 테이블 및 Nonce 외래키 기반 스키마
 - `scripts/migrate.ts`: 두 스키마를 한 트랜잭션으로 적용하는 수동 실행 스크립트
 - `test/nonce-registry.test.ts`, `test/order-transaction.test.ts`: PGlite 영속성·동시 요청·원자적 롤백 테스트
+- `test/order-http.test.ts`: 실제 localhost HTTP + PGlite 주문 생성 통합 검증
 
 ## 개발 검증
 
@@ -32,7 +35,7 @@ npm run build
 npm run db:migrate
 ```
 
-실제 마이그레이션은 이 개발 회차에서 수행하지 않았습니다. DB 연결 정보는 저장소나 로그에 남기지 않습니다. 기존 독립 Nonce 기능은 `createPostgresNonceRegistry(pool)`로 사용할 수 있지만, **주문 생성에는** `postgresTransactionManager(pool)`를 만들고 `acceptSignedOrder(order, signature, trustedDomain, manager)`를 호출해야 합니다. 이렇게 해야 `pg.Pool.connect()`로 확보한 같은 연결에서 Nonce 예약과 주문 INSERT가 커밋되거나 함께 롤백됩니다. 향후 M2-T3 REST API에서도 해당 트랜잭션 경계를 유지해야 하며, HTTP API·인증된 취소 경로는 아직 구현되지 않았습니다.
+실제 마이그레이션은 이 개발 회차에서 수행하지 않았습니다. DB 연결 정보는 저장소나 로그에 남기지 않습니다. 기존 독립 Nonce 기능은 `createPostgresNonceRegistry(pool)`로 사용할 수 있지만, **주문 생성에는** `postgresTransactionManager(pool)`를 만들고 `acceptSignedOrder(order, signature, trustedDomain, manager)`를 호출해야 합니다. 이렇게 해야 `pg.Pool.connect()`로 확보한 같은 연결에서 Nonce 예약과 주문 INSERT가 커밋되거나 함께 롤백됩니다. M2-T3의 `POST /api/orders`도 같은 트랜잭션 매니저를 사용합니다. 주문 조회 및 인증된 취소 HTTP 엔드포인트는 추후 구현 예정입니다.
 
 ## 주의 사항
 
@@ -40,6 +43,37 @@ npm run db:migrate
 - Nonce는 `(chainId, verifyingContract, account, nonce)` 고유키로 영구 예약합니다. `USED`, `CANCELED`, `EXPIRED` 상태에서도 행을 삭제하지 않아 Replay가 차단됩니다.
 - `PostgresNonceRegistry.cancel()`은 인증을 우회할 수 있는 **내부 함수**입니다. 외부 API에는 노출하지 마세요. 취소 요청은 `cancelSignedOrder(request, signature, trustedDomain, transactionManager)`만 호출하여 EIP-712 소유자 인증을 강제합니다. `CancelOrder(account,nonce,deadline)`의 타입명과 도메인은 주문 서명과 분리되어 서명 목적 혼동을 차단합니다.
 - 주문이 없을 때도 유효한 취소 서명으로 Nonce를 사전 차단할 수 있습니다. OPEN/PARTIALLY_FILLED 주문의 기존 체결 수량은 유지하며, FILLED/CANCELED/EXPIRED 주문은 충돌로 거부합니다. 취소 실패 시 주문·Nonce 상태는 함께 롤백됩니다.
-- EIP-712 도메인은 HTTP 입력이 아닌 신뢰된 서버 설정으로 고정해야 하며 현재 HTTP REST 엔드포인트는 아직 없습니다.
+- EIP-712 도메인은 HTTP 입력이 아닌 신뢰된 서버 설정으로 고정합니다. 현재 HTTP API는 `POST /api/orders`만 지원하고, 서명이 검증된 주문을 생성합니다.
 - 주문 입력 성공 후 DB 커밋과 API 응답 사이에서 네트워크 장애가 나면 재전송을 별도 복구/idempotency 흐름으로 다루어야 합니다. 현재는 중복을 거부합니다.
 - 스마트 컨트랙트 지갑(ERC-1271)은 현 EOA 서명 검증 범위 밖입니다.
+
+## M2-T3 주문 생성 REST API (개발 구현)
+
+`POST /api/orders`를 지원합니다. JSON 요청:
+
+```json
+{
+  "order": {
+    "account": "0x1111111111111111111111111111111111111111",
+    "market": "ETH-USDC",
+    "side": "BUY",
+    "price": "1000",
+    "quantity": "100",
+    "nonce": "1",
+    "expiresAt": 1800000000
+  },
+  "signature": "0x<EOA가 EIP-712 Order에 서명한 65/64바이트 서명>"
+}
+```
+
+위 데이터는 **형식 설명 예시**이며 실제 유효한 서명이 아닙니다. 현재 시각 이후의 `expiresAt`을 사용해야 합니다.
+
+- 정상 생성: HTTP 201 `{orderId, status:"OPEN", order}`; DB의 주문 레코드와 Nonce는 원자적으로 저장됩니다.
+- 잘못된 요청/만료 주문: 400; 위조 서명: 401; 사용된 Nonce: 409.
+- JSON 외 Content-Type: 415, 64KiB 초과: 413, 지원하지 않는 메서드: 405.
+- DB 내부 오류: 500. 클라이언트 응답에 SQL 에러나 DB 연결 정보는 포함하지 않습니다.
+- `chainId`와 `verifyingContract`는 **서버 시작 시점 설정**으로 고정됩니다. HTTP 요청에 `domain`을 넣으면 거부합니다.
+
+이 개발 단계에서는 운영 PostgreSQL을 실행하거나 배포하지 않았습니다. 운영자가 별도로 테스트 서버를 구성할 경우 `DATABASE_URL`, `PERPDEX_CHAIN_ID`, `PERPDEX_VERIFYING_CONTRACT`을 제공하고 **DB 마이그레이션을 별도 승인·실행한 후** `npm start`로 시작합니다. 기본 바인딩은 `127.0.0.1:8080`이며 `PORT`로 포트를 지정할 수 있습니다. 공개 접근/프록시/인증·rate limit 등 운영 구성은 별도 보안 검토가 필요합니다.
+
+현 단계에서는 `npm test`가 외부 DB 없이 localhost 임시 포트 + PGlite를 이용해 HTTP 경계부터 SQL 저장까지 검증합니다. 주문 조회·취소 REST API, 재요청 idempotency, 운영 DB 다중 프로세스 검증은 미완료입니다.

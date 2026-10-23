@@ -1,6 +1,6 @@
 # M2-T2 QA
 
-상태: In Progress — 서명 검증·Nonce Replay 방지·주문 저장 트랜잭션 검증 완료(PGlite), 인증된 취소/운영 DB 검증 미완료
+상태: Passed — 로컬 구현·PGlite 검증 완료 (운영 PostgreSQL 멀티프로세스 검증은 M2-T3 이관)
 
 ## 이번 회차 검증 (2026-10-24)
 - `cd backend && npm test`: **17 passed / 0 failed** (기존 9개 + 신규 8개).
@@ -51,3 +51,10 @@
 - PostgreSQL CHECK 오류로 주문 상태 갱신 실패를 유발한 테스트에서 Nonce까지 rollback되고 정상 재시도 가능한 것을 확인.
 - 생성·취소 동시 제출에서도 CANCELED Nonce를 가진 OPEN 주문이 생기지 않음을 PGlite 트랜잭션 테스트로 확인.
 - 운영 PostgreSQL 연결/멀티프로세스 테스트와 외부 HTTP API 인증 통합은 **이번 실행에서 미검증**. `forge` 실행도 미검증.
+
+## 2026-10-24 — 로컬 범위 최종 QA 판정
+
+- 구현·로컬 검증 결과: EIP-712 주문·취소 인증, Nonce 영구 보존, DB 트랜잭션의 commit/rollback, PGlite 동시 요청·복구 시나리오 모두 통과.
+- M2-T3 HTTP 주문 생성 경계까지 연결한 회귀: **44/44 통과**, `tsc --noEmit` 성공.
+- 운영 PostgreSQL 멀티 연결/프로세스, API 실제 배포 환경, Foundry 회귀: **미실행**. 문서상 M2-T3/릴리스 QA 이관.
+- 판정: **M2-T2 로컬 완료**, 운영 환경 검증 미완료를 명시함.
