@@ -3,6 +3,50 @@ import type { OrderInput } from "./order.ts";
 import type { OrderSigningDomainInput } from "./signature.ts";
 import { validateOrderSigningDomain } from "./signature.ts";
 
+export interface PublicOrder {
+  orderId: string;
+  account: string;
+  nonce: string;
+  market: string;
+  side: string;
+  price: string;
+  quantity: string;
+  filledQuantity: string;
+  expiresAt: number;
+  status: string;
+  createdAt: string;
+}
+
+interface DatabasePublicOrder {
+  order_id: string;
+  account: string;
+  nonce: string;
+  market: string;
+  side: string;
+  price: string;
+  quantity: string;
+  filled_quantity: string;
+  expires_at: number | string;
+  status: string;
+  created_at: string;
+}
+
+function publicOrder(row: DatabasePublicOrder): PublicOrder {
+  return {
+    orderId: row.order_id,
+    account: row.account,
+    nonce: row.nonce,
+    market: row.market,
+    side: row.side,
+    price: row.price,
+    quantity: row.quantity,
+    filledQuantity: row.filled_quantity,
+    expiresAt: Number(row.expires_at),
+    status: row.status,
+    createdAt: row.created_at,
+  };
+}
+
 // Reusable for REST APIs, matching, and background workers.
 // The caller MUST supply the SAME transaction-scoped SQL connection used to claim the nonce.
 export class PostgresOrderStore {
@@ -50,6 +94,57 @@ export class PostgresOrderStore {
       [domain.chainId, domain.verifyingContract.toLowerCase(), input.account.toLowerCase(), input.nonce],
     );
     return (result.rows[0] as { status: "CANCELED"; quantity: string; filled_quantity: string } | undefined) ?? null;
+  }
+
+  /**
+   * Public order projection. Never SELECT signature or other credentials.
+   * Queries are scoped to a trusted server EIP-712 domain, not request data.
+   */
+  async findPublicById(orderId: string, domainInput: OrderSigningDomainInput): Promise<PublicOrder | null> {
+    const domain = validateOrderSigningDomain(domainInput);
+    const result = await this.db.query(
+      `SELECT order_id, account, nonce, market, side, price, quantity,
+              filled_quantity, expires_at, status, created_at::TEXT AS created_at
+       FROM orders
+       WHERE chain_id=$1 AND verifying_contract=$2 AND order_id=$3`,
+      [domain.chainId, domain.verifyingContract.toLowerCase(), orderId.toLowerCase()],
+    );
+    const row = result.rows[0] as DatabasePublicOrder | undefined;
+    return row ? publicOrder(row) : null;
+  }
+
+  /**
+   * Stable ordering for offset-based pagination: newest first, then account
+   * and nonce as immutable tie breakers. Read one extra row for hasMore.
+   */
+  async listPublic(input: {
+    domain: OrderSigningDomainInput;
+    market?: string;
+    status?: string;
+    limit: number;
+    offset: number;
+  }): Promise<{ items: PublicOrder[]; hasMore: boolean }> {
+    const domain = validateOrderSigningDomain(input.domain);
+    const values: unknown[] = [domain.chainId, domain.verifyingContract.toLowerCase()];
+    let sql = `SELECT order_id, account, nonce, market, side, price, quantity,
+                      filled_quantity, expires_at, status, created_at::TEXT AS created_at
+               FROM orders WHERE chain_id=$1 AND verifying_contract=$2`;
+    if (input.market) {
+      values.push(input.market);
+      sql += " AND market=$" + values.length;
+    }
+    if (input.status) {
+      values.push(input.status);
+      sql += " AND status=$" + values.length;
+    }
+    values.push(input.limit + 1, input.offset);
+    sql += " ORDER BY created_at DESC, account ASC, nonce ASC LIMIT $" + (values.length - 1) + " OFFSET $" + values.length;
+    const result = await this.db.query(sql, values);
+    const rows = result.rows as DatabasePublicOrder[];
+    return {
+      items: rows.slice(0, input.limit).map(publicOrder),
+      hasMore: rows.length > input.limit,
+    };
   }
 
   async findByNonce(input: {

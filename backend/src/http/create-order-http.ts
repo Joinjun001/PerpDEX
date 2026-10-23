@@ -7,12 +7,52 @@ import type { CreateOrderInput } from "../orders/order.ts";
 import { OrderValidationError } from "../orders/order.ts";
 import { NonceAlreadyUsedError, NonceValidationError } from "../orders/nonce-registry.ts";
 import { InvalidOrderSignatureError } from "../orders/order-auth.ts";
+import { PostgresOrderStore } from "../orders/order-store.ts";
+import type { SqlRunner } from "../orders/nonce-registry.ts";
+import { ORDER_STATUSES } from "../orders/order.ts";
 
 const MAX_BODY_BYTES = 64 * 1024;
 
 class InvalidJsonBodyError extends Error {}
 class BodyTooLargeError extends Error {}
 class UnsupportedContentTypeError extends Error {}
+class InvalidQueryError extends Error {}
+
+const ORDER_ID_PATTERN = /^0x[0-9a-fA-F]{64}$/;
+const MARKET_PATTERN = /^[A-Z0-9]+(?:[-_/][A-Z0-9]+)*$/;
+const DECIMAL = /^(0|[1-9][0-9]*)$/;
+
+function readSingleParam(url: URL, name: string): string | undefined {
+  const values = url.searchParams.getAll(name);
+  if (values.length > 1) throw new InvalidQueryError();
+  return values[0];
+}
+
+function parsePagination(value: string | undefined, fallback: number, min: number, max: number): number {
+  if (value === undefined) return fallback;
+  if (!DECIMAL.test(value)) throw new InvalidQueryError();
+  const number = Number(value);
+  if (!Number.isSafeInteger(number) || number < min || number > max) throw new InvalidQueryError();
+  return number;
+}
+
+function parseListQuery(url: URL) {
+  for (const key of url.searchParams.keys()) {
+    if (!["market", "status", "limit", "offset"].includes(key)) throw new InvalidQueryError();
+  }
+  const rawMarket = readSingleParam(url, "market");
+  const market = rawMarket?.toUpperCase();
+  if (market !== undefined && (market.length > 32 || !MARKET_PATTERN.test(market))) throw new InvalidQueryError();
+  const status = readSingleParam(url, "status");
+  if (status !== undefined && !ORDER_STATUSES.includes(status as (typeof ORDER_STATUSES)[number])) throw new InvalidQueryError();
+  return {
+    market,
+    status,
+    limit: parsePagination(readSingleParam(url, "limit"), 20, 1, 50),
+    offset: parsePagination(readSingleParam(url, "offset"), 0, 0, 10000),
+  };
+}
+
 
 function sendJson(response: ServerResponse, status: number, body: object, extra: Record<string, string> = {}) {
   const payload = JSON.stringify(body);
@@ -75,19 +115,43 @@ function validatedRequest(payload: Record<string, unknown>): {order: CreateOrder
 export function createOrderHttpHandler(input: {
   trustedDomain: OrderSigningDomainInput;
   transactions: OrderTransactionManager;
+  readDatabase: SqlRunner;
 }) {
   const trustedDomain = validateOrderSigningDomain(input.trustedDomain);
+  const store = new PostgresOrderStore(input.readDatabase);
   return async (request: IncomingMessage, response: ServerResponse): Promise<void> => {
-    const path = request.url?.split("?", 1)[0];
-    if (path !== "/api/orders") {
-      sendJson(response, 404, { error: { code: "NOT_FOUND", message: "route not found" } });
-      return;
-    }
-    if (request.method !== "POST") {
-      sendJson(response, 405, { error: { code: "METHOD_NOT_ALLOWED", message: "POST required" } }, { Allow: "POST" });
-      return;
-    }
     try {
+      const url = new URL(request.url ?? "/", "http://localhost");
+      const detail = /^\/api\/orders\/([^/]+)$/.exec(url.pathname);
+      if (url.pathname !== "/api/orders" && !detail) {
+        sendJson(response, 404, { error: { code: "NOT_FOUND", message: "route not found" } });
+        return;
+      }
+      if (detail) {
+        if (request.method !== "GET") {
+          sendJson(response, 405, { error: { code: "METHOD_NOT_ALLOWED", message: "GET required" } }, { Allow: "GET" });
+          return;
+        }
+        if (url.search || !ORDER_ID_PATTERN.test(detail[1])) throw new InvalidQueryError();
+        const order = await store.findPublicById(detail[1].toLowerCase(), trustedDomain);
+        if (!order) {
+          sendJson(response, 404, { error: { code: "ORDER_NOT_FOUND", message: "order not found" } });
+          return;
+        }
+        sendJson(response, 200, { order });
+        return;
+      }
+      if (request.method === "GET") {
+        const query = parseListQuery(url);
+        const result = await store.listPublic({ domain: trustedDomain, ...query });
+        sendJson(response, 200, { ...result, limit: query.limit, offset: query.offset });
+        return;
+      }
+      if (request.method !== "POST") {
+        sendJson(response, 405, { error: { code: "METHOD_NOT_ALLOWED", message: "GET or POST required" } }, { Allow: "GET, POST" });
+        return;
+      }
+      if (url.search) throw new InvalidQueryError();
       const payload = await parseBody(request);
       const { order, signature } = validatedRequest(payload);
       const accepted = await acceptSignedOrder(order, signature, trustedDomain, input.transactions);
@@ -101,6 +165,8 @@ export function createOrderHttpHandler(input: {
         sendJson(response, 413, { error: { code: "PAYLOAD_TOO_LARGE", message: "request body too large" } });
       } else if (error instanceof UnsupportedContentTypeError) {
         sendJson(response, 415, { error: { code: "UNSUPPORTED_MEDIA_TYPE", message: "application/json required" } });
+      } else if (error instanceof InvalidQueryError) {
+        sendJson(response, 400, { error: { code: "INVALID_QUERY", message: "invalid query parameters" } });
       } else if (error instanceof InvalidJsonBodyError || error instanceof OrderValidationError ||
                  error instanceof NonceValidationError || error instanceof RangeError) {
         sendJson(response, 400, { error: { code: "INVALID_ORDER", message: "invalid order request" } });

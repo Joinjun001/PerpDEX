@@ -57,6 +57,7 @@ before(async()=>{
   server=createServer(createOrderHttpHandler({
     trustedDomain:DOMAIN,
     transactions:txManager(db),
+    readDatabase:db,
   }));
   await new Promise<void>(resolve=>server.listen(0,"127.0.0.1",resolve));
   const addr=server.address() as AddressInfo;
@@ -130,15 +131,16 @@ test("content-type mismatch, oversized body, route and method reject consistentl
   assert.equal((await post({hello:"world"},{type:"text/plain"})).status,415);
   assert.equal((await post({padding:"x".repeat(70000)})).status,413);
   assert.equal((await post({},{path:"/api/unknown"})).status,404);
-  const method=await fetch(root+"/api/orders",{method:"GET"});
+  const method=await fetch(root+"/api/orders",{method:"PUT"});
   assert.equal(method.status,405);
-  assert.equal(method.headers.get("allow"),"POST");
+  assert.equal(method.headers.get("allow"),"GET, POST");
 });
 
 test("unexpected DB error is HTTP 500 without leaking SQL or credentials",async()=>{
   const handler=createOrderHttpHandler({
     trustedDomain:DOMAIN,
     transactions:{async withTransaction(){throw new Error("private DB password; SQL connection details");}},
+    readDatabase: { async query() { throw new Error("private DB password; SQL connection details"); } },
   });
   const broken=createServer(handler);
   await new Promise<void>(resolve=>broken.listen(0,"127.0.0.1",resolve));

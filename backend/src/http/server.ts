@@ -19,6 +19,7 @@ const pool = new Pool({ connectionString: databaseUrl });
 const server = createServer(createOrderHttpHandler({
   trustedDomain: domain,
   transactions: postgresTransactionManager(pool),
+  readDatabase: pool,
 }));
 
 server.listen(port, "127.0.0.1", () => {

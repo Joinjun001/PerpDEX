@@ -21,3 +21,11 @@
 - 첫 구현의 API 경로에 필요한 테스트 및 `npm run build` 통과.
 - 운영 PostgreSQL 실서버, 멀티프로세스, API 서버 배포 및 실제 키 사용은 이번 회차 범위 밖. 실제 서버 연결/마이그레이션은 별도 승인 필요.
 - 서명된 취소·조회 기능 및 HTTP 재시도 idempotency 정책은 다음 미완료 작업.
+
+## 주문 단건·목록 조회 계약 (6회차)
+
+- GET `/api/orders/:orderId`: 서버의 신뢰된 chainId/verifyingContract로 제한하고, 주문 ID는 `0x` + hex 64자리여야 한다. 존재하지 않는 주문 404; 형식 불일치·쿼리 삽입은 400.
+- GET `/api/orders`: 서버 도메인 범위, 선택적 market/status 필터, limit 1~50(기본 20), offset 0~10000(기본 0). 허용되지 않거나 중복된 필터는 400.
+- SQL 정렬: `created_at DESC, account ASC, nonce ASC`. `LIMIT limit + 1`로 `hasMore` 계산. offset 방식은 동시 삽입 시 스냅샷 간 페이지 겹침 가능성이 있으므로 후속 cursor 검토 항목.
+- 응답 단건 `{order}`, 목록 `{items,hasMore,limit,offset}`. account, orderId, nonce, market, side, price, quantity, filledQuantity, expiresAt, status, createdAt만 노출; DB 원본 서명은 반환하지 않음. price/quantity/filledQuantity는 문자열 유지.
+- 데이터베이스 내부 오류는 500 INTERNAL_ERROR; 보안 오류 상세는 응답에 노출하지 않음. 외부 공개용 접근 제어·rate limit과 비공개 주문 정책은 별도 운영 보안 검토.

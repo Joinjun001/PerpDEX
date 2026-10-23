@@ -77,3 +77,20 @@ npm run db:migrate
 이 개발 단계에서는 운영 PostgreSQL을 실행하거나 배포하지 않았습니다. 운영자가 별도로 테스트 서버를 구성할 경우 `DATABASE_URL`, `PERPDEX_CHAIN_ID`, `PERPDEX_VERIFYING_CONTRACT`을 제공하고 **DB 마이그레이션을 별도 승인·실행한 후** `npm start`로 시작합니다. 기본 바인딩은 `127.0.0.1:8080`이며 `PORT`로 포트를 지정할 수 있습니다. 공개 접근/프록시/인증·rate limit 등 운영 구성은 별도 보안 검토가 필요합니다.
 
 현 단계에서는 `npm test`가 외부 DB 없이 localhost 임시 포트 + PGlite를 이용해 HTTP 경계부터 SQL 저장까지 검증합니다. 주문 조회·취소 REST API, 재요청 idempotency, 운영 DB 다중 프로세스 검증은 미완료입니다.
+
+## M2-T3 주문 조회 API (6회차)
+
+서버가 설정한 `PERPDEX_CHAIN_ID`와 `PERPDEX_VERIFYING_CONTRACT`로 읽기 범위를 제한합니다. 클라이언트에서 체인·컨트랙트를 지정할 수 없으며, DB 조회에는 파라미터 바인딩을 사용합니다.
+
+- `GET /api/orders/:orderId` — 32바이트 hex 주문 ID로 단건 조회. 정상 `200 {order}`, 미존재 `404 ORDER_NOT_FOUND`, 잘못된 형식 `400 INVALID_QUERY`.
+- `GET /api/orders?market=ETH-USDC&status=OPEN&limit=20&offset=0` — 주문 목록. `market`은 대문자로 정규화하고 지정 가능한 `status`는 OPEN/PARTIALLY_FILLED/FILLED/CANCELED/EXPIRED입니다.
+- `limit` 기본값은 20, 허용 범위는 1~50. `offset` 기본값 0, 허용 범위는 0~10000. 중복·알 수 없는 쿼리 파라미터와 범위 밖 값은 `400 INVALID_QUERY`로 거부합니다.
+- 정렬은 `created_at DESC, account ASC, nonce ASC` 순서이며 서버 측 `LIMIT + 1` 조회로 `hasMore`를 반환합니다.
+- 응답 목록 형식은 `{items,hasMore,limit,offset}`입니다. 가격·수량·체결수량은 손실 방지를 위해 **문자열**로 반환합니다.
+- 단건·목록 모두 서명 원문, DB 접속 정보 또는 서버 내부 필드를 SELECT/반환하지 않습니다. **계정 주소와 주문 조건은 공개 주문 정보**로 설계한 상태이며, 비공개 주문이 필요하면 실제 외부 공개 전에 접근 제어 정책을 다시 검토해야 합니다.
+- Offset 페이지네이션은 요청 도중 신규 주문이 들어오면 다른 페이지에서 중복·누락 가능성이 있습니다. 현재 API 순서는 같은 스냅샷에서 결정적이며, 향후 활성 주문 변화가 많은 환경에는 커서 기반 페이지네이션을 별도로 검토합니다.
+- PGlite + localhost HTTP 통합 검증 수행. 실제 운영 PostgreSQL/다중 연결 API 검증은 미완료입니다.
+
+## 테스트 안정화
+
+PGlite는 파일별로 독립 PostgreSQL 엔진을 초기화하므로, 리소스가 제한된 홈서버에서 모든 테스트 파일을 동시에 실행하면 프로세스가 SIGKILL로 종료될 수 있습니다. `npm test`는 `--test-concurrency=1`로 **테스트 파일을 순차 실행**하도록 설정했습니다. 각 파일 내부에서 수행하는 동시 요청·Nonce 경합 테스트는 그대로 유지됩니다.
