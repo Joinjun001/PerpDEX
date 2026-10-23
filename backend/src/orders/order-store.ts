@@ -32,6 +32,26 @@ export class PostgresOrderStore {
     );
   }
 
+  /**
+   * Guarded status transition for an authorized cancel service.
+   * Filled quantity is deliberately preserved: partial fills remain settled.
+   */
+  async cancelActive(input: {
+    account: string;
+    nonce: string;
+    domain: OrderSigningDomainInput;
+  }): Promise<{ status: "CANCELED"; quantity: string; filled_quantity: string } | null> {
+    const domain = validateOrderSigningDomain(input.domain);
+    const result = await this.db.query(
+      `UPDATE orders SET status='CANCELED', updated_at=NOW()
+       WHERE chain_id=$1 AND verifying_contract=$2 AND account=$3 AND nonce=$4
+         AND status IN ('OPEN','PARTIALLY_FILLED')
+       RETURNING status, quantity, filled_quantity`,
+      [domain.chainId, domain.verifyingContract.toLowerCase(), input.account.toLowerCase(), input.nonce],
+    );
+    return (result.rows[0] as { status: "CANCELED"; quantity: string; filled_quantity: string } | undefined) ?? null;
+  }
+
   async findByNonce(input: {
     account: string;
     nonce: string;

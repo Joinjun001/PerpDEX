@@ -41,3 +41,13 @@
 - 검증 대상: `002_orders.sql`, `order-store.ts`, `order-transactions.ts`, `accept-order.ts`, `migrate.ts`.
 - 운영 PostgreSQL 프로세스/네트워크/다중 연결 검증은 환경에 DB 서버가 없어 **미실행**. 서버 마이그레이션·원격 push·실배포·개인키 처리는 수행하지 않음.
 - 아직 미구현: 외부 REST API, 취소 요청의 소유자 인증, 주문과 Nonce의 취소 상태 동기화, HTTP 재시도 idempotency.
+
+## 2026-10-24 — 주문 취소 인증 및 트랜잭션 검증 (4회차)
+
+- `npm run build`: TypeScript 정적 타입 검사 **통과**.
+- `npm test`: **37 passed / 0 failed**, 이전 30개 + 신규 취소 시나리오 7개.
+- 소유자 EIP-712 `CancelOrder` 유효 서명 검증, 위조/다른 계정/서명 변조/서명 도메인 변경/만료 요청 거부.
+- DB 테스트: 주문 생성 전 Nonce 사전 취소 및 생성 차단, OPEN→CANCELED, PARTIALLY_FILLED→CANCELED에서 filled_quantity 유지, FILLED/EXPIRED 및 중복 취소 거부.
+- PostgreSQL CHECK 오류로 주문 상태 갱신 실패를 유발한 테스트에서 Nonce까지 rollback되고 정상 재시도 가능한 것을 확인.
+- 생성·취소 동시 제출에서도 CANCELED Nonce를 가진 OPEN 주문이 생기지 않음을 PGlite 트랜잭션 테스트로 확인.
+- 운영 PostgreSQL 연결/멀티프로세스 테스트와 외부 HTTP API 인증 통합은 **이번 실행에서 미검증**. `forge` 실행도 미검증.

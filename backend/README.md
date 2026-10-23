@@ -5,6 +5,8 @@
 - `src/orders/nonce-registry.ts`: PostgreSQL 기반 Nonce 영속 저장/중복 거부/취소/만료 전이
 - `src/orders/order-auth.ts`: EIP-712 검증 후 Nonce 예약을 수행하는 인증 경계
 - `src/orders/accept-order.ts`: 서명 확인 → Nonce 예약 → 주문 INSERT를 단일 트랜잭션에서 실행하는 서비스
+- `src/orders/cancel-signature.ts`: 별도 EIP-712 CancelOrder(account, nonce, deadline) 서명 검증
+- `src/orders/cancel-order.ts`: 취소 서명 검증 → Nonce 봉인 → 주문 취소를 단일 트랜잭션에서 실행
 - `src/orders/order-transactions.ts`: `pg.Pool.connect()`에서 받은 단일 연결의 BEGIN/COMMIT/ROLLBACK 및 release 관리
 - `src/orders/order-store.ts`: 별도 SQL Runner를 주입받는 주문 저장소
 - `sql/001_order_nonces.sql`: Nonce 복합 고유키 기반 DB 스키마
@@ -36,6 +38,8 @@ npm run db:migrate
 
 - EIP-712 도메인 `chainId/verifyingContract`는 사용자 입력을 그대로 신뢰하지 말고 서버 설정으로 고정해야 합니다.
 - Nonce는 `(chainId, verifyingContract, account, nonce)` 고유키로 영구 예약합니다. `USED`, `CANCELED`, `EXPIRED` 상태에서도 행을 삭제하지 않아 Replay가 차단됩니다.
-- `cancel()`은 **내부 함수**입니다. 외부 API로 노출할 때는 서명된 취소 요청 등 소유자 인증이 필수입니다. 인증되지 않은 사용자가 다른 계정의 Nonce를 취소할 수 있게 해서는 안 됩니다.
+- `PostgresNonceRegistry.cancel()`은 인증을 우회할 수 있는 **내부 함수**입니다. 외부 API에는 노출하지 마세요. 취소 요청은 `cancelSignedOrder(request, signature, trustedDomain, transactionManager)`만 호출하여 EIP-712 소유자 인증을 강제합니다. `CancelOrder(account,nonce,deadline)`의 타입명과 도메인은 주문 서명과 분리되어 서명 목적 혼동을 차단합니다.
+- 주문이 없을 때도 유효한 취소 서명으로 Nonce를 사전 차단할 수 있습니다. OPEN/PARTIALLY_FILLED 주문의 기존 체결 수량은 유지하며, FILLED/CANCELED/EXPIRED 주문은 충돌로 거부합니다. 취소 실패 시 주문·Nonce 상태는 함께 롤백됩니다.
+- EIP-712 도메인은 HTTP 입력이 아닌 신뢰된 서버 설정으로 고정해야 하며 현재 HTTP REST 엔드포인트는 아직 없습니다.
 - 주문 입력 성공 후 DB 커밋과 API 응답 사이에서 네트워크 장애가 나면 재전송을 별도 복구/idempotency 흐름으로 다루어야 합니다. 현재는 중복을 거부합니다.
 - 스마트 컨트랙트 지갑(ERC-1271)은 현 EOA 서명 검증 범위 밖입니다.

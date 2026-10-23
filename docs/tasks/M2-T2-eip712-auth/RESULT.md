@@ -55,3 +55,17 @@
 - 인증된 취소 요청(EIP-712 CancelOrder 등)과 주문/Nonce 상태의 원자적 갱신을 구현. 승인되지 않은 사용자의 취소가 불가능하도록 보안 테스트 작성.
 - M2-T3 REST API에 서버 고정 chainId/verifyingContract와 현재 transaction manager를 주입하고 요청/응답 및 재전송 결과를 검증.
 - 운영 PostgreSQL 서버가 준비되는 경우 별도 승인하에 마이그레이션과 다중 프로세스 동시성 E2E 확인.
+
+## 2026-10-24 — EIP-712 서명 기반 주문 취소 (4회차)
+
+- 시작 Git 상태 깨끗함, 직전 로컬 커밋 `59dea03` 확인.
+- `backend/src/orders/cancel-signature.ts` 신규 구현: `CancelOrder(account,nonce,deadline)` typed data, EOA 취소 서명 복원/검증, 도메인 분리, uint256 nonce와 deadline 검증.
+- `backend/src/orders/cancel-order.ts` 신규 구현: 유효한 취소 서명에 대해서만 트랜잭션 시작 → nonce cancel(잠금/재사용 방지) → 주문 CANCELED 상태 갱신. 주문 UPDATE 실패·종료 상태일 때 전체 rollback.
+- `PostgresOrderStore.cancelActive` 추가: `OPEN`, `PARTIALLY_FILLED` 주문만 전이하며 기존 부분 체결 수량을 수정하지 않음. 전체 주문 없으면 사전 취소 Nonce tombstone 저장.
+- `backend/test/cancel-order.test.ts` 신규 7개 시나리오: 사전 취소와 Replay 방지, 정상 취소·중복 거부, 부분 체결 보존, 위조/타 계정/다른 체인/컨트랙트/만료 서명 거부, FILLED·EXPIRED 거부 및 상태 rollback, SQL CHECK 제약 오류 시 주문·Nonce 동시 rollback/재시도, 생성·취소 동시 요청 경합 방지.
+- 검증: `npm run build`(`tsc --noEmit`) 성공, `npm test` **37 passed / 0 failed**.
+- 실제 운영 PostgreSQL 서버·서로 다른 프로세스의 동시 접근 및 REST API는 **미검증**. 원격 push/실배포/DB 실운영 migration/사용자 개인키 사용 없음.
+
+### 후속 개발
+- M2-T2 인증 계층의 최종 QA 정리 및 운영 DB 제약 검증은 실제 서버 환경이 준비되면 진행.
+- M2-T3 주문 REST API: 서버에서 고정한 도메인을 이용한 주문 생성/조회/취소, 입력검증·오류 응답·요청 중복 처리 및 E2E 테스트.

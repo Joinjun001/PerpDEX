@@ -20,3 +20,14 @@ M2-T1의 주문 도메인을 그대로 사용해 EOA 지갑의 EIP-712 주문 �
 
 ## 단계 제한
 첫 번째 개발 단계에서 1~2만 구현한다. 3~5는 다음 실행에서 후속 구현한다.
+
+## EIP-712 취소 인증 정책 (4회차 확정)
+
+- `CancelOrder(address account,uint256 nonce,uint256 deadline)`은 기존 주문 서명 `Order`와 다른 타입으로 취소 의사를 표시한다.
+- 동일한 서버 고정 EIP-712 도메인(`PerpDEX/1/chainId/verifyingContract`)으로 서명한다. 유효 기간은 취소 요청의 `deadline`으로 검사하며, 미래의 안전한 정수 타임스탬프만 허용한다.
+- `cancelSignedOrder`는 서명 검증 **이후** 하나의 PostgreSQL 트랜잭션에서 (1) Nonce cancel/tombstone으로 직렬화, (2) 주문 상태 CANCELED 전이 순서로 실행한다. 두 단계 중 오류 발생 시 전체 ROLLBACK.
+- 주문이 없는 Nonce도 소유자가 사전 취소 가능하다. 이후 해당 Nonce를 사용한 주문 생성은 실패한다.
+- 기존 주문이 `OPEN`, `PARTIALLY_FILLED`인 경우만 취소 가능. 부분 체결량(`filled_quantity`)은 변경하지 않고 나머지 `quantity - filled_quantity`만 취소한다.
+- `FILLED`, `CANCELED`, `EXPIRED` 주문과 중복 취소는 거부하며, Nonce 상태 변경도 rollback한다.
+- `PostgresNonceRegistry.cancel()`은 인증되지 않는 내부 DB 함수이므로 HTTP에서 직접 노출하면 안 된다. 인증 진입점은 `cancelSignedOrder`이어야 한다.
+- 운영 PostgreSQL / 다중 서버와 실제 API 엔드포인트는 별도 통합 검증 대상으로 남긴다.
