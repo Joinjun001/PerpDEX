@@ -9,16 +9,21 @@ if (!databaseUrl) {
   throw new Error("DATABASE_URL is required to run PostgreSQL migrations");
 }
 const pool = new Pool({ connectionString: databaseUrl });
-const script = fileURLToPath(new URL("../sql/001_order_nonces.sql", import.meta.url));
+const migrations = [
+  "../sql/001_order_nonces.sql",
+  "../sql/002_orders.sql",
+];
 
 try {
-  const migration = await readFile(script, "utf8");
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    await client.query(migration);
+    for (const relativePath of migrations) {
+      const filepath = fileURLToPath(new URL(relativePath, import.meta.url));
+      await client.query(await readFile(filepath, "utf8"));
+    }
     await client.query("COMMIT");
-    process.stdout.write("order nonce migration applied\n");
+    process.stdout.write("order nonce and order schema migrations applied\n");
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;

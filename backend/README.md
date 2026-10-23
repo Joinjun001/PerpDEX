@@ -4,9 +4,13 @@
 
 - `src/orders/nonce-registry.ts`: PostgreSQL 기반 Nonce 영속 저장/중복 거부/취소/만료 전이
 - `src/orders/order-auth.ts`: EIP-712 검증 후 Nonce 예약을 수행하는 인증 경계
-- `sql/001_order_nonces.sql`: 고유키 기반 DB 스키마
-- `scripts/migrate.ts`: 별도 명령으로 실행하는 PostgreSQL 스키마 적용 스크립트
-- `test/nonce-registry.test.ts`: PGlite(실제 PostgreSQL SQL 엔진 내장) 기반 영속성·동시 요청 테스트
+- `src/orders/accept-order.ts`: 서명 확인 → Nonce 예약 → 주문 INSERT를 단일 트랜잭션에서 실행하는 서비스
+- `src/orders/order-transactions.ts`: `pg.Pool.connect()`에서 받은 단일 연결의 BEGIN/COMMIT/ROLLBACK 및 release 관리
+- `src/orders/order-store.ts`: 별도 SQL Runner를 주입받는 주문 저장소
+- `sql/001_order_nonces.sql`: Nonce 복합 고유키 기반 DB 스키마
+- `sql/002_orders.sql`: 주문 테이블 및 Nonce 외래키 기반 스키마
+- `scripts/migrate.ts`: 두 스키마를 한 트랜잭션으로 적용하는 수동 실행 스크립트
+- `test/nonce-registry.test.ts`, `test/order-transaction.test.ts`: PGlite 영속성·동시 요청·원자적 롤백 테스트
 
 ## 개발 검증
 
@@ -26,7 +30,7 @@ npm run build
 npm run db:migrate
 ```
 
-실제 마이그레이션은 이 개발 회차에서 수행하지 않았습니다. DB 연결 정보는 저장소나 로그에 남기지 않습니다. `pg.Pool` 객체는 `createPostgresNonceRegistry(pool)` (`src/orders/postgres-adapter.ts`)로 주입할 수 있습니다. 향후 M2-T3 Order API에서 주문 레코드 삽입과 Nonce 소비를 **같은 DB 트랜잭션/연결**에 묶어 부분 저장을 방지해야 합니다.
+실제 마이그레이션은 이 개발 회차에서 수행하지 않았습니다. DB 연결 정보는 저장소나 로그에 남기지 않습니다. 기존 독립 Nonce 기능은 `createPostgresNonceRegistry(pool)`로 사용할 수 있지만, **주문 생성에는** `postgresTransactionManager(pool)`를 만들고 `acceptSignedOrder(order, signature, trustedDomain, manager)`를 호출해야 합니다. 이렇게 해야 `pg.Pool.connect()`로 확보한 같은 연결에서 Nonce 예약과 주문 INSERT가 커밋되거나 함께 롤백됩니다. 향후 M2-T3 REST API에서도 해당 트랜잭션 경계를 유지해야 하며, HTTP API·인증된 취소 경로는 아직 구현되지 않았습니다.
 
 ## 주의 사항
 

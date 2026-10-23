@@ -37,3 +37,21 @@
 - M2-T3 주문 API의 주문 INSERT·Nonce 예약을 하나의 PostgreSQL 트랜잭션으로 통합하여 실패 시 원자적 rollback 구현.
 - 인증된 취소 요청 경계를 확립하고 nonce 취소를 인증된 사용자 요청으로 연결.
 - 운영 PostgreSQL 서버의 연결·다중 프로세스·재시작 E2E 검증. 실환경이 없다면 미검증으로 기록하고 단위/embedded PostgreSQL 범위에서 가능한 기능 구현 지속.
+
+## 2026-10-24 — 주문 저장 + Nonce 소비 트랜잭션 통합 (3회차)
+
+- Git 초기 상태: 작업 트리 깨끗함, 이전 커밋 `1a1845a`.
+- `backend/sql/002_orders.sql`: 주문 테이블, 주문 상태·가격·수량·서명 형식 검사, Nonce 복합키를 참조하는 외래키, 시장/상태/생성시각 인덱스 추가. 동일 canonical order ID가 서로 다른 EIP-712 도메인에서 발생할 수 있으므로 global unique로 묶지 않음.
+- `backend/src/orders/order-store.ts`: 트랜잭션 범위 SqlRunner를 주입받아 주문 저장 및 Nonce 기준 조회.
+- `backend/src/orders/order-transactions.ts`: `pg.Pool.connect()`로 얻은 단일 연결에서 BEGIN → callback → COMMIT, 오류 시 ROLLBACK, finally release. 롤백 자체가 실패하면 원래 오류와 함께 AggregateError 전달.
+- `backend/src/orders/accept-order.ts`: EIP-712 서명 검증·Nonce 예약·주문 INSERT를 동일 트랜잭션 콜백으로 수행. 검증 도메인은 서비스에 전달되는 신뢰된 서버 설정이어야 함.
+- `backend/scripts/migrate.ts`: 001/002 스키마를 같은 마이그레이션 트랜잭션으로 적용하도록 수정. 실제 운영 DB에는 실행하지 않음.
+- 신규 `backend/test/order-transaction.test.ts` 7개: 정상 저장, 실제 SQL constraint failure→Nonce 포함 rollback·재시도, 12개 동시 요청에서 단 1개 원자적 성공, 디스크 DB 종료/재개방, 서로 다른 체인 도메인에서 동일 canonical ID 수용, 외래키 검증, pg pool adapter의 동일 연결 COMMIT/ROLLBACK/release.
+- `npm run build`의 `tsc --noEmit` 통과, `npm test` **30 passed / 0 failed** (기존 23개 + 신규 7개).
+- 운영 PostgreSQL 서버, 서로 다른 서버 프로세스/연결 사이의 동시성 및 실제 REST API E2E는 **미검증**. 테스트는 PGlite SQL 엔진 및 PgPool 모의 연결을 사용함.
+- 원격 push·실배포·실제 DB migration·비밀키 사용 금지 준수.
+
+### 다음 단계
+- 인증된 취소 요청(EIP-712 CancelOrder 등)과 주문/Nonce 상태의 원자적 갱신을 구현. 승인되지 않은 사용자의 취소가 불가능하도록 보안 테스트 작성.
+- M2-T3 REST API에 서버 고정 chainId/verifyingContract와 현재 transaction manager를 주입하고 요청/응답 및 재전송 결과를 검증.
+- 운영 PostgreSQL 서버가 준비되는 경우 별도 승인하에 마이그레이션과 다중 프로세스 동시성 E2E 확인.

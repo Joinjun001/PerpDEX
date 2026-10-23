@@ -1,6 +1,6 @@
 # M2-T2 QA
 
-상태: In Progress — EIP-712 서명 기능 검증 완료, Replay 방지 미구현
+상태: In Progress — 서명 검증·Nonce Replay 방지·주문 저장 트랜잭션 검증 완료(PGlite), 인증된 취소/운영 DB 검증 미완료
 
 ## 이번 회차 검증 (2026-10-24)
 - `cd backend && npm test`: **17 passed / 0 failed** (기존 9개 + 신규 8개).
@@ -32,3 +32,12 @@
 2. M2-T3에서 서명 도메인을 신뢰할 수 있는 서버 설정으로 고정하고, **주문 DB INSERT와 Nonce INSERT를 동일 연결/트랜잭션에서 커밋**해야 함. 현재 서비스의 독립 Nonce 예약과 주문 저장의 원자성은 아직 미구현.
 3. `pg.Pool` 운영 서버(PostgreSQL) 마이그레이션 및 다중 연결/서버 재시작 테스트는 차후 별도 환경에서 실시.
 4. ERC-1271 스마트컨트랙트 지갑은 현재 지원하지 않음.
+
+## 2026-10-24 — 주문과 Nonce 원자적 저장 검증 (3회차)
+
+- `npm run build`: TypeScript 타입 검사 통과.
+- `npm test`: **30 passed / 0 failed**.
+- 신규 PGlite(내장 PostgreSQL 엔진) 통합 시나리오 **7개 통과**: 정상 주문과 Nonce 동시 커밋, 실제 주문 INSERT CHECK 제약 실패 시 둘 다 rollback 후 정상 재시도, 12개 동일 주문 동시 시도 중 1개만 성공, DB 파일 닫기/재개방 뒤 재사용 차단, chainId가 다른 동일 canonical ID 주문 분리 저장, Nonce 없는 주문의 FK 위반 거부, PostgreSQL Pool transaction adapter BEGIN/COMMIT/ROLLBACK/release 연결 단위 모의 검증.
+- 검증 대상: `002_orders.sql`, `order-store.ts`, `order-transactions.ts`, `accept-order.ts`, `migrate.ts`.
+- 운영 PostgreSQL 프로세스/네트워크/다중 연결 검증은 환경에 DB 서버가 없어 **미실행**. 서버 마이그레이션·원격 push·실배포·개인키 처리는 수행하지 않음.
+- 아직 미구현: 외부 REST API, 취소 요청의 소유자 인증, 주문과 Nonce의 취소 상태 동기화, HTTP 재시도 idempotency.
