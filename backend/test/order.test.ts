@@ -142,3 +142,59 @@ test("deterministic order ID is stable and changes with canonical fields", () =>
   assert.equal(orderId, createDeterministicOrderId(sameOrder));
   assert.notEqual(orderId, createDeterministicOrderId(nextNonce));
 });
+
+test("runtime validation rejects unsafe timestamps and malformed field types", () => {
+  const cases: Array<[keyof ReturnType<typeof validOrder>, unknown]> = [
+    ["account", null],
+    ["market", "A".repeat(33)],
+    ["side", 1],
+    ["price", 1],
+    ["quantity", "01"],
+    ["nonce", "1e3"],
+    ["expiresAt", NOW - 1],
+    ["expiresAt", NOW + 0.5],
+    ["expiresAt", Number.MAX_SAFE_INTEGER + 1],
+  ];
+
+  for (const [field, invalidValue] of cases) {
+    assert.throws(
+      () => validateCreateOrder({ ...validOrder(), [field]: invalidValue }, NOW),
+      (error: unknown) =>
+        error instanceof OrderValidationError && error.field === field,
+      `expected invalid ${field} to be rejected`,
+    );
+  }
+
+  assert.throws(
+    () => validateCreateOrder(null, NOW),
+    (error: unknown) =>
+      error instanceof OrderValidationError && error.field === "account",
+  );
+  assert.equal(validateCreateOrder({ ...validOrder(), expiresAt: NOW + 1 }, NOW).expiresAt, NOW + 1);
+});
+
+test("deterministic order ID changes when any canonical identity field changes", () => {
+  const base = validOrder();
+  const baseId = createDeterministicOrderId(validateCreateOrder(base, NOW));
+  const variants = [
+    { account: "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb" },
+    { market: "BTC-USDC" },
+    { side: "SELL" },
+    { price: "2500000001" },
+    { quantity: "1000000000000000001" },
+    { nonce: "1" },
+    { expiresAt: NOW + 301 },
+  ];
+
+  for (const variant of variants) {
+    const order = validateCreateOrder({ ...base, ...variant }, NOW);
+    assert.notEqual(
+      createDeterministicOrderId(order),
+      baseId,
+      `expected distinct ID for ${Object.keys(variant)[0]}`,
+    );
+  }
+
+  const normalized = validateCreateOrder({ ...base, account: base.account.toLowerCase(), market: "ETH-USDC", side: "BUY" }, NOW);
+  assert.equal(createDeterministicOrderId(normalized), baseId);
+});

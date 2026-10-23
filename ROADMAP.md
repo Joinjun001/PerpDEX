@@ -18,7 +18,7 @@
 
 | TASK | 내용 | 상태 |
 |---|---|---|
-| M2-T1 | 주문 도메인 모델, 입력 검증 및 상태 머신 기반 | In Progress |
+| M2-T1 | 주문 도메인 모델, 입력 검증 및 상태 머신 기반 | Completed |
 | M2-T2 | EIP-712 주문 서명 검증, nonce 및 replay 방지 | Planned |
 | M2-T3 | Order REST API와 주문 저장/조회/취소 흐름 | Planned |
 | M2-T4 | 가격-시간 우선 Matching Engine 및 부분 체결 | Planned |
