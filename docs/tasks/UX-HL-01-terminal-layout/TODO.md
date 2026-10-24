@@ -65,3 +65,10 @@
 - [x] L1 BTC/ETH/SOL × 각 9개 행의 실 데이터 출처/접근성 설명 일치, JS 비실행 초기 HTML 확인
 - [x] L1 프런트 전체 148/148, JS syntax/TS build/HTML 구조·고유 ID/CSP/git diff 검사
 - [ ] L2 실제 브라우저·스크린리더/모바일에서 최근 체결 목록/샘플 순번 낭독 인수 (샌드박스 환경 제한)
+
+- [x] M1 Recent Trades의 합성 매수/매도 방향이 가격의 적색/녹색으로만 표현되는 결함을 실제 main.js 렌더·정적 HTML/CSS 회귀 2건 수정 전 FAIL로 재현
+- [x] M1 Price/Size/Sample # 다음 가시적 Side 열과 Buy/Sell 텍스트를 기존 MOCK 방향에서 생성
+- [x] M1 시장별 9개 행의 시각적 방향과 기존 ARIA 방향/가격 색상이 일치하도록 회귀 검증
+- [x] M1 가상 Recent Trades 전용 4열 CSS 적용, Order Book 3열/모바일 접기 및 샘플 순번 유지
+- [x] M1 프런트 전체 150/150·JS syntax·TypeScript build·HTML 구조/고유 ID/CSP·git diff 검사
+- [ ] M2 실 브라우저 모바일/스크린리더에서 4열 글자 가독성·색상 무관 방향 인수 (Chromium 샌드박스 환경 의존)

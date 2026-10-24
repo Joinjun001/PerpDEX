@@ -463,7 +463,7 @@ test('UX-HL-01-F1 generated trades use sample IDs, never fabricated clock timest
   const app=await boot(),id=app.id;
   const rows=id('recent-trades').children;
   assert.equal(rows.length,9);
-  const labels=rows.map(row=>row.children.at(-1).textContent);
+  const labels=rows.map(row=>row.children[2].textContent);
   assert.deepEqual(labels,Array.from({length:9},(_,i)=>'#'+String(i+1).padStart(2,'0')));
   assert.equal(labels.some(v=>/^\d{1,2}:\d{2}$/.test(v)),false);
 });
@@ -577,6 +577,36 @@ test('UX-HL-01-L1 mock recent trades have accessible market, direction, price, s
 test('UX-HL-01-L1 recent trade container has non-live accessible list fallback',()=>{
   assert.match(html,/id="recent-trades"[^>]*role="list"[^>]*aria-label="BTC 합성 최근 체결 예시 목록/);
   assert.match(html,/실제 체결 시각·블록체인 기록 아님/);
+});
+test('UX-HL-01-M1 recent-trade direction is visible in text, not inferred only from red/green',async()=>{
+  const app=await boot(),id=app.id;
+  for(const market of ['BTC','ETH','SOL']){
+    app.market(market).dispatch('click');
+    const rows=id('recent-trades').children;
+    assert.equal(rows.length,9);
+    const sides=new Set();
+    for(const row of rows){
+      assert.equal(row.children.length,4);
+      const cell=row.children[3];
+      assert.ok(cell.textContent==='Buy'||cell.textContent==='Sell');
+      const expected=row.children[0].className==='positive'?'Buy':'Sell';
+      assert.equal(cell.textContent,expected,'direction must agree with existing synthetic sample');
+      const korean=expected==='Buy'?'매수':'매도';
+      assert.ok(row.getAttribute('aria-label').includes('모의 '+korean+' 방향'));
+      assert.equal(cell.getAttribute('aria-hidden'),'true');
+      assert.match(cell.className,expected==='Buy'?/positive/:/negative/);
+      sides.add(cell.textContent);
+    }
+    assert.deepEqual([...sides].sort(),['Buy','Sell']);
+  }
+});
+test('UX-HL-01-M1 mock recent-trade header and narrow-grid CSS visibly support side field',()=>{
+  const section=html.match(/<section id="market-depth-trades"[\s\S]*?<\/section>/)?.[0]??'';
+  assert.match(section,/<span>Side<\/span>/);
+  const css=readFileSync(fileURLToPath(new URL('./trade.css',import.meta.url)),'utf8');
+  assert.match(css,/\.trade-shell \.trade-log-panel \.trade-row/);
+  assert.match(css,/\.trade-shell \.trade-log-panel \.book-header/);
+  assert.match(css,/grid-template-columns:[^;]*minmax\(0,1fr\)/);
 });
 test('UX-HL-01-J1 synthetic depth bars scale with cumulative displayed book totals',async()=>{
   const app=await boot(),id=app.id;

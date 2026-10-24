@@ -121,7 +121,8 @@ function renderTrades(){
       sampleLabel+'. 가격 '+priceLabel+' USD, 수량 '+sizeLabel+' '+
       view.market+'. 실제 체결 기록 아님.');
     const cells=[node('span',buy?'positive':'negative',priceLabel),
-      node('span','',sizeLabel),node('span','',sampleLabel)];
+      node('span','',sizeLabel),node('span','',sampleLabel),
+      node('span','trade-side '+(buy?'positive':'negative'),buy?'Buy':'Sell')];
     cells.forEach(cell=>cell.setAttribute('aria-hidden','true'));
     row.append(...cells);
     container.append(row);

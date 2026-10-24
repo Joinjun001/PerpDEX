@@ -148,3 +148,13 @@
 - 수정 후 대상 node --test frontend/order-interactions.test.mjs 28/28 PASS, 전체 node --test frontend/*.test.mjs 148/148 PASS (기존 146+신규 2). 모든 frontend/*.js/*.mjs node --check, npm --prefix backend run build (tsc --noEmit) PASS.
 - HTMLParser index.html/trade.html 유효 태그 중첩·고유 ID, CSP connect-src none/계정 tbody 5개 미연결, git diff --check PASS.
 - 실제 스크린리더·모바일 픽셀/터치·접근성 트리 인수 미실행. 체결·서명·지갑·API·Sepolia/운영 DB·푸시/배포 변경 없음.
+
+## 2026-10-25 UX-HL-01-M1 — 최근 체결 방향의 텍스트 표시
+
+- 시작 main HEAD 5121995, Git clean, origin/main보다 29개 로컬 커밋 앞섬. PROJECT_STATE, ROADMAP, Hyperliquid UX 가이드 및 UX-HL-01 최근 SPEC/TODO/QA/RESULT, 프런트 실제 HTML/JS/CSS·통합 회귀를 확인.
+- 브라우저: 프로젝트 내부 Playwright/Chromium 643MB 설치돼 있으나 runuser -u node -- unshare -Ur true → Operation not permitted. 정책 우회·no-sandbox 실행 없이 실제 렌더링/스크린리더 인수 미완료 유지.
+- 재현: Price 색상만 매수·매도를 나타내고 Recent Trades의 가시 열은 Price/Size/Sample # 셋뿐. 실제 main.js BTC/ETH/SOL 실행 기반 표시 방향·ARIA 정합성 테스트 및 정적 HTML/CSS 4열 검사 신규 2건 수정 전 FAIL.
+- 변경: trade.html 최근 체결 헤더에 Side 추가. main.js renderTrades의 기존 buy 불리언을 재사용해 가시 Buy/Sell을 네 번째 열에 추가. 기존 aria-label 모의 방향/색상 및 9개 샘플 순번 불변. trade.css Recent Trades에만 4열 그리드·좁은 폭 텍스트 스타일 적용. 과거 F1 테스트의 샘플 추출을 마지막 행 칸이 아니라 세 번째 칸 인덱스로 변경.
+- 수정 후 대상 order-interactions.test.mjs 30/30 PASS, 전체 node --test frontend/*.test.mjs 150/150 PASS (기존 148+신규 2). 모든 프런트 JS node --check, npm --prefix backend run build (tsc --noEmit) PASS.
+- 첫 git diff --check에서 새 CSS 끝 불필요한 빈 줄 1건 발견, 수정 후 검사 PASS. HTMLParser index.html/trade.html 태그/고유 ID, CSP connect-src none 및 5개 계정 tbody 빈 상태 확인.
+- 실제 브라우저 픽셀·터치/스크린리더 가독성, 서버/지갑/실자금·실거래·Sepolia 트랜잭션, 운영 DB·원격 push/배포 미실행.

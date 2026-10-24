@@ -70,6 +70,8 @@ PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성�
 - **UX-HL-01-K2 (Pending browser)**: 모의 호가 목록·행을 실제 브라우저/스크린리더·모바일에서 인수 검증 필요.
 - **UX-HL-01-L1 (Local Completed)**: Recent Trades MOCK 예시를 시장별 ARIA 목록·행으로 구조화, 각 합성 행의 매수/매도 방향·가격/수량·Sample #·실체결 아님 설명을 동적으로 제공. 신규 2건 포함 프런트 148/148 PASS.
 - **UX-HL-01-L2 (Pending browser)**: 최근 체결 합성 목록/행 접근성을 실제 모바일·키보드·스크린리더에서 인수 검증 필요.
+- **UX-HL-01-M1 (Local Completed)**: MOCK Recent Trades의 매수·매도 방향이 색상으로만 구분되던 문제 해결. Buy/Sell Side 열과 전용 4열 레이아웃, 기존 ARIA 방향의 일치를 확인. 프런트 150/150 PASS.
+- **UX-HL-01-M2 (Pending browser)**: 실제 샌드박스 Chromium에서 모바일·색각/스크린리더 4열 가독성 인수 미완료.
 
 ### Hyperliquid 계정 탭 탐색 UX 진행
 

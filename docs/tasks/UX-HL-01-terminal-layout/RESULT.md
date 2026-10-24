@@ -117,3 +117,12 @@
 - frontend/order-interactions.test.mjs: 신규 2건으로 실제 main.js DOM 및 초기 HTML 상태 검증, 수정 전 두 테스트 FAIL 확인.
 - 전체 프런트 148/148 PASS, JS syntax/TypeScript build/HTML 구조/CSP/diff PASS. 서버·지갑·실체인 연결 없음.
 - 다음 UX-HL-01-L2 실 브라우저/보조공학 인수는 안전한 브라우저 샌드박스 실행 환경이 갖춰질 때 진행.
+
+## 2026-10-25 UX-HL-01-M1 — 로컬 가시 방향 열 구현 완료
+
+- frontend/trade.html: Recent Trades에 Side 헤더 추가.
+- frontend/main.js: 기존 합성 매수·매도 방향을 Buy/Sell 텍스트로 표시. 가격·수량·Sample #·기존 ARIA 접근성 레이블 유지.
+- frontend/trade.css: Recent Trades 영역만 4개 열을 배치해 색상 없이도 방향 구분. 호가창 3열 스타일 불변.
+- frontend/order-interactions.test.mjs: BTC/ETH/SOL × 9행의 가시 방향·기존 색상/ARIA 정합성과 새 헤더/전용 CSS를 검증하는 2건 추가. F1 샘플 순번 검사 위치 정정.
+- 신규 2건 포함 전체 프런트 150/150 PASS, JS/TypeScript/HTML/CSP/Git 검사 PASS. 실제 렌더링 M2 미완료.
+- MOCK 체결 샘플/시장 생성 로직·계정 인증/주문/서명·실체인/운영 DB·원격 push/배포 미변경.
