@@ -55,6 +55,12 @@ PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성�
 - **UX-HL-01-C (Follow-up)**: 실제 브라우저 너비별 시각 확인 및 모바일·접근성 보완.
 - **UX-HL-01-D1 (Local Completed)**: 모바일 화면용 가상 호가·최근 체결 접기/펼치기 버튼, 760px 이하 전용 CSS·ARIA/키보드 기본 button·progressive enhancement. 신규 6건, 프런트 85/85 PASS. 실제 브라우저/터치 QA 보류.
 
+### Hyperliquid 계정 탭 탐색 UX 진행
+
+- **UX-HL-03-A1 (Local Completed)**: 모바일 5개 계정 탭 클릭/Arrow/Home/End 선택 시 탭이 보이도록 가로 스크롤 영역 위치를 조정, 포커스·ARIA 유지. 신규 8건 포함 프런트 전체 93/93 PASS. 문서 docs/tasks/UX-HL-03-account-tab-navigation/.
+- **UX-HL-03-A2 (Pending browser)**: 실제 모바일/브라우저에서 선택 탭 가시성·스크린리더/키보드 확인. 브라우저 도구 부재로 미완료.
+- 실계정 조회/지갑 API 미준비로 계정 데이터 연결 게이트 계속 보류.
+
 ### Hyperliquid 주문 티켓 UX 진행
 
 - **UX-HL-02-A (Local Completed)**: Market/Limit DEMO 입력 전환, Limit Price 범위·형식 검사, 선택 시장 MOCK 가격과 유형별 명목가치·참고 증거금/미리보기. 64/64 프런트 검증 PASS. 문서: docs/tasks/UX-HL-02-order-ticket/.

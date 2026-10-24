@@ -16,6 +16,7 @@ class FakeElement {
   getAttribute(name){return this.attributes[name];}
   addEventListener(name,callback){this.listeners[name]=callback;}
   focus(){this.focused=true;}
+  getBoundingClientRect(){return {left:0,right:400};}
   replaceChildren(...children){this.children=[...children];}
   fire(name,event={}){this.listeners[name]?.(event);}
 }
@@ -29,6 +30,9 @@ function fixture(){
     selectors.set('#account-panel-'+id+' tbody',new FakeElement());
     selectors.set('#account-panel-'+id+' table',new FakeElement());
   }
+  const scroller=new FakeElement();
+  scroller.clientWidth=400;scroller.scrollWidth=400;scroller.scrollLeft=0;
+  selectors.set('.account-tab-scroll',scroller);
   return {root:{
     getElementById:(id)=>byId.get(id),
     querySelector:(selector)=>selectors.get(selector),

@@ -118,6 +118,7 @@
 .trade-shell .account-heading{padding:17px 20px}
 .trade-shell .account-tab-scroll{
   max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;
+  scroll-padding-inline:8px;
   border-bottom:1px solid var(--border);scrollbar-color:#314d4e transparent;
 }
 .trade-shell .account-tablist{display:flex;min-width:max-content;align-items:stretch;padding:0 17px;gap:7px}

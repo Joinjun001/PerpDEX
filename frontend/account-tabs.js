@@ -16,7 +16,22 @@ export function initAccountTabs(root=document){
   if(entries.some(e=>Object.values(e).some(v=>!v))){
     throw new Error('Incomplete account tab markup');
   }
+  const tabScroller=root.querySelector('.account-tab-scroll');
+  if(!tabScroller)throw new Error('Account tab scroll container missing');
   let selected=0;
+  function revealSelectedTab(tab){
+    // Only adjust horizontal overflow; avoid scrollIntoView, which can shift
+    // the entire document vertically when mobile users switch history tabs.
+    if(tabScroller.scrollWidth<=tabScroller.clientWidth)return;
+    const viewport=tabScroller.getBoundingClientRect();
+    const bounds=tab.getBoundingClientRect();
+    const delta=bounds.left<viewport.left
+      ?bounds.left-viewport.left
+      :bounds.right>viewport.right
+        ?bounds.right-viewport.right
+        :0;
+    if(Number.isFinite(delta)&&delta!==0)tabScroller.scrollLeft+=delta;
+  }
   function activate(index,focus=false){
     if(!Number.isInteger(index)||index<0||index>=entries.length){
       throw new RangeError('Account tab index out of bounds');
@@ -29,7 +44,8 @@ export function initAccountTabs(root=document){
       tab.classList.toggle('active',active);
       panel.hidden=!active;
     });
-    if(focus)entries[index].tab.focus();
+    if(focus)entries[index].tab.focus({preventScroll:true});
+    revealSelectedTab(entries[index].tab);
   }
   entries.forEach((entry,i)=>{
     // Static site: always fail closed to disconnected. No backend adapter wired.
