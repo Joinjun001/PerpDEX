@@ -35,3 +35,12 @@
 - frontend/account-tabs.test.mjs의 fake DOM 확장 및 신규 account-tabs-renderer.test.mjs: 9건의 snapshot/중복/오류/경합/DOM 삽입 회귀.
 - 총 43/43 프런트 테스트 및 TypeScript build PASS. UI 실제 픽셀 렌더링/실지갑·API 통합은 미검증.
 - 다음 UX-HL-01-B2-B2-B: 실제 확인된 wallet·server adapter 경계/API 연결과 오류·재시도/계정 변경 E2E. 준비되지 않으면 안전한 독립 UI TASK로 진행. UX-HL-01-C 브라우저 인수도 미완료.
+
+## 2026-10-25 UX-HL-01-B2-B2-B1 — 로컬 완료
+
+- backend의 현재 공개 주문 GET 엔드포인트는 계정별 인증/소유권 검사가 없어 프런트 account read에 바로 이용할 수 없음을 실 코드로 확인. 조사 결과 BACKEND_ACCOUNT_READ_GAP.md 작성.
+- frontend/account-read-flow.mjs: API/지갑 연결이 없는 상태에서 주입된 검증 콜백으로 비동기 계정 조회를 오케스트레이션하는 순수 작업 경계. 세션 version·전/후 검증, AbortController·per-tab 최신 요청 보장, 기존 coordinator의 envelope/row/revision 검사 활용.
+- frontend/account-read-flow.test.mjs: 진입 차단, 세션/response 실패, 동시·중복·늦은 응답·지갑/체인 전환, 재검증 실패와 UI state 변화를 **12/12 PASS**로 재현.
+- 실제 앱 account-tabs.js, order preview, 거래 DOM 및 GitHub Pages는 계정 미연결/빈 기록 상태로 유지. 인증·지갑·fetch·DB·온체인·배포·push 없음.
+- 다음 UX-HL-01-B2-B2-B2: 서버 측 wallet 계정 소유권 검증·계정 read API 준비 후 프런트 실제 연결, 아니면 독립 가능한 UX-HL-01-C 브라우저 QA.
+- 검증: 전체 frontend 55/55 PASS, backend 주문 read HTTP 6/6 PASS, TypeScript build·JS 문법·HTML 구조·Git diff 검사 PASS.

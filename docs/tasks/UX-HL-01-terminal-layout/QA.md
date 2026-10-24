@@ -41,3 +41,13 @@
 - 브라우저 직접 실행 및 스크린샷·실보조공학 검증은 **미실행**. fake DOM 이벤트/렌더링 테스트를 실제 브라우저 인수로 주장하지 않음.
 - 실제 MetaMask·HTTPS 계정 API·PostgreSQL/chain data source 신뢰성 검증 **미구현**. allowValidatedRecords는 로컬 렌더링 사용 여부를 구분하는 UI 옵션일 뿐 인증/서명·데이터 신뢰 증명이 아니다.
 - 공개 데모의 계정 표는 모두 지갑 미연결·빈 tbody를 유지. 안전한 데이터 어댑터가 준비될 때까지 실제 record 출력 기능 비활성.
+
+## 2026-10-25 UX-HL-01-B2-B2-B1 — 계정 read adapter 오프라인 QA
+
+- 시작: main HEAD 9e22fe5, clean, origin/main 대비 ahead 5. PROJECT_STATE/ROADMAP/Hyperliquid UX 및 TASK SPEC/TODO/QA/RESULT/ACCOUNT_QUERY_CONTRACT, frontend/ 소스 확인.
+- backend/src/http/create-order-http.ts의 GET /api/orders, GET /api/orders/:orderId 및 backend/src/orders/order-store.ts의 listPublic/findPublicById SQL 확인: account owner 인증 및 강제 WHERE account 제약 없음. signed-sim-account-reconciliation은 내부 API이며 HTTP read endpoint 미구현. 기존 공개 GET을 개인 account history 연동에 사용하지 않음.
+- 신규 frontend/account-read-flow.mjs: 주입된 verifySession/query 기반의 지갑 세션 재검증, version monotonicity, per-tab request sequence, AbortController, 계정 전환 및 reconnect stale 차단, coordinator accept/fail 연결. 정적 UI·실 네트워크 미연결.
+- 신규 frontend/account-read-flow.test.mjs **12/12 PASS**: 인증 콜백 누락/잘못된 연결/계정·체인/출처, 요청 전후 세션 재검증, 중복 응답, 동시 요청/이전 토큰, disconnect/계정 전환, 탭별 실패, 버전 역행·동일 버전 다른 계정 거부, 세션 취소 등 테스트.
+- 검증: frontend Node 전체 **55/55 PASS** (기존 43건+신규 12건), JavaScript 파일 문법 검사 PASS, npm --prefix backend run build PASS, backend/test/order-read-http.test.ts **6/6 PASS**.
+- HTMLParser로 index(고유 ID 4개)/trade(고유 ID 46개) 문서 중첩·중복 ID 검사 PASS. Git diff check PASS. 실제 크롬/Playwright 시각 렌더링 검증은 미실행.
+- 실제 사용자 지갑 권한, 백엔드 계정 endpoint/CORS/HTTPS, 독립 DB/체인 데이터 신뢰성 및 브라우저 시각 인수는 미실행. 검증 콜백은 테스트에서 주입한 코드로서 실제 인증 증명이 아님.

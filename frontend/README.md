@@ -8,6 +8,8 @@ Hyperliquid의 거래 정보 구조·사용자 흐름을 주요 UX 레퍼런스�
 
 계정 UI 출력 경계: account-tabs-renderer.mjs는 고정 컬럼과 안전한 textContent로만 표를 구성합니다. 정적 화면은 미연결 상태로 유지하며, 검증된 coordinator 데이터를 렌더링하는 경로는 오프라인 단위 테스트에서만 활성화했습니다. 테스트 플래그가 출처 인증을 대체하지 않으며 실제 API·지갑 연동은 미구현입니다.
 
+오프라인 계정 read orchestration: account-read-flow.mjs은 외부 verifySession/query를 주입해야 하고, 요청 전후 지갑 세션 검증·Abort/stale/race 방지를 처리합니다. 프런트 코드에서 자동 호출하지 않으며 공개 주문 GET API에는 계정별 권한이 없어 개인 히스토리 API로 직접 연동하지 않습니다. 백엔드 조사: docs/tasks/UX-HL-01-terminal-layout/BACKEND_ACCOUNT_READ_GAP.md.
+
 ## 페이지 구조
 
 - index.html (서비스 소개): 프로젝트 비전, 기술 구조, 개발 로드맵, 거래 화면 진입 버튼. 거래 입력/차트를 포함하지 않습니다.

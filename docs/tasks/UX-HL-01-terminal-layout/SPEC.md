@@ -9,6 +9,8 @@
 - **UX-HL-01-B2-B2 (다음):** 인증된 데이터 adapter와 UI 상태/표 렌더링 결합. 아직 지갑·API 미연결.
 - **UX-HL-01-B2-B2-A (이번 회차 로컬 완료):** 연결되지 않은 실제 화면은 disconnected만 보이도록 유지하며, 분리된 계정 테이블 renderer가 검증된 coordinator 상태와 명시적인 외부 신뢰 adapter 조건이 있을 때만 안전한 textContent/허용 컬럼 기반 테이블을 표시하도록 준비. loading/empty/error/disconnect 시 이전 tbody 제거. 실제 출처 인증 수행 없음.
 - **UX-HL-01-B2-B2-B (다음):** backend read API/지갑 서명·신뢰 출처·원장 확인에 대한 계약을 먼저 마련한 뒤 renderer의 외부 adapter 접속, 실 API 에러/재시도·계정 경합 통합 검증. 해당 환경이 없으면 안전한 독립 UI QA로 진행.
+- **UX-HL-01-B2-B2-B1 (이번 회차 로컬 완료):** 기존 backend HTTP 라우트의 계정 권한 미구현을 조사하고 인증 공급자/조회 콜백을 주입하는 오프라인 비동기 read flow, 세션 버전/지갑/chain·요청 세대 확인과 AbortController·재인증·기존 레코드 폐기 QA. 실제 UI·API 연결하지 않음.
+- **UX-HL-01-B2-B2-B2 (다음, 환경 의존):** 신뢰 가능한 서버 읽기 API 및 지갑 소유권 인증이 준비된 뒤 브라우저 UI 연동 및 E2E 검증. 미준비 시 C1 접근성·레이아웃 독립 QA 우선.
 - **UX-HL-01-C (후속):** 브라우저가 준비되면 wide/tablet/mobile 시각·접근성 인수.
 
 ## A 인수 기준
@@ -42,3 +44,11 @@
 3. 실패·로딩·빈 응답·연결 해제·계정/요청 교체 시 tbody 선행 제거; old token 수락 불가 시 새 레코드로 갱신되지 않음.
 4. 기록 금액은 원자 단위를 임의 decimals/통화로 바꾸지 않고 atomic로 명시, 백엔드 미제공 Mark/Price/Fee/시각 등은 대시(-) 처리.
 5. 기존 5개 ARIA 탭/모바일 CSS, 주문 데모, 소개 페이지, CSP 유지. 신규 HTML 렌더링/경합 회귀·빌드 검증. 실제 API/지갑/실 브라우저 시험은 별도 인수.
+
+## B2-B2-B1 인수 기준
+
+1. 기존 GET /api/orders 및 /api/orders/:orderId의 읽기 스코프를 실제 파일에서 확인. 서버가 강제하는 계정별 권한 없이 개인 계정 탭 연결 금지.
+2. 오프라인 verifySession/query 콜백 없으면 flow 구성 거부. Sepolia chain/계정/source/sessionVersion 검증 실패 시 request 전송/결과 반영 금지.
+3. 겹친 요청은 abort signal과 request token으로 폐기하고, 계정 전환/disconnect/reconnect/sessionVersion 역행·동일 version 다른 계정에서 이전 기록 제거.
+4. 요청 이후 재검증에서 계정·세션이 바뀌거나 검증 실패하면 disconnected, 데이터 형식 실패는 error, 정상 빈 결과는 empty. 다른 탭 요청의 실패는 독립 처리.
+5. 실제 네트워크·브라우저·wallet/계정 인증/백엔드 schema 변경 없이 순수 비동기 테스트만 구현, 기존 주문·ARIA/렌더링 회귀 유지.
