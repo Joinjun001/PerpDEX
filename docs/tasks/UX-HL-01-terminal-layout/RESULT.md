@@ -53,3 +53,13 @@
 - frontend/mobile-market-depth.test.mjs: 신규 6건, 전체 프런트엔드 85/85 PASS. TS 빌드/JS syntax/HTML 구조 및 CSP 안전성 PASS.
 - 미수행: 실제 브라우저 픽셀 레이아웃/스와이프/스크린리더·테스트넷 계정/API 거래. UX-HL-01-C 및 UX-HL-02-B2-B 시각 검증은 독립 미완료.
 - 다음 독립 UX 후보: UX-HL-03 계정 탭의 미연결 기능 설명·모바일 표 탐색 접근성을 개선하되 실 데이터/위험 정보를 가공하지 말 것. 또는 실제 browser가 가용한 경우 보류된 C/B2-B부터 검증.
+
+## 2026-10-25 UX-HL-01-E1 — 로컬 구현 완료
+
+- frontend/preview-model.mjs: 합성 샘플 배열에서만 min/max/last 및 실제 시각이 아님을 명시하는 접근성 대체 설명 describeSampleChart(market,points) 추가. 외부 조회/데이터 생성 경로 증가 없음.
+- frontend/main.js: 64개 원본 points를 시각 chart geometry에 활용하고 같은 값으로 MOCK LOW/HIGH·aria 설명 갱신. BTC/ETH/SOL 시장 변경 시 범위 일치.
+- frontend/trade.html: 오해 소지가 있는 시계 축 08:00~18:00 제거 → 샘플 순번 #01~#64, visible MOCK LOW/HIGH 및 SVG aria-describedby 결속.
+- frontend/trade.css: 시각 요약 및 스크린리더 설명의 visually hidden 스타일/좁은 화면 범위 조정.
+- frontend/chart-sample-accessibility.test.mjs 신규 5건, order-interactions.test.mjs 실행형 1건, 프런트 전체 109/109 PASS. JS 문법·TypeScript build·HTML/고유 ID·CSP 및 diff 검사 PASS.
+- 실 웹사이트 배포 없음, 브라우저/스크린리더 시각 인수 미완료. 주문/계정·실거래/서명·실체인/DB 연동 안 함.
+- 다음 UX-HL-01-E2(실 브라우저/스크린리더 가용 시 차트 인수)와 UX-HL-01-C, UX-HL-02-B2-B, UX-HL-03-A2/B2(기존 브라우저 게이트). 새로 가치 있는 독립 UX TASK가 없다면 중복 기능 구현 금지.

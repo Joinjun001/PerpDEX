@@ -250,3 +250,20 @@
     display:none!important;
   }
 }
+
+/* UX-HL-01-E1 — transparent sample-axis provenance and accessible chart range. */
+.trade-shell .chart-sample-range{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;
+  flex-wrap:wrap;padding:2px 22px 13px;
+  color:#8ca8b7;font-size:10px;font-variant-numeric:tabular-nums;
+}
+.trade-shell .chart-sample-range>span{display:inline-flex;gap:8px;align-items:center}
+.trade-shell .chart-sample-range strong{color:#d6e7ed;font-size:11px}
+.trade-shell .chart-sample-description{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+}
+@media(max-width:380px){
+  .trade-shell .chart-sample-range{padding-inline:14px;gap:6px}
+  .trade-shell .chart-sample-range strong{font-size:10px}
+}

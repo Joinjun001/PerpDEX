@@ -61,3 +61,14 @@
 - HTMLParser index.html ID 4개/trade.html ID 59개 중복 없음, 중첩 태그 검사 PASS; CSP connect-src none 및 신규 JS의 네트워크·지갑·실체인 호출 부재 확인, git diff --check PASS.
 - 브라우저 시각 테스트, 실제 CSS 페인트/모바일 스크린 너비/터치 활성화/스크린리더 결과: 미실행. JS가 없는 실제 브라우저와 CSS 브레이크포인트 인수 역시 미실행.
 - 기존 서버/지갑/테스트넷·실제 거래 미연결. 로컬 UI/테스트/문서 이외 수정 없음. push/배포 금지 준수.
+
+## 2026-10-25 UX-HL-01-E1 — MOCK 차트 출처/접근성 QA
+
+- 시작 Git main HEAD 4097d86, working tree clean, origin/main 대비 로컬 12커밋 앞섬. PROJECT_STATE/ROADMAP/Hyperliquid UX/UX-HL-03 TASK SPEC·TODO·QA·RESULT 및 frontend 실제 코드와 기존 테스트 확인.
+- chromium/chromium-browser/google-chrome/google-chrome-stable/firefox 및 playwright/playwright-core/puppeteer/puppeteer-core 미가용. 브라우저/스크린리더 픽셀 인수 미실행; 패키지 설치·권한 우회 없음.
+- 분석: 기존 frontend/preview-model.mjs sampleChart는 고정 64개 합성 값만 반환하며 타임스탬프를 갖지 않는데 frontend/trade.html은 08:00~18:00 시간축을 사용하여 오해 위험 발견.
+- 신규 frontend/chart-sample-accessibility.test.mjs **5/5 PASS**: BTC/ETH/SOL 샘플 범위 정합성, 개수 변화, 잘못된/비유한 값 거부, unsupported time axis 제거, 차트 svg aria-describedby/텍스트·MOCK 표시·CSP 격리.
+- 기존 frontend/order-interactions.test.mjs에 실제 main.js의 BTC→ETH→SOL 이벤트 전환에 따라 가시 최저/최고와 스크린리더용 설명이 변하는 통합 회귀 **1건 추가 PASS**.
+- 전체 node --test frontend/*.test.mjs **109/109 PASS** (이전 103 + 신규 6). JS 문법 검사 frontend/main.js/preview-model.mjs/chart-sample-accessibility.test.mjs PASS, npm --prefix backend run build (tsc --noEmit) PASS.
+- HTMLParser index.html ID 4개 / trade.html ID 67개, HTML 구조 및 중복 ID PASS. CSP connect-src none, SVG 설명 결속/기존 시간 텍스트 부재, git diff --check PASS.
+- 실제 렌더링·스크린리더·모바일 간격/터치 QA는 실행하지 않았다. 실제 시세/오라클/체결 데이터 및 계정 API·지갑·DB·체인은 호출하지 않음.

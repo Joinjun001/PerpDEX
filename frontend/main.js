@@ -1,4 +1,4 @@
-import {MARKETS,FORMAT_USD,FORMAT_QTY,previewOrderEstimate,validPreviewQuantity,validPreviewLimitPrice,sampleChart} from './preview-model.mjs';
+import {MARKETS,FORMAT_USD,FORMAT_QTY,previewOrderEstimate,validPreviewQuantity,validPreviewLimitPrice,sampleChart,describeSampleChart} from './preview-model.mjs';
 import {createDemoOrderReview,renderDemoOrderReview} from './order-review.mjs';
 
 const byId=(id)=>document.getElementById(id);
@@ -42,7 +42,8 @@ function updateMarket(){
 }
 function renderChart(){
   const points=sampleChart(view.market,64);
-  const min=Math.min(...points),max=Math.max(...points),span=max-min||1;
+  const summary=describeSampleChart(view.market,points);
+  const min=summary.low,max=summary.high,span=max-min||1;
   const xy=points.map((p,i)=>[i/(points.length-1)*800,260-(p-min)/span*225]);
   const path=xy.map(([x,y],i)=>(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)).join(' ');
   const last=xy.at(-1);
@@ -50,6 +51,9 @@ function renderChart(){
   byId('chart-area').setAttribute('d',path+' L800 284 L0 284 Z');
   byId('chart-point').setAttribute('cx',String(last[0]));
   byId('chart-point').setAttribute('cy',String(last[1]));
+  byId('chart-sample-low').textContent=FORMAT_USD.format(summary.low);
+  byId('chart-sample-high').textContent=FORMAT_USD.format(summary.high);
+  byId('chart-sample-description').textContent=summary.accessibilityText;
   byId('chart-value-label').textContent=FORMAT_USD.format(MARKETS[view.market].price);
   byId('chart-value-label').style.top=Math.max(4,Math.min(84,last[1]/284*100-4))+'%';
 }

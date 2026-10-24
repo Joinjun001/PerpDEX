@@ -16,3 +16,8 @@
 - [x] D1 JS 미실행 시 샘플 패널을 숨기지 않는 progressive enhancement와 데스크톱 3열 무변경
 - [x] D1 신규 토글 6개 단위/정적 회귀, 기존 전체 85/85, JavaScript·TypeScript·HTML/CSP 검사
 - [ ] D2 실제 브라우저/모바일 viewport/터치/보조공학 렌더링 인수 (현재 도구 미가용; C와 병행 보류)
+
+- [x] E1 가상 시세 차트의 근거 없는 08:00~18:00 시간을 고정 샘플 순번 #01~#64로 변경
+- [x] E1 BTC/ETH/SOL 생성 sampleChart 배열로부터 min/max/last·가상 샘플 출처 대체 텍스트 생성, SVG aria-describedby 결속 및 화면 MOCK HIGH/LOW 표시
+- [x] E1 별도 5건 단위/정적 QA와 실제 main.js 시장 변경 통합 1건, 프런트 전체 109/109 PASS, JS/TS/HTML/CSP/git 검사
+- [ ] E2 실 브라우저/실스크린리더·레이아웃에서 샘플 요약 접근성 인수 (현재 환경 미가용)

@@ -209,6 +209,23 @@ test('B2-A invalid keyboard form submit focuses field with inline error, never a
   assert.equal(id('preview-order').disabled,true);
   assert.equal(id('order-result').hidden,true);
 });
+test('UX-HL-01-E1 market switch refreshes visible sample range and text chart description',async()=>{
+  const app=await boot(),id=app.id;
+  const btcLow=id('chart-sample-low').textContent;
+  const btcHigh=id('chart-sample-high').textContent;
+  assert.match(id('chart-sample-description').textContent,/BTC-USD-PERP/);
+  assert.match(id('chart-sample-description').textContent,/64개/);
+  assert.notEqual(btcLow,'—');
+  assert.notEqual(btcHigh,'—');
+  app.market('ETH').dispatch('click');
+  assert.notEqual(id('chart-sample-low').textContent,btcLow);
+  assert.notEqual(id('chart-sample-high').textContent,btcHigh);
+  assert.match(id('chart-sample-description').textContent,/ETH-USD-PERP/);
+  assert.doesNotMatch(id('chart-sample-description').textContent,/BTC-USD-PERP/);
+  app.market('SOL').dispatch('click');
+  assert.match(id('chart-sample-description').textContent,/SOL-USD-PERP/);
+  assert.match(id('chart-sample-description').textContent,/실제 시간축이나 실시간 시세/);
+});
 test('B2-A no network or wallet connection side effects in simulated event execution',async()=>{
   const app=await boot(),id=app.id;
   id('limit-type').dispatch('click');

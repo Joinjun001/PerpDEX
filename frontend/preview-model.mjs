@@ -51,6 +51,27 @@ export function previewOrderEstimate({market,orderType='MARKET',quantity,leverag
     notional,indicativeMargin,executionGuaranteed:false,
   });
 }
+/**
+ * Accessible sample summary, derived only from synthetic chart points.
+ * It never asserts real times, live OHLC, exchange range or price-feed data.
+ */
+export function describeSampleChart(market,points){
+  if(!Object.hasOwn(MARKETS,market)||!Array.isArray(points)||
+     points.length<4||points.length>1000||
+     points.some(n=>typeof n!=='number'||!Number.isFinite(n)||n<=0)){
+    throw new RangeError('Invalid synthetic sample summary');
+  }
+  const low=Math.min(...points),high=Math.max(...points);
+  const last=points.at(-1);
+  return Object.freeze({
+    market,count:points.length,low,high,last,
+    accessibilityText:
+      market+'-USD-PERP 고정 생성 샘플 '+points.length+'개. '+
+      '샘플 최저 '+FORMAT_USD.format(low)+', 최고 '+FORMAT_USD.format(high)+
+      ', 마지막 '+FORMAT_USD.format(last)+'. '+
+      '실제 시간축이나 실시간 시세, 거래 또는 오라클 가격이 아닙니다.',
+  });
+}
 export function sampleChart(market,count=64){
   const item=MARKETS[market];
   if(!item)throw new RangeError('Unknown market');
