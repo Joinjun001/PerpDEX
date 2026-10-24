@@ -105,14 +105,25 @@ function renderBook(){
 }
 function renderTrades(){
   const container=byId('recent-trades');container.replaceChildren();
+  container.setAttribute('role','list');
+  container.setAttribute('aria-label',view.market+' 합성 최근 체결 예시 목록 · 실제 체결 기록 아님');
   const m=MARKETS[view.market];
   for(let i=0;i<9;i++){
     const buy=((i*7+m.seed)%5)<3;
     const px=m.price+(buy?1:-1)*m.depthStep*((i%5)+.5);
     const qty=((i*3+5)%9+1)*.012*(view.market==='SOL'?10:1);
     const row=node('div','trade-row');
-    row.append(node('span',buy?'positive':'negative',prices.format(px)),
-      node('span','',FORMAT_QTY.format(qty)),node('span','','#'+String(i+1).padStart(2,'0')));
+    const priceLabel=prices.format(px);
+    const sizeLabel=FORMAT_QTY.format(qty);
+    const sampleLabel='#'+String(i+1).padStart(2,'0');
+    row.setAttribute('role','listitem');
+    row.setAttribute('aria-label','모의 '+(buy?'매수':'매도')+' 방향, 샘플 '+
+      sampleLabel+'. 가격 '+priceLabel+' USD, 수량 '+sizeLabel+' '+
+      view.market+'. 실제 체결 기록 아님.');
+    const cells=[node('span',buy?'positive':'negative',priceLabel),
+      node('span','',sizeLabel),node('span','',sampleLabel)];
+    cells.forEach(cell=>cell.setAttribute('aria-hidden','true'));
+    row.append(...cells);
     container.append(row);
   }
 }

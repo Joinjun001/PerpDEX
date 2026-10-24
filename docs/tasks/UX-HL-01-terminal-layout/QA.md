@@ -138,3 +138,13 @@
 - 수정: trade.html의 두 목록 role=list 및 합성 매수/매도 구분·실주문 아님 레이블. main.js의 renderBook이 시장 전환마다 목록 이름을 갱신하고 각 행에 role=listitem 및 현재 표시된 Price/Size/Total과 방향/출처를 포함한 aria-label을 부여. 시각용 span에 aria-hidden=true를 추가, 데이터 산출/화면 배열은 불변.
 - 테스트: order-interactions.test.mjs 신규 2건. BTC/ETH/SOL 전환 × asks/bids × 7행에서 가시적인 가격·수량·누적값과 행 설명, 원본 시장 및 정적 마크업을 확인. 테스트 레이블 정규식 단어 순서 수정 뒤 target 26/26 PASS, 전체 node --test frontend/*.test.mjs 146/146 PASS (기존 144+신규 2). 모든 frontend JS 문법, npm --prefix backend run build (tsc --noEmit), HTMLParser 중첩·고유 ID, CSP connect-src none/5개 계정 tbody 빈 상태, git diff --check PASS.
 - 실제 스크린리더/브라우저 접근성 트리, 모바일 터치·시각 검증은 미실행. 실거래·백엔드 연결·지갑/서명·Sepolia 트랜잭션·운영 DB·원격 push/배포 없음.
+
+## 2026-10-25 UX-HL-01-L1 — Recent Trades 모의 예시 접근성 검증
+
+- 시작 로컬 main HEAD d43a1d6, Git clean, origin/main 대비 28커밋 앞섬. PROJECT_STATE, ROADMAP, Hyperliquid UX reference, UX-HL-01 SPEC/TODO/QA/RESULT, 프런트 실제 main.js/trade.html/테스트 확인.
+- 기존 프로젝트 내부 .local-browser-qa 약 643MB. unprivileged userns 생성 명령 runuser -u node -- unshare -Ur true가 Operation not permitted. 브라우저 샌드박스 사용 불가·우회 금지로 UX-HL-01-K2·L2 실제 시각 인수 미완료 유지.
+- 발견: 기존 recent-trades/각 trade-row에 list/listitem·모의 방향/열별 가격·수량·샘플 순번 설명이 없었다. 신규 main.js 이벤트 통합 테스트 1건과 정적 마크업 테스트 1건 수정 전 FAIL.
+- 수정: trade.html recent-trades 컨테이너에 role=list와 BTC 합성 최근 체결 예시 목록 기본 이름. main.js renderTrades에서 시장별 목록 이름과 각 9행에 role=listitem, aria-label(모의 매수/매도 방향, Sample #, 화면 표시된 가격과 수량, 실제 체결 기록 아님)을 생성. 가시적인 3개 span은 aria-hidden=true.
+- 수정 후 대상 node --test frontend/order-interactions.test.mjs 28/28 PASS, 전체 node --test frontend/*.test.mjs 148/148 PASS (기존 146+신규 2). 모든 frontend/*.js/*.mjs node --check, npm --prefix backend run build (tsc --noEmit) PASS.
+- HTMLParser index.html/trade.html 유효 태그 중첩·고유 ID, CSP connect-src none/계정 tbody 5개 미연결, git diff --check PASS.
+- 실제 스크린리더·모바일 픽셀/터치·접근성 트리 인수 미실행. 체결·서명·지갑·API·Sepolia/운영 DB·푸시/배포 변경 없음.

@@ -109,3 +109,11 @@
 - frontend/order-interactions.test.mjs: 정적 목록 및 실제 main.js × BTC/ETH/SOL/양측 7행 설명 검증 2건 신규.
 - 프런트 146/146 PASS, JS syntax/TypeScript build/HTML 구조·CSP/Git diff PASS. 호가/차트/주문/계정 실제 데이터·계산 및 네트워크 호출은 변경하지 않음.
 - UX-HL-01-K2 실제 브라우저·스크린리더 인수 미완료. 프로젝트 내부 브라우저 샌드박스 제한은 우회하지 않음.
+
+## 2026-10-25 UX-HL-01-L1 — 로컬 접근성 마크업 완료
+
+- frontend/trade.html: 합성 최근 체결 예시 컨테이너를 모의·비실거래 ARIA 목록으로 표시.
+- frontend/main.js: BTC/ETH/SOL 전환 때 목록 이름을 동기화하고, 각 9행에 매수/매도 방향·샘플 번호·가격/수량·가상 출처를 담은 접근성 레이블 생성. 기존 데이터/시간 순번·가격·수량/색상 불변.
+- frontend/order-interactions.test.mjs: 신규 2건으로 실제 main.js DOM 및 초기 HTML 상태 검증, 수정 전 두 테스트 FAIL 확인.
+- 전체 프런트 148/148 PASS, JS syntax/TypeScript build/HTML 구조/CSP/diff PASS. 서버·지갑·실체인 연결 없음.
+- 다음 UX-HL-01-L2 실 브라우저/보조공학 인수는 안전한 브라우저 샌드박스 실행 환경이 갖춰질 때 진행.

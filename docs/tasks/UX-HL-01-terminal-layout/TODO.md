@@ -58,3 +58,10 @@
 - [x] K1 가시 숫자 span에는 aria-hidden=true를 적용하여 행 단위 레이블 중복 발표 방지
 - [x] K1 전체 프런트 146/146, JS 문법·TypeScript 빌드·HTML 태그/고유 ID/CSP/Git diff 검사
 - [ ] K2 실제 샌드박스 브라우저·스크린리더에서 합성 호가 목록·행/언어 안내 확인 (현재 실행 제한)
+
+- [x] L1 Recent Trades의 합성 Price/Size/Sample # 행에 보조공학 목록·열 설명이 없는 문제를 DOM/정적 회귀 2건 수정 전 FAIL로 재현
+- [x] L1 최근 체결 컨테이너를 시장별 가상 목록으로 표시하고, 각 행에 시장·방향·순번·가시 가격/수량·실거래 아님 설명 추가
+- [x] L1 화면에 이미 보이는 숫자 span은 중복 낭독을 방지하도록 aria-hidden=true 사용
+- [x] L1 BTC/ETH/SOL × 각 9개 행의 실 데이터 출처/접근성 설명 일치, JS 비실행 초기 HTML 확인
+- [x] L1 프런트 전체 148/148, JS syntax/TS build/HTML 구조·고유 ID/CSP/git diff 검사
+- [ ] L2 실제 브라우저·스크린리더/모바일에서 최근 체결 목록/샘플 순번 낭독 인수 (샌드박스 환경 제한)

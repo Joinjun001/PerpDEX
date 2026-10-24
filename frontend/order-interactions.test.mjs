@@ -552,6 +552,32 @@ test('UX-HL-01-K1 pre-JS markup identifies distinct mock book lists',()=>{
   assert.match(html,/id="bids"[^>]*role="list"[^>]*aria-label="BTC 합성 매수호가 목록/);
   assert.match(html,/SYNTHETIC LIQUIDITY/);
 });
+test('UX-HL-01-L1 mock recent trades have accessible market, direction, price, size and sample sequence',async()=>{
+  const app=await boot(),id=app.id;
+  for(const market of ['BTC','ETH','SOL']){
+    app.market(market).dispatch('click');
+    const list=id('recent-trades');
+    assert.equal(list.getAttribute('role'),'list');
+    assert.match(list.getAttribute('aria-label')??'',new RegExp(market+'.*합성.*체결.*실제 체결 기록 아님'));
+    assert.equal(list.children.length,9);
+    for(const [i,row] of list.children.entries()){
+      assert.equal(row.getAttribute('role'),'listitem');
+      const direction=row.children[0].className==='positive'?'매수':'매도';
+      const label=row.getAttribute('aria-label')??'';
+      assert.ok(label.includes('모의 '+direction+' 방향'),label);
+      assert.ok(label.includes('샘플 '+row.children[2].textContent),label);
+      assert.ok(label.includes('가격 '+row.children[0].textContent+' USD'),label);
+      assert.ok(label.includes('수량 '+row.children[1].textContent+' '+market),label);
+      assert.ok(label.includes('실제 체결 기록 아님'),label);
+      assert.ok(row.children.every(cell=>cell.getAttribute('aria-hidden')==='true'));
+      assert.equal(row.children[2].textContent,'#'+String(i+1).padStart(2,'0'));
+    }
+  }
+});
+test('UX-HL-01-L1 recent trade container has non-live accessible list fallback',()=>{
+  assert.match(html,/id="recent-trades"[^>]*role="list"[^>]*aria-label="BTC 합성 최근 체결 예시 목록/);
+  assert.match(html,/실제 체결 시각·블록체인 기록 아님/);
+});
 test('UX-HL-01-J1 synthetic depth bars scale with cumulative displayed book totals',async()=>{
   const app=await boot(),id=app.id;
   const amount=cell=>Number(cell.textContent.replaceAll(',',''));
