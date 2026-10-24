@@ -92,6 +92,11 @@ PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성�
 - **UX-HL-04-C1 (Potential independent)**: 미지원 거래 편의 안내를 실제 사용자 필요와 안전 경계에 따라 검토. 승인되지 않은 포지션/위험 데이터 숫자는 만들지 않음.
 - **UX-HL-04 execution (Dependent)**: 서명, Reduce Only 위험 정책, 포지션 감소·잔량 검증 및 M5~M8 승인 뒤 별도 구현.
 
+### Hyperliquid 주문 티켓 수치 동치 재선택
+
+- **UX-HL-02-J1 (Local Completed)**: 유효한 입력 0.050/5e-2 등과 빠른 수량 0.05의 수치가 같아도 문자열 비교로 기존 검토를 초기화하던 결함 수정. 선택 CSS·aria-pressed와 검토 유지 조건에 검증된 수치 동치 기준 적용. 신규 2건 포함 프런트 154/154 PASS.
+- **UX-HL-02-J2 (Pending browser)**: 수량 등가 표현·실제 키보드/스크린리더/모바일 프리셋 인수는 Chromium 샌드박스 환경 의존.
+
 ### Hyperliquid 주문 티켓 UX 진행
 
 - **UX-HL-02-A (Local Completed)**: Market/Limit DEMO 입력 전환, Limit Price 범위·형식 검사, 선택 시장 MOCK 가격과 유형별 명목가치·참고 증거금/미리보기. 64/64 프런트 검증 PASS. 문서: docs/tasks/UX-HL-02-order-ticket/.

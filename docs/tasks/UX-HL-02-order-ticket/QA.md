@@ -107,3 +107,14 @@
 - 수정 후 관련 36/36 PASS, 전체 node --test frontend/*.test.mjs **138/138 PASS** (기존 136+신규 2). Node JS 문법검사 main.js/order-ticket.test.mjs/order-interactions.test.mjs PASS, npm --prefix backend run build(tsc --noEmit) PASS.
 - Python HTMLParser trade.html/index.html 태그/고유 ID, CSP connect-src none, 지갑·계정 데이터 5개 tbody 공백, git diff --check PASS.
 - 진짜 스크린리더/브라우저 접근성 트리·모바일 뷰포트/터치 인수, 실지갑/백엔드 API·Sepolia·운영 DB·실거래/푸시/배포 없음.
+
+## 2026-10-25 UX-HL-02-J1 — 같은 수치의 빠른 수량 재선택 회귀
+
+- 시작 로컬 main HEAD 2ccf535, Git clean, origin/main 대비 31커밋 앞섬. PROJECT_STATE, ROADMAP, Hyperliquid UX reference, UX-HL-01-N1 및 UX-HL-02 SPEC/TODO/QA/RESULT, main.js/preview-model.mjs/실제 이벤트 통합 테스트를 확인.
+- 샌드박스 점검: 기존 프로젝트 내부 Playwright/Chromium 설치(약 643MB), 비특권 사용자 unshare -Ur 실행은 Operation not permitted. 브라우저 인수 UX-HL-01-N2와 UX-HL-02-J2는 미완료. no-sandbox·권한 우회 금지 유지.
+- 수정 전 신규 order-interactions.test.mjs 2건 FAIL: 정상 0.050 입력 후 0.05 프리셋 클릭 시 사용자의 입력 포맷이 0.05로 바뀌고 리뷰가 무효화되며, aria-pressed도 0.050 프리셋을 false로 표시.
+- 수정: matchesQuickQuantity(quantity,preset)는 기존 validPreviewQuantity(quantity) 후 Number(quantity)===Number(preset)일 때만 true. renderTicket의 active CSS·aria-pressed 및 data-qty 클릭 핸들러의 동일 수량 검출에서 공통 사용한다.
+- 실행형 회귀: 유효한 0.050 검토 후 0.05 클릭은 기존 리뷰 노드/입력 포맷·표시 보존; 다른 프리셋 0.1은 리뷰 무효화. 입력 직접 변경 0.050/5e-2/0.0100/0.07와 부적합 공백·문자 입력의 선택 상태 점검.
+- 수정 후 대상 node --test frontend/order-interactions.test.mjs 34/34 PASS, 전체 node --test frontend/*.test.mjs 154/154 PASS (기존 152+신규 2), 모든 프런트 JS node --check PASS, npm --prefix backend run build (tsc --noEmit) PASS.
+- Python HTMLParser frontend/index.html·trade.html 태그/중복 ID, 정적 CSP connect-src none·계정 tbody 5개 빈 상태, git diff --check PASS.
+- 실제 브라우저/스크린리더 입력 포맷 및 모바일 인수 미실행. 서버/지갑·실주문·Sepolia 트랜잭션·운영 DB·원격 push/배포 미실행.

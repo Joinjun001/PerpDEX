@@ -80,3 +80,10 @@
 - frontend/order-ticket.test.mjs와 frontend/order-interactions.test.mjs: 정적/실제 이벤트 회귀 2건. 수정 전 FAIL 재현 후 전체 프런트 138/138 PASS, JS/TS/HTML/CSP/Git 검사 PASS.
 - UX-HL-02-H1의 같은 빠른 수량 재클릭 검토 보존과 변경 시 검토 무효화는 기존 기능을 유지한다.
 - 실제 브라우저·스크린리더 인수 UX-HL-02-I2는 미완료. 지갑/API/실자금/온체인·운영 DB·push/배포 미실행.
+
+## 2026-10-25 UX-HL-02-J1 — 로컬 구현 완료
+
+- frontend/main.js: 유효한 수량과 빠른 수량 프리셋을 수치적으로 비교하는 공통 함수 추가. 입력이 0.050이나 5e-2처럼 유효한 동치 표현이면 기존 모의 검토 유지 및 CSS active/aria-pressed 선택 일치. 다른 실제 수량은 기존처럼 검토 무효화. 잘못된 입력을 수치 형변환으로 선택 처리하지 않음.
+- frontend/order-interactions.test.mjs: 실제 main.js DOM 이벤트에서 검토 보존과 서로 다른 수량 전환, 수치 동치/부적합 입력의 ARIA·CSS 일치 신규 2건 (수정 전 2/2 FAIL).
+- 전체 프런트 154/154 PASS, JS syntax/TypeScript 빌드/HTML 구조·CSP/git diff PASS.
+- 실제 브라우저 UX-HL-02-J2 인수 미완료. DEMO/계정 미연결/백엔드 현재 M5 상태 및 실거래·push·배포 금지 불변.

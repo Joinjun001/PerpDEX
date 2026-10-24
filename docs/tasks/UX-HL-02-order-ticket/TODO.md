@@ -55,3 +55,9 @@
 - [x] I1 main.js renderTicket에서 CSS active와 aria-pressed를 동일 조건으로 갱신하고 수량 직접 입력/프리셋 클릭/일치하는 프리셋 없는 경우 검증
 - [x] I1 전체 프런트 138/138, JS syntax·TypeScript build·HTML 구조/고유 ID/CSP 및 git diff 검사
 - [ ] I2 실제 브라우저/키보드·스크린리더에서 선택 수량의 상태 읽기 및 모바일 배치 인수 (환경 미가용)
+
+- [x] J1 정상 0.050 vs 프리셋 0.05의 재선택이 입력 텍스트 및 완료 검토를 불필요하게 초기화하는 결함 수정 전 실제 main.js 테스트 FAIL
+- [x] J1 validPreviewQuantity 기반 숫자 동치 비교로 동일 수량 검토 보존, 다른 수량만 검토 무효화
+- [x] J1 0.050, 5e-2, 0.0100 및 일치하지 않는 0.07/부적합 입력의 aria-pressed·CSS active 상태 확인
+- [x] J1 프런트 전체 154/154 PASS, 모든 JS syntax/TypeScript build/HTML 고유 ID·태그 구조/CSP/git diff 검사
+- [ ] J2 실제 브라우저/모바일·키보드/스크린리더에서 수량 등가 표현·재선택·미리보기 유지 인수 (Chromium 샌드박스 권한 미가용)

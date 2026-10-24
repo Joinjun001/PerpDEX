@@ -131,6 +131,11 @@ function renderTrades(){
     container.append(row);
   }
 }
+function matchesQuickQuantity(quantity,preset){
+  // Only validated numeric input can select a preset. Equivalent decimal
+  // representations must not invalidate a completed demo review.
+  return validPreviewQuantity(quantity)&&Number(quantity)===Number(preset);
+}
 function renderTicket(){
   const sideBuy=view.side==='BUY';
   byId('buy-tab').classList.toggle('active',sideBuy);
@@ -181,7 +186,7 @@ function renderTicket(){
     button.disabled=true;
   }
   document.querySelectorAll('[data-qty]').forEach(b=>{
-    const selected=b.dataset.qty===quantity;
+    const selected=matchesQuickQuantity(quantity,b.dataset.qty);
     b.classList.toggle('active',selected);
     b.setAttribute('aria-pressed',String(selected));
   });
@@ -264,8 +269,8 @@ byId('quantity').addEventListener('input',()=>{
   byId('order-result').hidden=true;
 });
 document.querySelectorAll('[data-qty]').forEach(b=>b.addEventListener('click',()=>{
-  // Re-selecting an identical quick amount leaves the validated demo review current.
-  if(byId('quantity').value===b.dataset.qty)return;
+  // Keep the review for the same valid amount even if text differs (e.g. 0.050).
+  if(matchesQuickQuantity(byId('quantity').value,b.dataset.qty))return;
   byId('quantity').value=b.dataset.qty;
   renderTicket();
   byId('order-result').hidden=true;

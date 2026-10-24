@@ -377,6 +377,35 @@ test('UX-HL-02-H1 active preset does not replace invalid draft unless quantity c
   assert.equal(id('quantity').value,'0.25');
   assert.equal(id('order-result').hidden,true);
 });
+test('UX-HL-02-J1 numeric-equivalent quick quantity keeps demo review and original input representation',async()=>{
+  const app=await boot(),id=app.id;
+  const quantity=id('quantity');
+  quantity.value='0.050';
+  quantity.dispatch('input');
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  const review=id('order-result').children[1];
+  app.qty('0.05').dispatch('click');
+  assert.equal(quantity.value,'0.050','same numeric quantity should not reformat the user draft');
+  assert.equal(id('order-result').hidden,false,'same amount must keep review visible');
+  assert.equal(id('order-result').children[1],review,'identical review DOM must be preserved');
+  app.qty('0.1').dispatch('click');
+  assert.equal(quantity.value,'0.1');
+  assert.equal(id('order-result').hidden,true,'different amount must invalidate review');
+});
+test('UX-HL-02-J1 quick selection uses valid numeric equality for scientific and decimal forms',async()=>{
+  const app=await boot(),id=app.id;
+  const qty=id('quantity');
+  for(const [value,selected] of [['0.050','0.05'],['5e-2','0.05'],['0.0100','0.01'],['0.07',null],[' 0.05',null],['0.05bad',null]]){
+    qty.value=value;
+    qty.dispatch('input');
+    for(const amount of ['0.01','0.05','0.1','0.25']){
+      const btn=app.qty(amount),active=amount===selected;
+      assert.equal(btn.getAttribute('aria-pressed'),String(active),value+' aria pressed '+amount);
+      assert.equal(btn.classList.contains('active'),active,value+' visual active '+amount);
+    }
+  }
+});
 test('UX-HL-02-I1 quick quantity buttons expose selected state through aria-pressed',async()=>{
   const app=await boot(),id=app.id;
   const buttons=['0.01','0.05','0.1','0.25'];
