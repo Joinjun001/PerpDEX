@@ -29,3 +29,12 @@
 - 집중 10/10 PASS, 관련 회귀 106/106 PASS, TypeScript 빌드 및 임시 PGlite 001~018 마이그레이션 PASS. 전체 `npm test` 및 실제 PG 다중 연결/권한·운영 QA 미실행.
 - 본 기능은 내부 SIMULATION_ONLY 로컬 기록이다. EIP-712 검증은 TS 내부 서비스, SQL 트리거는 기록 간 일치성/원자성 책임을 진다. DB 신뢰 역할/DDL권한에 대한 보안은 후속 M5-T4로 이관.
 - 다음 **C3-C**: 서명 주문의 부분 체결과 다중 예약을 지원하기 전에 단위별 미체결량/예약 차감 및 원자 처리 불변식을 분리하고 안전한 1개 구현 TASK부터 진행한다.
+
+## 2026-10-24 C3-C1 로컬 결과 — 영속 주문 수량 감사
+
+- 신규 SQL `backend/sql/019_perp_signed_order_fill_progress.sql`: SQL 016/017에서 실제 영속 종료된 BUY/SELL fill 영수증과 signed 주문 수량만으로 VIEW 계산. orderId별 total, committedFilled, unfilled, executableRemaining, committedFillCount. 기존 주문 영수증/체결 상태가 FULL-only 불변식과 다르면 SQL COMMIT 거부, 마이그레이션 시 기존 주문 preflight.
+- `backend/src/perp/signed-sim-fill-progress.ts`: 동일 트랜잭션의 signed 주문 FOR UPDATE 잠금 후 영속 수량 상태를 검사·반환하는 **읽기 전용** 서비스. `partialFillsAuthorized:false`, `executionAuthorized:false` 고정. PREPARED 후보를 fill 계산에 포함하지 않는다.
+- SQL 001~018, signed 주문 admission/취소 및 M3/M4 실제 모의 체결 원장 함수는 변경하지 않음. 기존 signed 원장 테스트 fixture를 SQL 019까지 확장했으며 기존 기능 유지.
+- `backend/scripts/migrate.ts`: 관리 전용 SQL 019 추가, 운영/실DB 실행하지 않음.
+- **검증**: 신규 focused 9/9 PASS, 관련 11파일 회귀 115/115 PASS, TypeScript build PASS, 별도 빈 PGlite SQL 001~019 적용 PASS, diff check PASS.
+- **미구현**: 부분 체결을 위한 잔여 IM 배분·취소/펀딩/수수료/실현 PnL·동시 외부 PostgreSQL 세션 안전성은 C3-C2/C3-C3/M5-T4로 이관. 정책값 임의 결정 없음.

@@ -39,3 +39,12 @@
 - `git diff --check`: PASS
 - 단일 `npm test`와 실제 다중 연결 PostgreSQL/권한별 격리 QA는 미실행. 실자금·온체인·운영 DB 적용 없음.
 - 서명 digest/signature 열은 앱에서 cryptographic 검증을 마친 입력을 보존하는 감사 기록이며, **DB가 별도로 secp256k1 서명을 복구하여 검증하는 기능은 아니다**. 임의 DDL/DB owner 또는 검증 없이 모든 테이블을 조작하는 역할로부터의 보안 보장을 주장하지 않으며 M5-T4 최소권한 검증 필요.
+
+## 2026-10-24 C3-C1 실제 검증
+
+- 신규 `backend/test/perp-signed-fill-progress.test.ts`: **9/9 PASS**. OPEN/CANCELED/FILLED, PREPARED 제외, 다중 OPEN 주문별 수량, 취소와 동시 read, 불변 order.quantity 직접 SQL 변조, 미허가 FILLED 직접 SQL, 중간 SQL 조회 장애/rollback, SQL 019 재적용 후 FULL+취소 기록 보존.
+- related 11개 테스트 파일 `--test-concurrency=1` 순차 회귀: **115/115 PASS**. 이전 C3-B 취소 receipt·C2 signed full execute, account reconciliation, signed fence/gate/risk, M3 margin, M4 paired regression 포함.
+- `cd backend && npm run build`: **PASS**
+- 임시 별도 PGlite 신규 DB에 SQL 001~019 전체 적용: **19/19 PASS**; SQL 019 commit trigger 2개 설치 확인.
+- `git diff --check`: PASS.
+- 단일 전체 `npm test`, 실제 PostgreSQL 복수 세션·role 권한 검증 미실행. SQL 019의 검증 결과는 **현재 FULL-only** 범위에서만 의미 있으며, 부분체결/예약금 비례 배분/부분 취소/실현손익의 DB 실행 경로는 존재하지 않는다.

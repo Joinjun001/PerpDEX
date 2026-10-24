@@ -4,7 +4,9 @@
 
 - **C3-A (이번 회차)**: 정책값 없는 읽기 전용 계정별 signed 주문 OPEN/CANCELED/FILLED 책임·M3 RESERVED/POSITION·M4 포지션/표시손익 교차 대조. 어떠한 체결·입출금·PnL 반영도 하지 않고 실행 권한 반환 금지.
 - **C3-B (로컬 구현 완료)**: 직접 SQL이 주문과 nonce를 함께 CANCELED로 바꾸고 RELEASE 기록을 누락해도 현 SQL 015~017에서 커밋되는 취소 무결성 결함을 해결. 취소 요청의 EIP-712 인증은 서비스에서 수행하며 DB에서는 불변 취소 영수증-주문-ID-M3 RELEASE 양쪽 분개와 RESERVED 잔고를 COMMIT 제약으로 검증해야 함. 기존 서명된 취소 API 호환 및 롤백 검증 필수.
-- **C3-C (후속)**: 다중 OPEN 예약 / 부분 체결 / 남은 예약 책임. 기존 SQL 017의 FLAT·전량·최종 영수증 제약을 유지하고, 정책적 의미가 합의되기 전 별도 실행 활성화 금지.
+- **C3-C1 (이번 회차)**: SQL 019로 영속 주문 전량과 기존 terminal 영수증에서 계산한 누적 체결/미체결/실행 가능 수량을 읽기 전용으로 투영하고, OPEN/CANCELED/FILLED의 현재 FULL-only 불변식을 COMMIT 검증한다. PREPARED는 체결량 0. 새 partial 체결·증거금 이동 기능을 열지 않는다.
+- **C3-C2 (다음)**: 복수 OPEN 예약 원장-누적분개/계정 잔액을 다중 트랜잭션 경쟁 조건에서도 보호하는 DB 제약·감사 서비스 강화. FULL-only 기존 체결과 CANCELED의 영수증 유지.
+- **C3-C3 (후속)**: 새로운 부분 체결·잔여 예약금 모델과 영속 증거금 배분 이벤트를 별도 승인된 정책에 따라 설계. 취소 시 이미 체결된 누적량과 잔량을 구분하되, SQL 015~019를 약화시키지 말 것.
 - **C3-D (후속)**: 포지션 감소와 실현 손익 계산-회계 연결, fee/funding은 승인된 정책 수치가 정해지기 전 정산 금지. 계산만 필요한 경우 기존 M4 numerator 기반 표시는 지원.
 
 ## C3-A 불변식
@@ -29,3 +31,12 @@ SIMULATION_ONLY, 로컬 /shared/PerpDEX 한정. SQL 015~017, 기존 체결·입�
 - **운영 마이그레이션 제한:** 영수증 없는 기존 CANCELED 기록을 무단으로 가짜 서명/영수증으로 채우지 않는다. SQL 018 DO 블록이 차단하며 검증된 과거 영수증 재구축 또는 운영자 승인된 별도 마이그레이션이 필요하다.
 - 서명 복구 검증은 viem 내부 서비스에서 수행한다. SQL 트리거 단독으로 ECDSA 서명을 인증하는 것은 불가능하고 DB owner/DDL 또는 receipt·ledger 전체 조작 권한에 대한 보장은 없다. M5-T4 DB role 최소 권한으로 분리해야 한다.
 - 실제 실자금·실거래·출금·메인넷 기능은 추가하지 않는다.
+
+## C3-C1 주문 수량 원장 불변식
+
+- SQL 019 `perp_signed_order_fill_progress` VIEW는 `perp_sim_orders.quantity`(원래 서명 수량)와 **실제 커밋된** SQL 017 `perp_signed_pair_executions`+SQL 016 PREPARED의 BUY/SELL 레그별 체결량만 합산한다. PREPARED 자체는 체결량이 아니다.
+- 무조건 `total = committedFilled + unfilled`, `0 <= committedFilled <= total`, 합계 uint256 한도.
+- **현재 단일 전량 경계**: OPEN→0건/0 filled/원래 전량 unfilled, FILLED→1건/전량 filled/0 unfilled, CANCELED→0건/0 filled/원래 전량 unfilled. CANCELED는 **미체결량은 보존하지만 실행 가능 수량은 0**이다.
+- SQL 019의 DEFERRABLE CONSTRAINT TRIGGER는 주문 상태 변경·terminal execution INSERT 시 위 조건을 재검사한다. 기존 SQL 015~018 체결·취소 트리거는 유지. 관리자가 019를 재실행할 때 기존 데이터 모두 재검증하고 불일치는 실패 처리.
+- `inspectSignedSimFillProgress`는 단일 주문 행을 FOR UPDATE로 잠근 DB 거래 안에서 영속 VIEW를 읽고 수량·상태를 검증하여 `partialFillsAuthorized:false` / `executionAuthorized:false`를 반환한다. 이 조회 결과는 후속 다른 거래에서의 실행 허가가 아니다.
+- 후속 부분체결의 나눗셈 반올림(IM 배분), 거래 수수료·펀딩·실현손익, 잔량 취소의 담보 정산은 본 작업에서 결정하거나 기록하지 않는다.

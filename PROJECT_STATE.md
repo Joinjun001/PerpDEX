@@ -6,11 +6,19 @@
 - 브랜치: `main`
 - 기준: 실제 소스 코드와 Git 상태를 최우선으로 판단
 - 현재 마일스톤: **M5 — Perpetual Futures 초기·유지증거금/레버리지 위험 엔진 (로컬 모의 구현)**
-- 현재 TASK: **M5-T3-C3-C — signed 부분체결·복수 미체결 예약의 원장 책임 검증 (Next; C3-B 취소 영수증·DB COMMIT 제약 로컬 완료)**
+- 현재 TASK: **M5-T3-C3-C2 — 복수 OPEN·잔여 예약·영속 원장 결속 검증 (Next; C3-C1 전량 영수증 기반 수량 감사 완료)**
 - 상태: M2-T4 로컬 완료 (A 코어/B 영속 매칭/C API 자동 체결/D 검증된 정산 원장 후보 어댑터); M2-T5-A~E 로컬 검증 완료 (E HTTP→체결→Outbox→정산 후보→모의 영수증 종단간 인수). 실제 PostgreSQL 15 임시 개발 서버의 복수 연결 검증과 Foundry 로컬 회귀 완료; 경제/위험 정책·실체인 정산·운영/스테이징 DB는 미승인/미완료
 - 최근 완료: M1 전체 및 M2-T1/T2/T3/T4 로컬 완료. M2-T5-A policy-gated 영속 Settlement Outbox, 동시 claim·lease fencing·retry·DB 재시작 복구 구현. M2-T5-C 영속 dry-run/ABI 인코딩·중복 의도 차단/UNKNOWN 격리 구현, M2-T5-E 신규 HTTP~정산 전 단계 E2E 통합 테스트 3개 포함 백엔드 전체 149/149 통과 및 TypeScript 검사 성공 (2026-10-24). 임시 실제 PostgreSQL 15 다중 연결 4/4×3 및 Foundry 35/35 검증 추가 완료; 스테이징/운영 PostgreSQL QA 별도 이관
 - 다음 작업은 사람 확인/승인 필요: 실제 스테이징/운영 PostgreSQL의 정책·백업·멀티프로세스/001~007 인수 (임시 개발용 DB 서버는 검증 후 정지), 정책/리스크·승인자/자산/금액 결정, 실제 체인 정산 실행과 read-only 영수증/settledTrades·최종성 통합, 운영 배포·push. 로컬 PostgreSQL 복수 연결 및 Foundry 테스트는 현재 완료. 검증 가이드 `docs/releases/M2-LOCAL-ACCEPTANCE.md`. 미확정 신규 기능을 임의로 생성하지 않음. M2-T5-A는 policy-gated Outbox/임대·재시도 기반으로 로컬 완료. 운영 PostgreSQL 멀티프로세스 및 003/004/005/006/007 마이그레이션은 환경/승인 준비 시 별도 수행
 - 사람 확인 필요: 개발용 PostgreSQL 15.19는 별도 임시 Unix socket 클러스터에서 다중 연결을 검증했지만, 운영/스테이징 DB의 멀티프로세스/권한/백업 및 마이그레이션은 여전히 미실행. 신규 `005_settlement_outbox.sql`/`006_settlement_intents.sql`/`007_settlement_reconciliations.sql` 운영 마이그레이션도 미실행. 실제 시장별 토큰·정밀도/마진·위험·수수료 정책과 신뢰된 정책 승인자/금액은 운영자 확인이 필요하며 자동 생성·승인하지 않음. M2-T5-B는 정책 입력과 체결별 EIP-712 서명 검증만 구현. Foundry 1.8.5 로컬 테스트 35/35 통과, Solidity invariant 128,000 calls 통과. 실제 배포/체인 RPC/영수증 검증은 미실행. 명시적으로 승인된 임시 PostgreSQL/Foundry 로컬 QA는 완료했으며, 실제 릴리스/온체인 연결은 추가 사람 승인 및 외부 환경 준비 대기. 운영/스테이징 DB 실제 마이그레이션·API 배포·Sepolia broadcast는 승인 없이 수행하지 않음. 원격 push는 AutoPilot 작업에서 제외한다.
+
+## 2026-10-24 M5-T3-C3-C1 — signed 주문 영속 수량 프로젝션 및 FULL-only 경계
+
+- 신규 SQL 019 `perp_signed_order_fill_progress`: 원래 서명 수량과 SQL 016/017 **완료된** BUY/SELL terminal 영수증만 이용해 order 단위 누적 체결/미체결/실행 가능 수량을 재구성. PREPARED는 체결량 0이며 취소된 수량은 미체결로 보존하되 실행 가능량은 0이다.
+- SQL 019 deferrable COMMIT 트리거: OPEN(0 filled), CANCELED(0 filled), FILLED(1회 전량) 및 total=filled+unfilled, uint256 한도를 강제. 기존 SQL 015~018의 서명·nonce·M3 이중분개·M4/OI 영수증을 변경하지 않음. 마이그레이션 시 기존 signed 주문 전량 검증.
+- 신규 `backend/src/perp/signed-sim-fill-progress.ts`는 체결 가능 인증이 아닌 읽기 전용 order 단위 영속 수량 감사 결과를 제공하며 partial/실제 실행 권한 모두 false. 복수 OPEN 주문은 주문별 개별 상태를 유지.
+- 다음 C3-C2: 여러 OPEN/종료 주문이 공존하는 계정의 누적 M3 예약금 책임/취소 레이스를 DB 레벨에서 강화. C3-C3: 부분 fill과 잔여 IM 배분·부분 취소에 필요한 정책/영수증 설계 이후 실행 구현.
+- 검증: 신규 focused 9/9 PASS, 관련 순차 회귀 115/115 PASS, TypeScript build PASS, SQL 001~019 로컬 migration 19/19 PASS. 전체 npm test 및 실제 PostgreSQL 다중 세션 미실행.
 
 ## 2026-10-24 M5-T3-C3-B — signed 취소 원자 영수증 및 DB 커밋 무결성
 
