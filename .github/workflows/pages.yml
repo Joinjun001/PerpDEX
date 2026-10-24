@@ -25,8 +25,11 @@ jobs:
       - name: Check simulation preview safety
         run: |
           test -f frontend/index.html
+          test -f frontend/trade.html
           test -f frontend/main.js
-          grep -q 'SIMULATION PREVIEW' frontend/index.html
+          grep -q 'PROJECT IN DEVELOPMENT' frontend/index.html
+          grep -q 'SIMULATION PREVIEW' frontend/trade.html
+          node --test frontend/*.test.mjs
           if grep -R -E 'DEPLOYER_PRIVATE_KEY|SEPOLIA_RPC_URL|wallet\.request|eth_sendTransaction' frontend/ --include='*.js' --include='*.html'; then
             echo 'Unsafe integration was added to public static demo'; exit 1
           fi

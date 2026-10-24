@@ -1,0 +1,20 @@
+/* Dedicated trading terminal, decoupled from landing page content. */
+.workspace-heading{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:24px 4px 18px}
+.workspace-heading>div{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.workspace-heading .workspace-label{font-size:10px;font-weight:850;letter-spacing:.13em;color:#43e1b4;display:flex;align-items:center;gap:7px}
+.workspace-heading .workspace-label:before{content:"";width:6px;height:6px;background:#43e1b4;border-radius:50%}
+.workspace-heading h1{font-size:17px;letter-spacing:-.02em;margin:0;font-weight:800}
+.workspace-heading h1 span{color:#71899c;font-size:10px;font-weight:600;margin-left:6px;vertical-align:1px}
+.workspace-about{border:1px solid #344856;border-radius:7px;padding:9px 12px;color:#9cbbaf;font-size:11px;font-weight:680;transition:background .15s}
+.workspace-about:hover{background:#22332f}
+.market-strip{min-height:80px;margin-bottom:14px}
+.market-option{padding-block:12px}
+.dashboard-grid,.left-stack,.market-detail-grid,.bottom-grid{gap:14px}
+.chart-wrap{height:318px}
+.order-panel{min-height:750px}
+.bottom-grid{grid-template-columns:1fr;margin-top:14px}
+.account-panel .empty-state{min-height:160px}
+.trade-shell .main-nav{margin-left:0}
+.trade-shell .main-content{padding-bottom:36px}
+@media(max-width:900px){.trade-shell .topbar .main-nav{margin-left:0}.chart-wrap{height:270px}.order-panel{min-height:0}}
+@media(max-width:650px){.workspace-heading{padding:19px 4px 14px;align-items:start}.workspace-heading>div{gap:7px}.workspace-heading h1{font-size:15px}.workspace-about{font-size:10px;padding:7px 8px}.trade-shell .topbar .main-nav{display:none}.market-strip{margin-bottom:12px}.chart-wrap{height:225px}.trade-shell .main-content{padding-bottom:18px}}
