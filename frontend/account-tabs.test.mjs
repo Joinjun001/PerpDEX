@@ -16,6 +16,7 @@ class FakeElement {
   getAttribute(name){return this.attributes[name];}
   addEventListener(name,callback){this.listeners[name]=callback;}
   focus(){this.focused=true;}
+  replaceChildren(...children){this.children=[...children];}
   fire(name,event={}){this.listeners[name]?.(event);}
 }
 function fixture(){
@@ -25,6 +26,8 @@ function fixture(){
     for(const field of ['data-account-title','data-account-description','data-account-view']){
       selectors.set('['+field+'="'+id+'"]',new FakeElement());
     }
+    selectors.set('#account-panel-'+id+' tbody',new FakeElement());
+    selectors.set('#account-panel-'+id+' table',new FakeElement());
   }
   return {root:{
     getElementById:(id)=>byId.get(id),

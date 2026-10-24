@@ -30,3 +30,12 @@
 
 - UX-HL-01-B2-B2: 신뢰된 adapter 경계, stale·query 실패·데이터 계약/DOM 상태 결합 검증. 백엔드·지갑 미연결이면 독립 UI 테스트만 진행.
 - UX-HL-01-C: 브라우저 너비별 시각/키보드·터치 접근성 검증.
+
+## 2026-10-25 B2-B2-A 안전한 UI 투영 계층
+
+- frontend/account-tabs-renderer.mjs은 테이블 외부 검증/인증 기능을 **보유하지 않음**. 기본 인수 allowValidatedRecords=false에서는 ready 응답을 보여주지 않고 disconnected만 렌더링한다.
+- 오프라인 integration 테스트에서만 allowValidatedRecords=true와 coordinator.get()의 수락된 응답 snapshot을 전달해 ready/empty/loading/error UI 동작을 검증한다. boolean 인자가 실제 데이터 출처 인증을 대신하지 않으므로 공개 웹사이트에는 true를 넣지 않는다.
+- 렌더링은 tab별 안전한 컬럼 고정 매핑 및 createElement('tr'/'td')와 textContent만 사용한다. innerHTML, 임의 서버 제공 컬럼명, HTML 파싱·개인키/RPC 요청 없음.
+- 모든 상태 전환은 tbody부터 지운다. 로딩·미연결·오류·정상 0건은 기존 기록이 남지 않는다. 검증된 ready 상태도 배열이 비정상이거나 빈 배열이면 error 처리한다.
+- 미제공 컬럼은 대시 표시, atomic 수치는 정확히 atomic으로 표시. 실제 USDC 정밀도/통화·PnL 값은 매핑하지 않는다. 교차 요청/old revision/계정 변경의 차단은 앞선 coordinator가 수행한다.
+- 실제 account-tabs.js 정적 초기 화면은 새 renderer를 호출하지만 disconnected 상태만 사용한다. 진짜 API/wallet/auth adapter는 연결하지 않았고, 실 브라우저 렌더링 인수도 미실행이다.

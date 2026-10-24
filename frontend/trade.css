@@ -171,3 +171,7 @@
   .trade-shell .account-empty{padding:25px 14px 28px}
   .trade-shell .account-footer-note{padding:11px 14px}
 }
+
+/* Explicit hidden attributes beat account-empty flex and table presentation. */
+.trade-shell .account-empty[hidden],
+.trade-shell .account-table[hidden]{display:none!important}

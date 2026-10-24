@@ -1,4 +1,5 @@
-import {ACCOUNT_TABS,accountTabIndexForKey,accountViewFor} from './account-tabs-model.mjs';
+import {ACCOUNT_TABS,accountTabIndexForKey} from './account-tabs-model.mjs';
+import {renderAccountTabSnapshot} from './account-tabs-renderer.mjs';
 
 /**
  * Native-button ARIA tabs. The static preview has neither a wallet connection
@@ -31,10 +32,8 @@ export function initAccountTabs(root=document){
     if(focus)entries[index].tab.focus();
   }
   entries.forEach((entry,i)=>{
-    const state=accountViewFor(ACCOUNT_TABS[i].id,'disconnected');
-    entry.title.textContent=state.title;
-    entry.description.textContent=state.description;
-    entry.view.dataset.accountState='disconnected';
+    // Static site: always fail closed to disconnected. No backend adapter wired.
+    renderAccountTabSnapshot(root,ACCOUNT_TABS[i].id,{state:'disconnected'});
     entry.tab.addEventListener('click',()=>activate(i));
     entry.tab.addEventListener('keydown',event=>{
       const next=accountTabIndexForKey(event.key,i,entries.length);

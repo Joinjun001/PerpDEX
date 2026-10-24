@@ -31,3 +31,13 @@
 - Python HTMLParser로 index/trade 페이지 중첩·고유 id PASS, git diff --check PASS.
 - 실제 네트워크·로그인·백엔드/테스트넷/브라우저 시각 인수는 미실행. 선언된 source 문자열만으로 신뢰된 API임을 인증하지 않는다.
 - 공개 페이지·계정 탭/DOM/실제 체결 기능 변경 없음, push/배포/실체인 미실행.
+
+## 2026-10-25 UX-HL-01-B2-B2-A 렌더링 경계 QA
+
+- 시작: main HEAD 79c0890, clean, origin/main보다 로컬 4커밋 앞섬. PROJECT_STATE·ROADMAP·Hyperliquid UX 참조·UX SPEC/TODO/QA/RESULT/ACCOUNT_QUERY_CONTRACT 및 프런트엔드 코드 확인.
+- 신규 account-tabs-renderer.test.mjs 9/9 PASS: 기본값에서 검증 안 된 ready 차단, 4개 상태별 빈 표/안내, 5개 탭별 안전한 셀 매핑, HTML 인젝션 textContent 처리, empty ready 거부, 겹친 요청·오류·disconnect 이후 기록 지우기, 중복/타 chain 거부, 정적 demo가 인증 adapter에 연결되지 않았는지 확인, 실제 HTML 헤더 수와 출력 컬럼 수 합치성.
+- 기존 frontend 테스트 34/34 PASS → 전체 43/43 PASS.
+- JavaScript syntax 및 npm --prefix backend run build (TypeScript tsc --noEmit) PASS.
+- 브라우저 직접 실행 및 스크린샷·실보조공학 검증은 **미실행**. fake DOM 이벤트/렌더링 테스트를 실제 브라우저 인수로 주장하지 않음.
+- 실제 MetaMask·HTTPS 계정 API·PostgreSQL/chain data source 신뢰성 검증 **미구현**. allowValidatedRecords는 로컬 렌더링 사용 여부를 구분하는 UI 옵션일 뿐 인증/서명·데이터 신뢰 증명이 아니다.
+- 공개 데모의 계정 표는 모두 지갑 미연결·빈 tbody를 유지. 안전한 데이터 어댑터가 준비될 때까지 실제 record 출력 기능 비활성.

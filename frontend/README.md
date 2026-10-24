@@ -6,6 +6,8 @@ Hyperliquid의 거래 정보 구조·사용자 흐름을 주요 UX 레퍼런스�
 
 계정 UI용 오프라인 응답 경계: account-query-contract.mjs의 Sepolia chain/계정/탭/요청 ID/revision/uint256 검증 및 stale 응답 폐기. 이 모듈은 실제 backend/지갑/DOM에 연결되지 않고 source 문자열이 서버 인증을 의미하지 않습니다. 문서: docs/tasks/UX-HL-01-terminal-layout/ACCOUNT_QUERY_CONTRACT.md.
 
+계정 UI 출력 경계: account-tabs-renderer.mjs는 고정 컬럼과 안전한 textContent로만 표를 구성합니다. 정적 화면은 미연결 상태로 유지하며, 검증된 coordinator 데이터를 렌더링하는 경로는 오프라인 단위 테스트에서만 활성화했습니다. 테스트 플래그가 출처 인증을 대체하지 않으며 실제 API·지갑 연동은 미구현입니다.
+
 ## 페이지 구조
 
 - index.html (서비스 소개): 프로젝트 비전, 기술 구조, 개발 로드맵, 거래 화면 진입 버튼. 거래 입력/차트를 포함하지 않습니다.

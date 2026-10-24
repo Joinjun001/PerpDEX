@@ -27,3 +27,11 @@
 - 문서 ACCOUNT_QUERY_CONTRACT.md 추가. 실제 wallet/백엔드/API·테이블 렌더링은 추가되지 않음.
 - 전체 프런트엔드 34/34 PASS, JS 문법·TypeScript build·HTML 구조 PASS. 브라우저 UI/실제 네트워크/DB는 미검증.
 - 다음 UX-HL-01-B2-B2: 신뢰 가능한 어댑터와 UI 연결 안전성·상태 렌더러. 그 이후 UX-HL-01-C 브라우저 QA.
+
+## 2026-10-25 UX-HL-01-B2-B2-A — 로컬 완료
+
+- frontend/account-tabs-renderer.mjs: 5개 계정 탭의 disconnected/loading/empty/error/ready 상태를 순수 DOM 경계로 투영. 미인증 기본값은 disconnected만 출력, 테스트에서 명시적으로 유효한 coordinator 결과를 제공할 때 허용된 컬럼만 textContent 기반 안전 출력.
+- frontend/account-tabs.js: static 초기화가 새 렌더러에 disconnected만 전달, 외부 wallet/API 연결 없음. frontend/trade.css에 hidden empty/table 명시적 우선 적용.
+- frontend/account-tabs.test.mjs의 fake DOM 확장 및 신규 account-tabs-renderer.test.mjs: 9건의 snapshot/중복/오류/경합/DOM 삽입 회귀.
+- 총 43/43 프런트 테스트 및 TypeScript build PASS. UI 실제 픽셀 렌더링/실지갑·API 통합은 미검증.
+- 다음 UX-HL-01-B2-B2-B: 실제 확인된 wallet·server adapter 경계/API 연결과 오류·재시도/계정 변경 E2E. 준비되지 않으면 안전한 독립 UI TASK로 진행. UX-HL-01-C 브라우저 인수도 미완료.
