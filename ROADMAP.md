@@ -40,6 +40,10 @@
 
 주의: M1 Vault의 현재 `withdraw()`는 오프체인 locked margin을 강제하지 않으며, M2 `BUYER_TO_SELLER` direct settlement는 선물 포지션 회계가 아니다. 새 로컬 위험 엔진이 마련되어도 M8 이전에 사용자 실자금·운영 활성화를 금지한다.
 
+## 제품 UX 레퍼런스 — Hyperliquid
+
+PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성은 **Hyperliquid**를 주요 참고 제품으로 삼는다. 정보 계층·주문 조작 편의성·포지션/주문 이력 통합을 참고하되 브랜드·원본 화면·코드를 복제하지 않는다. P0: 시장 정보 헤더, 차트/호가/주문 3열 터미널, 포지션/현재 주문/이력 하단 탭, Market/Limit 티켓. 자세한 구현 우선순위 및 안전 기준: `docs/architecture/HYPERLIQUID-UX-REFERENCE.md`. Sepolia 기반 오프체인 아키텍처를 Hyperliquid 자체 L1과 동등하다고 표현하지 않는다.
+
 ## M9 — Sepolia 테스트넷 무기한 선물 거래 MVP (신규 최종 목표)
 
 **사용자 목표:** 메인넷 실자금이 아닌 Ethereum Sepolia에서 무가치 테스트 담보로 MetaMask 연결 → 입금 → EIP-712 signed 주문 → BTC-USD-PERP Long/Short 체결 → 포지션 종료/정산 → 출금까지 검증 가능한 서비스. 상세 인수 조건: docs/releases/SEPOLIA-TESTNET-TRADING-MVP.md.
