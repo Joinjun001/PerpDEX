@@ -93,6 +93,35 @@ export async function readSimPerpPosition(
 export async function applySimPerpFillToLedger(
   transactions:OrderTransactionManager,fill:PerpPositionFill,context:PerpPositionContext,
 ):Promise<Readonly<PerpPositionTransition>>{
+  return transactions.withTransaction(async db=>{
+    // A single-account M4-T2 writer must not silently bypass paired-market OI.
+    // to_regclass works even in old M4-T2 schema tests lacking migration 011.
+    const present=await db.query(`SELECT to_regclass('perp_market_open_interest') AS oid`);
+    if((present.rows[0] as {oid:string|null}|undefined)?.oid){
+      const c=context.config;
+      const marketKey=[c.chainId,c.verifyingContract.toLowerCase(),c.market,c.collateralToken.toLowerCase()];
+      // Serializes even FIRST writer with pair bootstrap (INSERT unique row waits on
+      // an uncommitted concurrent insert). Mark legacy as permanently UNPAIRED;
+      // only an explicit future reconciliation may change its mode.
+      await db.query(`INSERT INTO perp_market_open_interest
+        (chain_id,verifying_contract,market,collateral_token,config_revision,mode,open_interest_atomic)
+        VALUES($1,$2,$3,$4,$5,'UNPAIRED','0') ON CONFLICT DO NOTHING`,
+        [...marketKey,c.revision]);
+      const tracked=await db.query(`SELECT mode,config_revision FROM perp_market_open_interest
+        WHERE chain_id=$1 AND verifying_contract=$2 AND market=$3 AND collateral_token=$4 FOR UPDATE`,marketKey);
+      const marker=tracked.rows[0] as {mode:string;config_revision:number|string}|undefined;
+      if(!marker||marker.mode!=='UNPAIRED'||Number(marker.config_revision)!==c.revision){
+        throw new PerpPositionLedgerError('paired market requires atomic two-account application');
+      }
+    }
+    return applySimPerpFillWithinTransaction(db,fill,context);
+  });
+}
+
+/** Internal composition primitive: caller MUST own the same atomic DB transaction. */
+export async function applySimPerpFillWithinTransaction(
+  db:SqlRunner,fill:PerpPositionFill,context:PerpPositionContext,
+):Promise<Readonly<PerpPositionTransition>>{
   if(!fill||fill.executionMode!=='SIMULATION_ONLY'||
      typeof fill.fillId!=='string'||!EMPTY_POSITION_RE.test(fill.fillId)){
     throw new PerpPositionLedgerError('simulation-only canonical fill required');
@@ -100,7 +129,7 @@ export async function applySimPerpFillToLedger(
   const account=scopedAccount(fill.account);
   const {empty,key}=positionKey(context,account);
   // No external API, live order matching, collateral, Vault or asset changes.
-  return transactions.withTransaction(async db=>{
+  {
     await db.query(
       `INSERT INTO perp_position_snapshots
        (chain_id,verifying_contract,market,collateral_token,account,config_revision,
@@ -153,5 +182,5 @@ export async function applySimPerpFillToLedger(
     );
     if(updated.rows.length!==1)throw new PerpPositionLedgerError('snapshot CAS failed');
     return applied;
-  });
+  }
 }

@@ -166,3 +166,9 @@ forge build && forge test -vv
 ## M3-T4 — 실 PostgreSQL 다중 연결 shadow 주문·마진 QA
 
 승인된 개발용 PostgreSQL 15(Unix 소켓, TCP 비활성, 테스트 DB, 별도 `perpdex_qa_<12hex>` 스키마)에서 EIP-712 v2 **SIMULATION_ONLY** 주문의 동시 Nonce 접수·예약/취소 경합·잔액 초과 방지·이중 분개 실패 롤백 및 PostgreSQL 서버 재시작 복구를 검증했습니다. 명령: `cd backend && PERPDEX_TEST_PG_SOCKET=... PERPDEX_TEST_PG_SCHEMA=... PERPDEX_TEST_PG_PHASE=seed npm run test:postgres-perp`; 실제 서버 재시작 후 같은 스키마로 `PERPDEX_TEST_PG_PHASE=verify` 실행합니다. 결과/사람 승인 게이트: `docs/tasks/M3-T4-postgres-margin-concurrency/QA.md`. 개발용 검증만으로 포지션·온체인·운영 출금이 활성화되지 않습니다.
+
+## M4-T3 — 양측 모의 포지션 체결 및 시장 OI
+
+`backend/src/perp/paired-clearing.ts`는 신뢰된 테스트용 정책과 시세를 받아 같은 `fillId`, 수량, 가격의 BUY/SELL을 서로 다른 두 계정에 **하나의 PostgreSQL 트랜잭션**으로 적용하고 시장별 LONG/SHORT Open Interest가 일치하는지 검증합니다. 신규 `backend/sql/011_perp_pair_clearing.sql`은 시장별 OI/PAIRED·UNPAIRED 모드와 append-only 공통 모의 체결 기록을 저장합니다. M4-T2 기존 단일 계정 원장과 시장 모드를 섞지 않도록 DB 락 및 고유 시장 상태로 차단합니다.
+
+이는 **실제 거래나 증거금 이동이 없는 SIMULATION_ONLY 구현**이며, 실제 체결 검증·양측 담보/위험 승인·펀딩·청산·온체인 정산에 연결하지 않았습니다. 로컬 PGlite 신규 15/15, 전체 백엔드 233/233 통과. 실제 PostgreSQL 다중 연결은 M4-T4에 별도 검증합니다.
