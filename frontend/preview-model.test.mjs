@@ -25,6 +25,24 @@ test('부적절한 수량·레버리지·마켓은 거부한다',()=>{
   }
   assert.throws(()=>previewEstimate('UNKNOWN','0.05',3),RangeError);
 });
+test('UX-HL-02-C1: reject non-decimal strings and implicit JS coercion in quantity',()=>{
+  for(const invalid of ['0x1','0b1','0o1',' 0.05 ','0.05 USD','1_0','', ' ',
+    true,false,[1],[0.05],{valueOf:()=>0.05},new Number(0.05),0n,
+    'Infinity','NaN','1e999','1e','1..0']){
+    assert.equal(validPreviewQuantity(invalid),false,String(invalid));
+    assert.throws(()=>previewEstimate('BTC',invalid,3),RangeError);
+  }
+});
+test('UX-HL-02-C1: preserve decimal and valid native number input forms at limits',()=>{
+  for(const [input,expected] of [['0.0001',0.0001],['1e-4',0.0001],
+    ['1E-4',0.0001],['.05',0.05],['0.05',0.05],['1.',1],
+    ['100',100],[0.05,0.05],[100,100]]){
+    assert.equal(validPreviewQuantity(input),true,String(input));
+    const p=previewEstimate('BTC',input,3);
+    assert.equal(p.quantity,expected);
+    assert.equal(p.orderExecutable,false);
+  }
+});
 test('샘플 차트는 요청하지 않은 외부 데이터나 음수 가격 없이 생성한다',()=>{
   for(const market of Object.keys(MARKETS)){
     const arr=sampleChart(market);

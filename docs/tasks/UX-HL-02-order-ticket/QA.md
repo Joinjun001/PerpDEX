@@ -29,3 +29,14 @@
 - Node 프런트엔드 전체 79/79 PASS (기존 72 + 신규 7), JavaScript 문법 검사 및 npm --prefix backend run build (tsc --noEmit) PASS.
 - 테스트용 DOM은 브라우저 레이아웃·기본 키 이벤트·스크린리더·실제 포커스 정책을 구현하지 않음. **실제 데스크톱·태블릿·모바일 시각/터치/보조공학 검증은 미실행**.
 - 실계정·API·지갑·체인/실주문 연결 없음. 변경은 프런트 로컬 테스트/오류 포커스 및 한국어 문서 한정, push/배포 없음.
+
+## 2026-10-25 UX-HL-02-C1 — 비숫자 입력의 암묵적 형변환 거부
+
+- 시작 main HEAD e43af4d, clean, origin/main보다 14커밋 앞섬. PROJECT_STATE, ROADMAP, Hyperliquid reference, UX-HL-01 SPEC/TODO/QA/RESULT 및 frontend 코드 검토.
+- chromium/google-chrome/firefox 실행파일과 Playwright/Puppeteer 패키지 미가용, 설치·우회 없음. 실 브라우저 UX-HL-01-F2/E2, UX-HL-02-B2-B 미완료 유지.
+- 구체적 결함: validPreviewQuantity()의 삼항 분기가 모두 Number(value)로 이어져 문자열 0x1과 bool true 및 array [1] 등이 범위 0.0001~100 검사를 우연히 통과. 수정 전 새 회귀 3건 가운데 2건 실제 FAIL 확인.
+- 수정: preview-model.mjs 수량은 string 또는 number primitive 타입만 받고, string은 십진수/선택적 e/E 지수 입력 문법 검사 후 Number로 범위 판정. Number(input)는 validation을 통과한 값에만 적용.
+- 신규 4건: preview-model.test.mjs 2, order-ticket.test.mjs 1, order-interactions.test.mjs 1. 비숫자/hex/진법 prefix, 객체의 valueOf 위조, 공백 거부 및 0.0001/100/.05/1e-4 등의 정상 범위/지수 허용, Market/Limit 양쪽 및 실제 UI aria-invalid/disabled/focus 흐름 확인.
+- 수정 후 node --test frontend/*.test.mjs 116/116 PASS (기존 112 + 신규 4). node --check frontend/preview-model.mjs, frontend/main.js 및 3개 관련 테스트 PASS. npm --prefix backend run build (tsc --noEmit) PASS.
+- Python HTMLParser index.html 고유 ID 4개, trade.html 67개, 구조/중복 ID PASS. 정적 계정 tbody 5개 빈 상태 및 trade.html CSP connect-src none 유지. git diff --check PASS.
+- 브라우저 실제 입력·화면/접근성 트리, 실계정·wallet/backend API·Sepolia 거래/DB·실리스크 인수는 미실행. Push/배포 금지.

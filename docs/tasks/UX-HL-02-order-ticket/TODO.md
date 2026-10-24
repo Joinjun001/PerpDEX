@@ -13,3 +13,9 @@
 - [x] B2-A3 invalid submit을 quantity/Limit 필드로 포커스 보내고 결과 생성 차단
 - [ ] B2-B 실제 브라우저·모바일·스크린리더/키보드와 viewport 레이아웃 인수 (환경 미가용)
 - [ ] C1 환경이 갖춰졌을 때 wide/tablet/mobile 브라우저 실제 상호작용 검증 및 시각 인수
+
+- [x] C1 validPreviewQuantity의 암묵적인 Number() 형변환으로 비숫자형 수량이 통과하는 결함 재현
+- [x] C1 수량을 primitive number 또는 문법상 유효한 decimal/scientific 문자열로 한정하고 기존 0.0001~100 범위 유지
+- [x] C1 공통 모델 검증 2건, Market/Limit 계약 1건, 실제 main.js 이벤트 통합 1건 추가
+- [x] C1 프런트 전체 116/116, JS syntax·backend TypeScript build·HTML 구조·CSP·Git diff 검사
+- [ ] C2 기존 브라우저 환경 확보 시 실제 숫자 input 동작/키보드·모바일 검증 (미실행)

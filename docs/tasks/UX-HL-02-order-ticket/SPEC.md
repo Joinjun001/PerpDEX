@@ -35,3 +35,11 @@
 3. 잘못된 quantity/Limit의 aria-invalid·role alert·disabled button과 폼 submit 시 해당 입력 포커스 이동, 리뷰 미노출.
 4. submit preventDefault 및 9항목 read-only 리뷰, 닫기·Escape/preview 버튼 포커스 복귀, 시장/방향/모드/수량/가격/레버리지 변경 시 stale 리뷰 미노출.
 5. 기존 구조·계정 탭·CSP 및 DEMO/네트워크/실체인 격리 불변. 브라우저 viewport/픽셀·실보조공학은 별도 검증.
+
+## UX-HL-02-C1 (2026-10-25) — 수량 형변환 검증 강화
+
+- 발견 결함: 이전 validPreviewQuantity()는 모든 입력에 Number(value)를 적용해 true, [1], 0x1 같은 형식도 유효한 주문 수량으로 잘못 수락했다. 빈 공백만 거부하려던 조건은 양쪽 분기가 동일해 작동하지 않았다.
+- 이번 수정은 공통 모델에 한정한다. 수량은 숫자 primitive 또는 문자로 된 정상 십진수/HTML number 입력의 지수 표기만 수락한다. 정수·소수·선행 . 또는 후행 .·e/E 지수(부호 가능)를 정상 처리한다.
+- 0.0001~100 범위의 유한 수만 허용하며, hex/binary/octal, whitespace, 임의 객체, 배열, bool, 숫자형 wrapper, Infinity/NaN 및 비정상 문법은 거부한다.
+- 정상 BTC/ETH/SOL Market/Limit preview, 기존 레버리지·가격 검증 및 static demo CSP/account read 경계는 유지한다. 이 검증은 체결 가능성·증거금 위험 엔진 정책을 의미하지 않는다.
+- 반례가 수정 전 실제 실패하는지 재현하고 순수/통합 검증, JS syntax, TS build, HTML 태그·고유 ID, git diff 검사를 통과해야 완료.

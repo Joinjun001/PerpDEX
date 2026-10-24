@@ -143,6 +143,31 @@ test('B2-A user input validation changes aria-invalid, error visibility and subm
   id('market-type').dispatch('click');
   assert.equal(id('limit-price-error').hidden,true);
 });
+test('UX-HL-02-C1 malformed numeric coercion cannot enable preview or produce a review',async()=>{
+  const app=await boot(),id=app.id;
+  for(const mode of ['MARKET','LIMIT']){
+    if(mode==='LIMIT')id('limit-type').dispatch('click');
+    for(const malformed of ['0x1','0b1',' 0.05 ', '1_0']){
+      id('quantity').value=malformed;
+      id('quantity').dispatch('input');
+      assert.equal(id('quantity').getAttribute('aria-invalid'),'true',mode+' '+malformed);
+      assert.equal(id('quantity-error').hidden,false);
+      assert.equal(id('preview-order').disabled,true);
+      const event=id('order-form').dispatch('submit');
+      assert.equal(event.defaultPrevented,true);
+      assert.equal(id('order-result').hidden,true);
+      assert.equal(id('quantity').didFocus,true);
+    }
+    id('quantity').value='1e-4';
+    id('quantity').dispatch('input');
+    assert.equal(id('quantity').getAttribute('aria-invalid'),'false');
+    assert.equal(id('quantity-error').hidden,true);
+    assert.equal(id('preview-order').disabled,false);
+    id('order-form').dispatch('submit');
+    assert.equal(id('order-result').hidden,false);
+    id('order-result').dispatch('keydown',{key:'Escape'});
+  }
+});
 test('B2-A actual form submit only renders review; Escape and close return focus',async()=>{
   const app=await boot(),id=app.id;
   id('limit-type').dispatch('click');

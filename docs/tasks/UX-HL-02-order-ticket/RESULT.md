@@ -25,3 +25,12 @@
 - frontend/main.js: 유효하지 않은 quantity 또는 Limit Price가 있는 form submit 시 결과를 보이지 않게 하고 오류 필드에 focus. 정상 미리보기 흐름은 기존 유지.
 - 프런트 79/79 PASS, JS/TypeScript 빌드 PASS. 실제 browser/viewport/스크린리더는 미실행.
 - 다음 UX-HL-02-B2-B: 지원 브라우저 환경 마련 시 실제 데스크톱·태블릿·모바일/키보드/접근성 인수. 브라우저가 없으면 독립 UX TASK로 분리하며 현재 통합 테스트를 실제 브라우저 완료로 간주하지 않음.
+
+## 2026-10-25 UX-HL-02-C1 — 로컬 구현 완료
+
+- frontend/preview-model.mjs: 기존 Number(value) 무조건 호출로 true/[1]/0x1을 수량으로 수락하던 모델 결함 수정. 유효한 string decimal/exponent 또는 number primitive, 0.0001~100만 허용.
+- frontend/preview-model.test.mjs: 엄격한 비숫자 형식 거부와 숫자/십진수/1e-4 형식 호환 2개 회귀 추가.
+- frontend/order-ticket.test.mjs: Market·Limit 양쪽의 잘못된 수량 형변환 경계 1개 회귀 추가.
+- frontend/order-interactions.test.mjs: 실제 main.js에서 비정상 숫자 문자열은 aria-invalid=true, 오류 표시/미리보기 비활성화/submit 차단 및 오류 필드 focus, 정상 지수 수량은 미리보기 표시를 확인하는 실행형 1건.
+- 신규 4건 포함 프런트 전체 116/116 PASS, JS syntax/TypeScript build/HTML 구조·CSP/Git diff PASS. 서버/지갑/온체인·API 연결 및 원격 push/배포 없음.
+- 다음: 실제 브라우저 가용 시 UX-HL-02-C2 및 UX-HL-02-B2-B, 이외엔 다른 코드 결함을 발견할 때만 독립 후속 TASK 선정.

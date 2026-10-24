@@ -73,6 +73,8 @@ PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성�
 - **UX-HL-02-B1 (Local Completed)**: 9개 읽기 전용 리뷰 항목/미계산 위험 고지, 닫기/Escape/포커스 복귀·quantity/Limit 오류 ARIA. 프런트 72/72 PASS, 브라우저 인수 미실행.
 - **UX-HL-02-B2-A (Local Completed)**: 실제 main.js import 기반 DOM 이벤트 7건 통합, 잘못된 submit의 수량/Limit 필드 포커스 이동. 프런트 79/79 PASS.
 - **UX-HL-02-B2-B (Pending browser)**: 브라우저 미가용으로 데스크톱·태블릿·모바일/보조공학 실제 시각 인수 보류.
+- **UX-HL-02-C1 (Local Completed)**: validPreviewQuantity의 bool/array/hex 암묵적 숫자형 변환 취약점 정정, 유효한 decimal/scientific form·범위만 허용. Market/Limit·UI 이벤트 회귀 4건, 프런트 116/116 PASS.
+- **UX-HL-02-C2 (Pending browser)**: 모바일/키보드 실제 number input 형식과 오류 포커스의 브라우저 인수 미완료.
 - 계정별 실제 read API/wallet 인증이 준비되지 않아 UX-HL-01-B2-B2-B2는 게이트 보류.
 
 ## M9 — Sepolia 테스트넷 무기한 선물 거래 MVP (신규 최종 목표)

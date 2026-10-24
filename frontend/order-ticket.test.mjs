@@ -70,6 +70,13 @@ test('UX-HL-02-A invalid qty/leverage/market still fail for either order mode',(
    assert.throws(()=>calc({orderType,market:'FAKE',limitPrice}),RangeError);
  }
 });
+test('UX-HL-02-C1: both Market and Limit preview reject malformed quantity coercion',()=>{
+ for(const orderType of ['MARKET','LIMIT']){
+  for(const quantity of ['0x1',true,[1],{valueOf:()=>1},' 0.1 ']){
+   assert.throws(()=>calc({orderType,quantity,limitPrice:'60000'}),RangeError);
+  }
+ }
+});
 test('UX-HL-02-A order UI offers accessible type selector and hidden-by-default Limit input',()=>{
  for(const id of ['market-type','limit-type','limit-price-field','limit-price','limit-price-help','limit-price-error','preview-price-label']){
    assert.match(html,new RegExp('id="'+id+'"'));

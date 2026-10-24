@@ -10,8 +10,15 @@ export const MARKETS = Object.freeze({
 export const FORMAT_USD = new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2});
 export const FORMAT_QTY = new Intl.NumberFormat('en-US',{minimumFractionDigits:3,maximumFractionDigits:4});
 export function validPreviewQuantity(value){
-  const quantity = typeof value === 'string' && value.trim() !== '' ? Number(value) : Number(value);
-  return Number.isFinite(quantity) && quantity >= 0.0001 && quantity <= 100;
+  // Accept only native numeric input strings or finite number primitives.
+  // Number() on arbitrary values silently accepts booleans, hex, arrays,
+  // valueOf() objects and whitespace, none of which represent user quantity.
+  if(typeof value!=='number'&&
+     (typeof value!=='string'||! /^(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)(?:[eE][+-]?[0-9]+)?$/.test(value))){
+    return false;
+  }
+  const quantity=Number(value);
+  return Number.isFinite(quantity)&&quantity>=0.0001&&quantity<=100;
 }
 export function previewEstimate(market,quantity,leverage){
   if(!MARKETS[market])throw new RangeError('Unknown simulation market');
