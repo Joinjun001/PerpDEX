@@ -6,5 +6,6 @@
 - [x] A4 DEMO 주문·차트 회귀 및 HTML/CSS/보안 정적 테스트
 - [x] B1 Positions/Open Orders/Order History/Trade History/Funding History 하단 ARIA 탭, 방향키/Home/End/클릭, 안전한 빈 계정 패널
 - [x] B2-A 계정 미연결·정상 빈 데이터·로딩·오류를 구분하는 순수 모델 및 단위 테스트
-- [ ] B2-B 실제 데이터 조회 API/지갑이 준비되면 상태·데이터 신뢰 경계를 계정 UI에 안전하게 연결
+- [x] B2-B1 계정 chain/source/tab/request/revision·row 필드·중복·uint256/잔량 검사 및 로컬 순수 비동기 상태 coordinator
+- [ ] B2-B2 신뢰 가능한 account adapter와 실제 UI 탭 상태/테이블 렌더링 통합·stale/실패 E2E (API·지갑 미연결)
 - [ ] C1 브라우저 wide/tablet/mobile 실제 렌더링·키보드 시각 인수(브라우저 가용 시)

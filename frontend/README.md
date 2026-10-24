@@ -4,6 +4,8 @@
 
 Hyperliquid의 거래 정보 구조·사용자 흐름을 주요 UX 레퍼런스로 사용하며 독립 브랜딩을 유지합니다. 세부 컴포넌트·우선순위는 `docs/architecture/HYPERLIQUID-UX-REFERENCE.md`를 참고합니다. 미구현 정보와 기능은 반드시 미연결/DEMO 표시로 남깁니다.
 
+계정 UI용 오프라인 응답 경계: account-query-contract.mjs의 Sepolia chain/계정/탭/요청 ID/revision/uint256 검증 및 stale 응답 폐기. 이 모듈은 실제 backend/지갑/DOM에 연결되지 않고 source 문자열이 서버 인증을 의미하지 않습니다. 문서: docs/tasks/UX-HL-01-terminal-layout/ACCOUNT_QUERY_CONTRACT.md.
+
 ## 페이지 구조
 
 - index.html (서비스 소개): 프로젝트 비전, 기술 구조, 개발 로드맵, 거래 화면 진입 버튼. 거래 입력/차트를 포함하지 않습니다.

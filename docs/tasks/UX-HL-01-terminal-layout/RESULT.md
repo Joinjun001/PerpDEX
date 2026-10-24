@@ -19,3 +19,11 @@
 - frontend/account-tabs.test.mjs: 신규 테스트 6개 포함 21/21 PASS, HTML·JS·TypeScript 빌드 통과.
 - 실계정/API/온체인/실거래 구현 없음, 실제 브라우저 시각 QA 미실행, push 및 배포 금지 준수.
 - 다음 UX-HL-01-B2-B: 승인된 백엔드·지갑 연동 전제의 계정 조회 계약 및 안전한 상태 전환 구현·검증. 다음 UX-HL-01-C: 실제 브라우저 렌더링 QA.
+
+## 2026-10-25 UX-HL-01-B2-B1 — 로컬 완료
+
+- frontend/account-query-contract.mjs: 5개 계정 탭별 계정/chain/source/request/revision envelope 및 최소 행 schema, signed/unsigned atomic 정수 문자열, 중복과 수량 보존, stale token/revision 경계.
+- frontend/account-query-contract.test.mjs: 신규 13건의 정상·위조·중복·경합·연결 해제·오류 경계 테스트.
+- 문서 ACCOUNT_QUERY_CONTRACT.md 추가. 실제 wallet/백엔드/API·테이블 렌더링은 추가되지 않음.
+- 전체 프런트엔드 34/34 PASS, JS 문법·TypeScript build·HTML 구조 PASS. 브라우저 UI/실제 네트워크/DB는 미검증.
+- 다음 UX-HL-01-B2-B2: 신뢰 가능한 어댑터와 UI 연결 안전성·상태 렌더러. 그 이후 UX-HL-01-C 브라우저 QA.

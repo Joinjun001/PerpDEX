@@ -48,7 +48,8 @@ PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성�
 
 - **UX-HL-01-A (Local Completed)**: 차트·호가/최근 체결·주문 폼 3열 터미널, 반응형 시장 정보 바, 고정 MOCK reference/change와 미연결 Mark/Oracle/Funding/OI 구분. 프런트 테스트 15/15 PASS. 문서: docs/tasks/UX-HL-01-terminal-layout/.
 - **UX-HL-01-B1 (Local Completed)**: 5개 계정 탭의 ARIA/키보드 탐색·빈 tbody·지갑 미연결 표시, 오프라인 4종 상태 모델. 프런트엔드 21/21 PASS.
-- **UX-HL-01-B2-B (Next)**: 안전한 계정 데이터 조회 계약/상태 변경, 실제 지갑/백엔드 미연결이면 disconnected만 표기.
+- **UX-HL-01-B2-B1 (Local Completed)**: 계정·Sepolia chain·출처·탭/요청 ID/revision/행 원자 수량 검증, 중복·stale/재연결 race 방지 순수 coordinator. 프런트 34/34 PASS.
+- **UX-HL-01-B2-B2 (Next)**: 신뢰된 API/wallet adapter와 실제 탭/테이블 상태 결합 (API 미연결 시 오프라인 안전성 검증만).
 - **UX-HL-01-C (Follow-up)**: 실제 브라우저 너비별 시각 확인 및 모바일·접근성 보완.
 
 ## M9 — Sepolia 테스트넷 무기한 선물 거래 MVP (신규 최종 목표)
