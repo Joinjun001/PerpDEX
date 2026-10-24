@@ -6,11 +6,11 @@
 - 브랜치: `main`
 - 기준: 실제 소스 코드와 Git 상태를 최우선으로 판단
 - 현재 마일스톤: **M2 — Off-chain Order API & Matching MVP**
-- 현재 TASK: **M2-T5-B — 정산 정책 검증 계층** (다음 작업)
-- 상태: M2-T4 로컬 완료 (A 코어/B 영속 매칭/C API 자동 체결/D 검증된 정산 원장 후보 어댑터); M2-T5-A Outbox 로컬 구현 완료, M2-T5-B~E 미완료
-- 최근 완료: M1 전체 및 M2-T1/T2/T3/T4 로컬 완료. M2-T5-A policy-gated 영속 Settlement Outbox, 동시 claim·lease fencing·retry·DB 재시작 복구 구현. 신규 9개 통합 테스트 포함 백엔드 전체 112/112 통과 및 TypeScript 검사 성공 (2026-10-24). 운영 PostgreSQL QA 별도 이관
-- 다음 미완료 항목: M2-T5-B 자산 매핑/정산 단위·위험 정책 검증 스키마 및 순수 검증기 구현(정책 값은 승인 전 차단) → C dry-run 정산 실행/영속 전송 멱등성 → D 영수증 복구 → E 릴리스 QA. M2-T5-A는 policy-gated Outbox/임대·재시도 기반으로 로컬 완료. 운영 PostgreSQL 멀티프로세스 및 003/004/005 마이그레이션은 환경/승인 준비 시 별도 수행
-- 사람 확인 필요: 실제 PostgreSQL 서버/CLI/Docker가 없어 운영 환경의 DB 다중 연결·멀티프로세스 검증은 미실행. 신규 `005_settlement_outbox.sql` 운영 마이그레이션도 미실행. 시장별 토큰/정밀도/마진·위험 정책 및 정산 금액·방향은 경제 정책 확인이 필요하여 자동 결정하지 않음. `forge`가 없어 Foundry 회귀 미실행. DB 실제 마이그레이션·API 배포·Sepolia broadcast는 승인 없이 수행하지 않음. 원격 push는 AutoPilot 작업에서 제외한다.
+- 현재 TASK: **M2-T5-C — dry-run/모의 정산 실행·영속 전송 멱등성** (다음 작업)
+- 상태: M2-T4 로컬 완료 (A 코어/B 영속 매칭/C API 자동 체결/D 검증된 정산 원장 후보 어댑터); M2-T5-A Outbox 및 B 명시적 정산 정책/승인 서명 검증 로컬 완료, M2-T5-C~E 미완료
+- 최근 완료: M1 전체 및 M2-T1/T2/T3/T4 로컬 완료. M2-T5-A policy-gated 영속 Settlement Outbox, 동시 claim·lease fencing·retry·DB 재시작 복구 구현. 신규 정산 정책/서명 검증 10개 테스트 포함 백엔드 전체 122/122 통과 및 TypeScript 검사 성공 (2026-10-24). 운영 PostgreSQL QA 별도 이관
+- 다음 미완료 항목: M2-T5-C 승인된 지시에 대한 dry-run/모의 정산 실행 의도·영속 기록·전송 멱등성(실제 송신 금지) → D 영수증 복구 → E 릴리스 QA. M2-T5-A는 policy-gated Outbox/임대·재시도 기반으로 로컬 완료. 운영 PostgreSQL 멀티프로세스 및 003/004/005 마이그레이션은 환경/승인 준비 시 별도 수행
+- 사람 확인 필요: 실제 PostgreSQL 서버/CLI/Docker가 없어 운영 환경의 DB 다중 연결·멀티프로세스 검증은 미실행. 신규 `005_settlement_outbox.sql` 운영 마이그레이션도 미실행. 실제 시장별 토큰·정밀도/마진·위험·수수료 정책과 신뢰된 정책 승인자/금액은 운영자 확인이 필요하며 자동 생성·승인하지 않음. M2-T5-B는 정책 입력과 체결별 EIP-712 서명 검증만 구현. `forge`가 없어 Foundry 회귀 미실행. DB 실제 마이그레이션·API 배포·Sepolia broadcast는 승인 없이 수행하지 않음. 원격 push는 AutoPilot 작업에서 제외한다.
 
 ## 현재 TASK 문서
 
@@ -19,7 +19,7 @@
 - M2-T3 로컬 완료: `docs/tasks/M2-T3-order-api/{SPEC,TODO,RESULT,QA}.md` (운영 DB QA 이관)
 - M2-T4 완료 문서: `docs/tasks/M2-T4-price-time-matching/{SPEC,TODO,RESULT,QA}.md` (A~D 로컬 구현/검증 완료, 운영 E2E 이관)
 
-- 현재 M2-T5: `docs/tasks/M2-T5-settlement/{SPEC,TODO,QA,RESULT}.md` (A 로컬 완료, B~E 미완료)
+- 현재 M2-T5: `docs/tasks/M2-T5-settlement/{SPEC,TODO,QA,RESULT}.md` (A/B 로컬 완료, C~E 미완료)
 
 ## 저장소 복원 결과
 
