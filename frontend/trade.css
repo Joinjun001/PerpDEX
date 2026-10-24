@@ -267,3 +267,18 @@
   .trade-shell .chart-sample-range{padding-inline:14px;gap:6px}
   .trade-shell .chart-sample-range strong{font-size:10px}
 }
+
+
+/* UX-HL-04-A1 — clearly unavailable position-dependent order option. */
+.trade-shell .reduce-only-option{
+  margin:12px 14px 14px;padding:11px 12px;
+  background:#16222e;border:1px solid #324452;border-radius:9px;
+}
+.trade-shell .reduce-only-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+.trade-shell .reduce-only-option input:disabled{accent-color:#738391;cursor:not-allowed;opacity:.55}
+.trade-shell .reduce-only-option label{font-size:12px;font-weight:700;color:#bdcad5;cursor:not-allowed}
+.trade-shell .reduce-only-unavailable{
+  font-size:9px;font-weight:800;letter-spacing:.055em;color:#a6b8c7;
+  border:1px solid #4a5d6b;border-radius:4px;padding:3px 6px;margin-left:auto;
+}
+.trade-shell .reduce-only-help{font-size:11px;line-height:1.55;color:#90a6b7;margin:8px 0 0}

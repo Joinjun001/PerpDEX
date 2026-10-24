@@ -73,6 +73,13 @@ PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성�
 - **UX-HL-03-B2 (Pending browser)**: 실제 모바일 테이블 가로 스크롤/스크린리더 접근성 QA, 브라우저 미가용으로 미실행.
 - 실계정 조회/지갑 API 미준비로 계정 데이터 연결 게이트 계속 보류.
 
+### Hyperliquid 거래 편의 기능 UX 진행
+
+- **UX-HL-04-A1 (Local Completed, disabled only)**: 미인증 포지션/잔량·위험 정책으로 인해 사용할 수 없는 Reduce Only를 주문 폼에 명시적 비활성 옵션과 제한 이유로 표시. 실제 주문/API 및 데모 계산 미연결. 신규 2건 포함 프런트 140/140 PASS. 문서 docs/tasks/UX-HL-04-reduce-only-availability/.
+- **UX-HL-04-A2 (Pending browser)**: Reduce Only 비활성 컨트롤의 실제 모바일/키보드/스크린리더 인수. 샌드박스 지원 환경 필요.
+- **UX-HL-04-B1 (Next independent)**: 미인증 Available/Reserved/Position Margin이 실제 보유값으로 오인되지 않도록 미연결 UI 강화.
+- **UX-HL-04 execution (Dependent)**: 서명, Reduce Only 위험 정책, 포지션 감소·잔량 검증 및 M5~M8 승인 뒤 별도 구현.
+
 ### Hyperliquid 주문 티켓 UX 진행
 
 - **UX-HL-02-A (Local Completed)**: Market/Limit DEMO 입력 전환, Limit Price 범위·형식 검사, 선택 시장 MOCK 가격과 유형별 명목가치·참고 증거금/미리보기. 64/64 프런트 검증 PASS. 문서: docs/tasks/UX-HL-02-order-ticket/.
