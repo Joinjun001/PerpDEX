@@ -135,3 +135,16 @@ docker compose up -d
 - `cd backend && node --experimental-strip-types --test test/m2-end-to-end.test.ts`는 **실제 HTTP 서명 주문 → 체결 → 영속 정산 대기 → 승인 서명 검증 → 로컬 ABI 모의 실행 → 모의 영수증 결과/불확실 상태 → DB 재시작 및 DDL 재적용**을 검증합니다.
 - 전체 절차·운영 승인 게이트는 [`docs/releases/M2-LOCAL-ACCEPTANCE.md`](docs/releases/M2-LOCAL-ACCEPTANCE.md)에 작성했습니다.
 - 현재 M2는 **로컬 테스트/모의 정산까지만 통과**했으며 실제 온체인 자금 이동이나 운영 릴리스는 구현·검증·승인되지 않았습니다.
+
+## M2 로컬 실 PostgreSQL/Foundry 검증 (운영 DB 사용 금지)
+
+실제 PostgreSQL의 복수 연결·잠금·트랜잭션과 Foundry 컨트랙트 검증을 위한 절차/결과는 [`docs/releases/M2-LOCAL-PG-FOUNDRY-QA.md`](docs/releases/M2-LOCAL-PG-FOUNDRY-QA.md)를 참고하세요. 기존 `npm test`는 PGlite/HTTP 기반이며, 실제 PostgreSQL 검증은 **명시적으로 생성한 임시 Unix 소켓 전용 서버**와 전용 테스트 DB가 있어야 실행할 수 있습니다.
+
+```bash
+cd backend
+PERPDEX_TEST_PG_SOCKET=/tmp/perpdex-pg-check/socket npm run test:postgres-local
+cd ../contracts
+forge build && forge test -vv
+```
+
+`test:postgres-local`은 고정 이름의 개발 DB와 임의의 고유 스키마에서만 작동하며 운영 `DATABASE_URL`을 사용하지 않습니다. 외부 RPC/배포/실토큰 이동은 하지 않습니다.

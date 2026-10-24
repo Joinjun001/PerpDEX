@@ -32,3 +32,11 @@
 - `node --experimental-strip-types --test test/m2-end-to-end.test.ts`에서 신규 **3/3 통과**: ① 실제 HTTP 주문 3건/서명·FIFO 잔량/체결 2건/Outbox·정책·승인·dry-run·모의 영수증/모순 UNKNOWN·DB 재시작 ② 정책 실패/위조 승인/HTTP 중복 주문 회귀 ③ 로컬 migration 001~007 반복 적용 및 순서 오류 거부.
 - 장기 운영 및 외부 체인 QA는 미검증. `cd backend && npm run build` TypeScript 검사 **통과**. 전체 `cd backend && npm test` **149/149 passed, 0 failed** (기존 146 + 신규 3).
 - 실 PostgreSQL 멀티프로세스, 운영 환경별 DDL/권한/백업·복구, Foundry/Solidity 자동회귀, 실제 정책 신뢰 경계, 송금·settledTrades RPC·chain finality/reorg, API 배포, 원격 push 등은 테스트/실행하지 않았다. 사람의 명시적 승인 및 환경 제공 없이는 실운영 인수를 완료할 수 없다.
+
+## 2026-10-24 — 사용자 승인된 실제 PostgreSQL·Foundry 로컬 QA
+
+- Solidity Foundry `/root/.foundry/bin/forge` 1.8.5: `forge build` 성공, `forge test -vv` **35/35 passed** (4개 suite), accounting invariant **128,000 calls, 0 reverts**.
+- Postgres server 15.19 실제 실행; TCP listener 없음. `PERPDEX_TEST_PG_SOCKET=/tmp/perpdex-pg-check/socket npm run test:postgres-local` **4/4 passed × 3회 (서버 재시작 후 1회 포함)**. 001~007 DDL, 실제 복수 PG 연결의 중복 주문/nonce·부분 체결·Outbox 멱등성/잠금, `FOR UPDATE SKIP LOCKED`, 매칭 중 SQL 오류 시 원자 롤백/정상 재시도 검증.
+- Test source는 고정 로컬 DB 사용자·DB 이름과 `/tmp` 사설 Unix 소켓을 강제하며, 운영 `DATABASE_URL`·실 키·실체인 RPC는 참조하지 않는다.
+- Node TypeScript·기존 백엔드 전체 회귀 결과는 최종 실행 후 추가 기록. 여러 OS 프로세스/운영 DB·Sepolia·실거래·경제 정책은 미검증.
+- 최종 `cd backend && npm run build` **통과**, `cd backend && npm test` **149/149 통과**. 실 PostgreSQL 임시 서버 재시작 전후 총 3회, 각 4/4 통과. 종료 시 PostgreSQL 임시 프로세스를 정지하고 Unix 소켓이 제거된 상태 확인.

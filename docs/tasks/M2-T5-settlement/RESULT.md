@@ -45,3 +45,12 @@
 - `docs/releases/M2-LOCAL-ACCEPTANCE.md` 신규: 로컬 복원/검증 명령, 사람 승인 전 운영/Foundry/금융·리스크 정책·실 DB/체인 검증 대기 게이트 명확화. README의 실제 `npm run start` 스크립트 및 마이그레이션 안내 정정.
 - `cd backend && npm run build` 성공 및 전체 `npm test` **149/149 통과** (기존 146 + 신규 3).
 - 이 단계는 실제 온체인 트랜잭션 경로를 **추가하지 않았다**. `MOCK_VERIFIED`를 실 자금 이전 또는 M2 운영 릴리스로 주장하지 않는다. 로컬 QA를 마쳤더라도 실운영 승인 대기가 남아 있다.
+
+## 2026-10-24 — PostgreSQL 및 Foundry 로컬 환경 승인 후 실검증
+
+- 시작 Git clean, HEAD `2f2af87`, 원격 대비 7개 로컬 커밋 앞섬. PROJECT_STATE/ROADMAP/M2-T5 SPEC·TODO·QA·RESULT 및 런북 확인.
+- `forge` 1.8.5 기존 설치를 확인하고 `contracts/`에서 `forge build`, `forge test -vv`: **35 tests passed / 0 failed**. Liability invariant **128,000 calls** 0 reverts (256 runs). 실체인 배포·브로드캐스트 없음.
+- PostgreSQL 15.19 서버 패키지/CLI를 `/tmp`에만 압축 해제하고 `nobody` 사용자의 외부 TCP 비활성 Unix socket 전용 테스트 서버로 기동. `perpdex_autopilot_test` 고정 테스트 DB와 테스트별 고유 `perpdex_qa_*` 스키마 사용. OS 시스템 서비스 등록·운영 DB 접근 없음.
+- `backend/qa/postgres-local.test.ts` 신규 및 `backend/package.json`에 `test:postgres-local` 명령 추가. 실제 PostgreSQL 연결 4개 검증을 두 번 반복하고 서버 재시작 후 한 번 더 실행 **모두 통과**. SQL 001~007, pg Pool 중복 nonce·부분 매칭, 진짜 `SKIP LOCKED` 잠금, 주문/nonce 롤백 및 재시도 검증.
+- 작업 내역·재현 방법과 잔여 운영 게이트는 `docs/releases/M2-LOCAL-PG-FOUNDRY-QA.md`에 기록. 경제/마진·정책 실인증/실정산/스테이징·운영 DB 인수는 자동 판단하지 않음.
+- 전체 백엔드 149/149 회귀 통과 및 타입 검사 성공. 개발용 PostgreSQL 클러스터는 결과 확인 후 `pg_ctl stop`으로 **정지**하여 외부 DB 서버/소켓을 남기지 않았다. Foundry 로컬 테스트는 35/35 통과했고 체인 송신·배포·원격 push는 없었다.

@@ -65,3 +65,11 @@ M2-T4의 커밋된 `order_fills`로부터 검증 가능한 정산 후보를 만�
 - 별도 실패 경로는 **HTTP에 이미 반영된 체결**이어도 Outbox 준비 미완료·위조 승인 금액이면 정산 지시가 생성되지 않으며, 중복 HTTP 주문 전송이 새로운 체결을 발생시키지 않는지 검사한다.
 - 001~007 각 마이그레이션 파일은 로컬 DB에서 지정된 순서로 재적용할 수 있어야 하며, 선행 스키마 없이 007을 단독 적용하는 잘못된 순서는 DB 오류로 거부된다. 운영 DB에서는 테스트 프로세스로 마이그레이션을 실행하지 않는다.
 - `docs/releases/M2-LOCAL-ACCEPTANCE.md`의 사람 확인 게이트가 남아 있는 동안 **M2의 로컬 기술 인수만 완료**로 기록한다. 실제 PostgreSQL 다중 연결, 외부 정책·리스크 승인, 실제 체인 RPC/실자산·영수증/블록 finality, Foundry 테스트·운영 마이그레이션·배포는 별도 승인이 필요하고 현재 로컬 모의 성공으로 대체되지 않는다.
+
+## M2 승인된 후속 QA — 개발용 PostgreSQL/Foundry 실환경 회귀
+
+- 사용자가 개발용 PostgreSQL 구성과 Foundry 로컬 테스트에 명시적으로 동의한 후에만 수행한다. 운영 DB/실체인 송신·자격증명·push는 승인하지 않은 상태를 유지한다.
+- 개발용 PostgreSQL 15는 외부 포트 없이 Unix socket 및 고정 전용 DB `perpdex_autopilot_test`에서만 테스트하고, 매 테스트마다 분리된 `perpdex_qa_*` 스키마에 `001~007`을 적용한다. `backend/qa/postgres-local.test.ts`는 서버 호스트·DB/사용자/접속 방식 가드를 유지하며, 의도치 않은 데이터베이스 연결은 오류로 차단한다.
+- 실제 pg Pool 다중 연결 nonce/시장 매칭 직렬성, Outbox `FOR UPDATE SKIP LOCKED`와 롤백 후 안전한 재시도 등의 차이를 PGlite 환경과 구분해 검증한다.
+- Foundry는 순수 로컬 `forge build && forge test -vv`로 역할/담보/정산/withdraw 계약 및 fuzz/invariant를 재검증한다. 리허설/온체인 방송/실자산은 없음.
+- 이 검증 이후에도 승인된 시장경제·담보 위험 모델, 실제 스테이징 운영/백업·권한, 멀티프로세스, 실체인 영수증 검증은 별도 게이트다.
