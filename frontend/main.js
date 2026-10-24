@@ -25,6 +25,11 @@ function updateMarket(){
   ch.className=m.change>=0?'positive':'negative';
   byId('pair-icon').textContent=tickets[view.market];
   byId('pair-icon').className='pair-icon '+(view.market==='BTC'?'coin-btc':view.market==='ETH'?'coin-eth':'coin-sol');
+  byId('market-stats-symbol').textContent=m.symbol+'-USD-PERP';
+  byId('market-stats-reference').textContent=FORMAT_USD.format(m.price);
+  const sampleChange=byId('market-stats-change');
+  sampleChange.textContent=(m.change>=0?'+':'−')+Math.abs(m.change).toFixed(2)+'%';
+  sampleChange.className=m.change>=0?'positive':'negative';
   byId('reference-price').textContent=FORMAT_USD.format(m.price);
   byId('quantity-unit').textContent=m.symbol;
   byId('input-unit').textContent=m.symbol;

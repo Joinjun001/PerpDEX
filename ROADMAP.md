@@ -44,6 +44,12 @@
 
 PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성은 **Hyperliquid**를 주요 참고 제품으로 삼는다. 정보 계층·주문 조작 편의성·포지션/주문 이력 통합을 참고하되 브랜드·원본 화면·코드를 복제하지 않는다. P0: 시장 정보 헤더, 차트/호가/주문 3열 터미널, 포지션/현재 주문/이력 하단 탭, Market/Limit 티켓. 자세한 구현 우선순위 및 안전 기준: `docs/architecture/HYPERLIQUID-UX-REFERENCE.md`. Sepolia 기반 오프체인 아키텍처를 Hyperliquid 자체 L1과 동등하다고 표현하지 않는다.
 
+### Hyperliquid UX TASK 진행
+
+- **UX-HL-01-A (Local Completed)**: 차트·호가/최근 체결·주문 폼 3열 터미널, 반응형 시장 정보 바, 고정 MOCK reference/change와 미연결 Mark/Oracle/Funding/OI 구분. 프런트 테스트 15/15 PASS. 문서: docs/tasks/UX-HL-01-terminal-layout/.
+- **UX-HL-01-B (Next)**: Positions/Open Orders/Order History/Trade History/Funding History 하단 계정 탭 및 빈 상태·접근성.
+- **UX-HL-01-C (Follow-up)**: 실제 브라우저 너비별 시각 확인 및 모바일·접근성 보완.
+
 ## M9 — Sepolia 테스트넷 무기한 선물 거래 MVP (신규 최종 목표)
 
 **사용자 목표:** 메인넷 실자금이 아닌 Ethereum Sepolia에서 무가치 테스트 담보로 MetaMask 연결 → 입금 → EIP-712 signed 주문 → BTC-USD-PERP Long/Short 체결 → 포지션 종료/정산 → 출금까지 검증 가능한 서비스. 상세 인수 조건: docs/releases/SEPOLIA-TESTNET-TRADING-MVP.md.
