@@ -18,6 +18,7 @@ const migrations = [
   "../sql/006_settlement_intents.sql",
   "../sql/007_settlement_reconciliations.sql",
   "../sql/008_perp_margin_ledger.sql",
+  "../sql/009_perp_sim_orders.sql",
 ];
 
 try {

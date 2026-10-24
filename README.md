@@ -156,3 +156,9 @@ forge build && forge test -vv
 `backend/src/perp/margin-ledger.ts`는 멱등 `operationId`, 트랜잭션/행 잠금, 잔액 보존 검사를 통해 내부 계정의 `RESERVE`, `RELEASE`, `ALLOCATE`, `UNALLOCATE`만 지원합니다. **실제 자금 입금·잔액 발행/지급 API는 없고**, `backend/test/perp-margin-ledger.test.ts`의 테스트용 시작 잔액은 PGlite 테스트 코드에서만 주입하는 검증되지 않은 fixture입니다. 공개 주문·체결·청산·출금 경로에도 연결하지 않았습니다. `RELEASE`/`UNALLOCATE`가 향후 허가된 주문 취소·포지션 종료와 원자적으로 연결되기 전에는 거래소 기능으로 노출하면 안 됩니다.
 
 검증: `cd backend && npm run build && npm test` (전체 백엔드 174/174). 실제 거래소의 담보 보호는 M8 ClearingHouse 및 승인된 정책/실자산 검증 전까지 미구현입니다.
+
+## M3-T3 — 서명 선물 주문의 모의 예약/취소 (실거래 아님)
+
+`backend/src/perp/sim-order.ts`는 **SIMULATION_ONLY EIP-712 v2** 주문·취소 서명과 신뢰된 시장 정책 전체 해시/로컬 oracle 검증을 사용합니다. 주문 nonce/새로운 `perp_sim_orders` 저장/이중 분개 증거금 예약이 한 트랜잭션에서 성공 또는 함께 롤백되고, 별도 주문 취소 서명이 nonce tombstone/정확한 원래 예약금 해제를 원자적으로 처리합니다. `009_perp_sim_orders.sql`은 수동 관리자 마이그레이션 목록에만 추가되었고 운영 DB는 변경하지 않았습니다.
+
+이 함수는 **공개 주문 API, M2 v1 matching/fill, Vault, 실제 자산/온체인 실행에 연결하지 않았습니다**. 포지션·위험 엔진 없는 부분 체결 후 예약 증감은 구현하지 않았고, 실거래용 collateral/수수료/청산 정책이 승인되지 않았으므로 모의 계산액을 실제로 사용할 수 없습니다. 테스트: `cd backend && node --experimental-strip-types --test test/perp-sim-order.test.ts`.
