@@ -14,6 +14,8 @@ UX-HL-02-A: Market/Limit 주문 모드와 Limit Price를 입력해 MOCK 명목�
 
 UX-HL-02-B1: order-review.mjs의 구조화된 9항목 읽기 전용 주문 검토와 닫기/Escape/초점 복귀, 수량/Limit 오류 접근성 개선을 추가했습니다. 서버·지갑·체결 0건 및 수수료·펀딩·청산 미계산을 명시합니다. 실제 주문 실행/API 연결은 없습니다. TASK docs/tasks/UX-HL-02-order-ticket/.
 
+UX-HL-02-B2-A: order-interactions.test.mjs는 실제 main.js를 테스트용 DOM에 import하여 Market/Limit·Long/Short·시장/수량/가격/레버리지 전환과 모의 submit·Escape·오류 포커스를 검증합니다. 실제 브라우저 렌더링·스크린리더 인수를 대체하지 않습니다.
+
 ## 페이지 구조
 
 - index.html (서비스 소개): 프로젝트 비전, 기술 구조, 개발 로드맵, 거래 화면 진입 버튼. 거래 입력/차트를 포함하지 않습니다.

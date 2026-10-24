@@ -19,3 +19,13 @@
 - index.html 고유 ID 4개, trade.html 고유 ID 54개, HTMLParser 태그 구조 및 중복 ID 검사 PASS. connect-src none 및 프런트 JS 외부 요청/지갑/실체인 API 없음; git diff --check PASS.
 - 실제 chromium/Playwright/Puppeteer 미가용으로 픽셀 렌더링·브라우저 키보드·스크린리더 QA는 미실행. 가짜 DOM 단위 테스트가 실제 브라우저 인수를 뜻하지 않음.
 - 실계정/메인넷/Sepolia/백엔드 거래/실제 주문·자산 처리/오라클/경제 리스크 검증은 미수행, MOCK 가격 참고 금액만 산출.
+
+## 2026-10-25 UX-HL-02-B2-A 이벤트 통합 QA
+
+- 시작 main HEAD 0c0f391, clean, origin/main 대비 ahead 8. PROJECT_STATE, ROADMAP, Hyperliquid reference, UX-HL-02 SPEC/TODO/QA/RESULT 및 실제 frontend 코드 확인.
+- 원격 명령 검색으로 chromium, chromium-browser, google-chrome, firefox, Node playwright/playwright-core/puppeteer/puppeteer-core/jsdom/happy-dom/linkedom 부재 확인. 설치·권한 우회 시도 없음.
+- 신규 frontend/order-interactions.test.mjs 7/7 PASS: 실제 main.js를 테스트용 DOM 객체에 import하여 이벤트 dispatch. MOCK 차트/호가 초기화, Market/Limit·Long/Short 전환, Limit·quantity 오류/disabled 상태, submit preventDefault·리뷰 포커스·Escape/닫기, 시장/가격/레버리지/quick quantity 변경에 따른 이전 결과 숨김, 네트워크 호출 미실행 검사.
+- frontend/main.js: 비정상 입력의 프로그램적/키보드 form submit에도 리뷰 열지 않으며 수량 또는 Limit Price 입력으로 포커스 이동. 기존 role alert/aria-invalid를 활용.
+- Node 프런트엔드 전체 79/79 PASS (기존 72 + 신규 7), JavaScript 문법 검사 및 npm --prefix backend run build (tsc --noEmit) PASS.
+- 테스트용 DOM은 브라우저 레이아웃·기본 키 이벤트·스크린리더·실제 포커스 정책을 구현하지 않음. **실제 데스크톱·태블릿·모바일 시각/터치/보조공학 검증은 미실행**.
+- 실계정·API·지갑·체인/실주문 연결 없음. 변경은 프런트 로컬 테스트/오류 포커스 및 한국어 문서 한정, push/배포 없음.

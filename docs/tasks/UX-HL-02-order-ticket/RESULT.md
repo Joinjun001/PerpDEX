@@ -18,3 +18,10 @@
 - frontend/order-review.test.mjs 신규 8건, 기존 정적 회귀 2곳 검사 위치 조정. 프런트 전체 72/72 PASS, JS 문법·백엔드 TS build·HTML 구조·CSP 및 격리 검사 PASS.
 - 브라우저 시각·실보조공학 인수는 미실행. 실제 계정 API/지갑/거래/온체인 및 push·배포 없음.
 - 다음 UX-HL-02-B2: 실제 브라우저/모바일/키보드 상호작용 QA 또는 가능한 독립적 접근성/통합 QA.
+
+## 2026-10-25 UX-HL-02-B2-A — 로컬 이벤트 통합 완료
+
+- 신규 frontend/order-interactions.test.mjs: 실제 main.js import·모의 DOM으로 7개 통합 이벤트 시나리오 실행. 기존 단위/정적 테스트와 별도로 버튼 클릭·입력·폼 submit·Escape·오래된 리뷰 처리 확인.
+- frontend/main.js: 유효하지 않은 quantity 또는 Limit Price가 있는 form submit 시 결과를 보이지 않게 하고 오류 필드에 focus. 정상 미리보기 흐름은 기존 유지.
+- 프런트 79/79 PASS, JS/TypeScript 빌드 PASS. 실제 browser/viewport/스크린리더는 미실행.
+- 다음 UX-HL-02-B2-B: 지원 브라우저 환경 마련 시 실제 데스크톱·태블릿·모바일/키보드/접근성 인수. 브라우저가 없으면 독립 UX TASK로 분리하며 현재 통합 테스트를 실제 브라우저 완료로 간주하지 않음.

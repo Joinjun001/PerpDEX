@@ -8,5 +8,8 @@
 - [x] B1-1 9항목 모의 주문 검토 패널과 textContent 안전 DOM 렌더러
 - [x] B1-2 닫기/Escape·키보드 포커스 복귀, quantity/Limit Price 오류 접근성 개선
 - [x] B1-3 신규 8건 및 전체 72건 회귀, JS/TS/HTML/CSP 검증
-- [ ] B2 실제 브라우저·모바일·키보드·스크린리더 상호작용 인수 또는 독립 접근성 QA
+- [x] B2-A1 기존 browser binary/Playwright/Puppeteer 실행 가능 여부 점검: 미가용, 설치·우회 없음
+- [x] B2-A2 실제 main.js 이벤트 통합 테스트: Market/Limit·Long/Short·시장·가격·수량·레버리지/preview·닫기/Escape/stale 결과
+- [x] B2-A3 invalid submit을 quantity/Limit 필드로 포커스 보내고 결과 생성 차단
+- [ ] B2-B 실제 브라우저·모바일·스크린리더/키보드와 viewport 레이아웃 인수 (환경 미가용)
 - [ ] C1 환경이 갖춰졌을 때 wide/tablet/mobile 브라우저 실제 상호작용 검증 및 시각 인수

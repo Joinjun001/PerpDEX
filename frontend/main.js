@@ -144,11 +144,22 @@ function displayOrderPreview(event){
     });
     panel.classList.remove('error');
     renderDemoOrderReview(panel,document,review,{onClose:dismissDemoReview});
-  }catch(err){
-    panel.classList.add('error');
-    panel.textContent='미리보기를 생성할 수 없습니다. 가격·수량·레버리지 입력을 확인하세요.';
-    panel.hidden=false;
-    panel.focus({preventScroll:true});
+  }catch{
+    // A keyboard-triggered form submission can occur even when the preview
+    // button is disabled. Route focus to the failing field rather than a
+    // generic status panel; no preview/order should be created.
+    renderTicket();
+    panel.hidden=true;
+    if(!validPreviewQuantity(byId('quantity').value)){
+      byId('quantity').focus();
+    }else if(view.orderType==='LIMIT'&&!validPreviewLimitPrice(byId('limit-price').value)){
+      byId('limit-price').focus();
+    }else{
+      panel.classList.add('error');
+      panel.textContent='미리보기를 생성할 수 없습니다. 입력값을 다시 확인하세요.';
+      panel.hidden=false;
+      panel.focus({preventScroll:true});
+    }
   }
 }
 byId('order-result').addEventListener('keydown',event=>{
