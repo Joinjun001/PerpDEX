@@ -33,7 +33,7 @@
 | --- | --- | --- |
 | **M3** | 고정소수점/신뢰 시장·오라클 입력, 이중 분개 격리 담보·주문 증거금 예약 | **Local foundation QA completed — M3-T1/T2-A/T3-A/T4 완료, M3-T2-B 및 T3-B는 실거래 승인/포지션·리스크 의존성 대기** |
 | **M4** | 순롱·순숏 포지션, 부분 체결·평균 진입가·realized/unrealized PnL, OI 영속 | **M4 local foundation complete — T1/T2/T3 로컬 구현 및 T4 임시 PostgreSQL seed 9/9·재시작 verify 2/2 완료; 운영/실체인 인수는 별도 승인 대기** |
-| **M5** | 레버리지·초기/유지증거금 위험 엔진, signed order v2·reduce-only·원자적 체결 게이트 | Next — M5-T1 순수 위험 수학·계산/승인 경계 먼저 구현 (운영 정책 미승인) |
+| **M5** | 레버리지·초기/유지증거금 위험 엔진, signed order v2·reduce-only·원자적 체결 게이트 | **In Progress — M5-T1-A 순수 IM/MM/Equity·레버리지 위험평가 로컬 구현, M5-T2 모의 pre-trade/reduce-only 다음** |
 | **M6** | funding index/rate 및 주기적 롱·숏 펀딩 분개·재시작 복구 | Planned (M5 선행) |
 | **M7** | 유지증거금 기반 부분/전체 청산, 보험기금·bad debt 및 위험 상태 머신 | Planned (M6 선행) |
 | **M8** | 전용 MarginVault/ClearingHouse, 포지션·PnL·출금 안전성, Foundry·실 PG 로컬 인수 | Planned (실체인/운영은 별도 승인) |
@@ -56,3 +56,8 @@ M3 시작 TASK: `docs/tasks/M3-T1-market-risk-foundation/{SPEC,TODO,RESULT,QA}.m
 
 - **M4-T1-A Local Completed:** `backend/src/perp/position-engine.ts`의 순수 One-way LONG/SHORT, 축소/전량 종료/반전, 정확한 cost basis 및 realized/unrealized BigInt PnL, stale policy/oracle 실패 안전 (신규 19개 테스트).
 - **M4-T2 (Local Complete):** 모의 계정별 fillId 영속 UNIQUE·append-only 포지션 이력/스냅샷 및 row lock + version CAS, 재시작·오류 롤백·장부 무결성 PGlite 15개. **M4-T3 (Local Complete):** 동일 거래 ID·시장·가격·수량으로 양측 원자적 스냅샷/이력, LONG=SHORT OI 집계·시장 락·PAIRED/UNPAIRED 격리. **M4-T4 (Local QA Complete):** 실 PostgreSQL 16-connection pool·최초 시장 생성/동시 체결/SQL rollback 및 서버 재시작 검증 (9+2개). **M5-T1 (Next):** 로컬 초기·유지증거금/레버리지·equity/risk 평가 엔진. M5 주문 위험/포지션 승인과 원자적 예약. 별도 승인 전 실 주문 활성화 금지.
+
+### 현재 활성 개발: M5 위험평가·사전 주문 게이트
+
+- **M5-T1-A (Local Completed):** `backend/src/perp/risk-engine.ts`에 trusted 테스트 정책/가격·M4 포지션·M3 3-버킷 이중분개 마진 스냅샷을 입력받는 순수 BigInt mark-based notional/IM/MM/Equity/realized·unrealized PnL/레버리지·위험 등급. 초과 손실·반올림·버전/계정 mismatch 실패 안전, 신규 21개 테스트. `executionAuthorized:false`와 `realizedPnlBookedAtomic:'0'`로 실 주문·정산 부재를 명확히 고정.
+- **M5-T2 (Next):** pure 모의 주문·reduce-only 방향/포지션 감소·post-fill 위험 예측/검증. 이후 M5-T3 별도 원자적 예약·양측 포지션 위험 게이트, M5-T4 개발용 PG 회귀. 실 시장 위험 숫자/자산/fee/funding/청산·M8 온체인 인출 정책은 사용자/운영 승인 전 비활성화.

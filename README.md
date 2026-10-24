@@ -176,3 +176,7 @@ forge build && forge test -vv
 ## M4-T4 — 로컬 PostgreSQL 실제 양측 체결/시장 OI QA
 
 개발용 PostgreSQL 15.19 임시 Unix 소켓만 사용해 `010`, `011` 스키마와 `paired-clearing.ts`의 동시 중복 체결/다른 ID 충돌, 시장 모드 최초 접근, 한쪽 journal 실패 시 전체 롤백 및 서버 재시작 후 체결 ID/OI 복구를 확인했습니다. 옵트인 명령은 `cd backend && PERPDEX_TEST_PG_SOCKET=/tmp/perpdex-pg-check/socket PERPDEX_TEST_PG_SCHEMA=perp_qa_<새 12자리 hex> PERPDEX_TEST_PG_PHASE=seed npm run test:postgres-paired`이며, 실제 테스트 서버 재시작 뒤 같은 schema로 `PERPDEX_TEST_PG_PHASE=verify` 실행합니다. 개발용 전용 DB에서만 사용 가능하며 **실거래/운영 DB에 적용하지 않습니다**. 자세한 검증 범위: `docs/tasks/M4-T4-postgres-paired-concurrency/QA.md`.
+
+## M5-T1 — 로컬 무기한 선물 IM/MM·레버리지 위험 평가
+
+`backend/src/perp/risk-engine.ts`는 테스트용 trusted MarketConfig/모의 오라클·M4 LONG/SHORT 포지션·M3 3-버킷 격리 마진 스냅샷을 받아 명목가치, 초기·유지증거금, 아직 계상되지 않은 실현손익과 미실현손익을 포함한 Equity, 레버리지·증거금 부족 등급을 **순수 계산만** 수행합니다. 항상 `SIMULATION_ONLY`와 `executionAuthorized:false`이므로 주문 승인·실 자금/증거금 이전·청산 권한은 없습니다. 테스트용 IM/MM/레버리지 비율을 운영 설정으로 사용하지 않습니다. 회계 전제·정밀도: `docs/tasks/M5-T1-isolated-risk-engine/SPEC.md`.

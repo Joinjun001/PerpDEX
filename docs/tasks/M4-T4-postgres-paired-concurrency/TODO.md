@@ -7,5 +7,5 @@
 - [x] SELL 쪽 journal 실패 및 최종 영수증 실패 시 양측/OI 원자적 rollback·같은 거래 재시도
 - [x] `pg_ctl restart`와 **별도 Node 프로세스**로 영속 OI/공통 receipt 및 비연속 replay 복구 검증
 - [x] TypeScript build 및 전체 백엔드 `npm test` 검증
-- [ ] M5-T1: 로컬 순수 IM/MM/Leverage/Equity 위험 엔진 및 `reduce-only` 후보 설계·구현
+- [x] M5-T1-A: 로컬 순수 IM/MM/Leverage/Equity 위험 엔진 (신규 21개 단위 테스트). reduce-only 모의 주문 게이트는 M5-T2로 분리
 - [ ] 운영자 승인 뒤에만 실 collateral·거래 정책·스테이징/운영 DB/RPC/배포 연동
