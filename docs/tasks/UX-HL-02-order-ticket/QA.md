@@ -52,3 +52,15 @@
 - node --test frontend/*.test.mjs **121/121 PASS** (기존 116 + 신규 5), 주요 JS 파일/테스트 node --check PASS, npm --prefix backend run build (tsc --noEmit) PASS.
 - HTMLParser: index.html ID 4개, trade.html ID 68개, 태그 중첩·중복 ID 없음. Static account tbody 5개 비어 있음, CSP connect-src none, leverage 오류 안내 ARIA 존재, git diff --check PASS.
 - 실 브라우저/터치/스크린리더·실거래·실계정·지갑/백엔드 API·Sepolia/운영 DB 미실행, push/배포 미수행.
+
+## 2026-10-25 UX-HL-02-E1 — 동일 시장 반복 선택 시 주문 초안 보존
+
+- 시작 main HEAD 91668ba, clean, origin/main보다 18개 커밋 앞섬. PROJECT_STATE/ROADMAP/Hyperliquid UX reference, UX-HL-02 SPEC·TODO·QA·RESULT 및 frontend/main.js, order-interactions.test.mjs 확인.
+- chromium/chromium-browser/google-chrome/google-chrome-stable/firefox 실행 파일과 Node Playwright/Puppeteer 미가용. 패키지 설치·권한 우회 없음. 기존 H2 및 UX-HL-02-D2 실제 브라우저 인수 미완료.
+- 수정 전 실제 DOM 이벤트 통합 테스트 2건 FAIL: 현재 BTC 버튼 재선택 시 사용자 Limit Price 60000.25가 기본 65240.50으로 덮임. 비정상 Limit 초안 invalid 역시 기본가로 바뀌는 문제 확인.
+- 수정: frontend/main.js 시장 버튼 click listener에서 b.dataset.market===view.market 경우 return. BTC→ETH 등 실제 변경은 updateMarket 호출 및 이전 미리보기 무효화 그대로 수행.
+- 신규 frontend/order-interactions.test.mjs 2건: 정상 Limit 초안/가격·수량·레버리지·차트·검토 패널의 상태/노드 유지, 잘못된 Limit 가격 오류 보존, 실제 다른 시장 변경 시 기본가·모의 시장 UI 갱신 및 과거 결과 숨김 검증.
+- Node 지정 실행형 테스트 16/16 PASS, 전체 node --test frontend/*.test.mjs 127/127 PASS (기존 125 + 신규 2).
+- node --check frontend/main.js 및 frontend/order-interactions.test.mjs PASS, npm --prefix backend run build (tsc --noEmit) PASS.
+- HTMLParser와 고유 ID 검사/CSP connect-src none·계정 empty state 및 git diff --check PASS (커밋 전 재검증).
+- 실제 Chromium 키보드·터치/보조공학·픽셀 배치, 지갑/인증 API·실거래/온체인·운영 DB/배포·원격 push 미실행.

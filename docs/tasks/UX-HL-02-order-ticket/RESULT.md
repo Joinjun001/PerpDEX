@@ -43,3 +43,10 @@
 - frontend/preview-model.test.mjs, order-ticket.test.mjs, order-interactions.test.mjs: 신규 5건으로 model/Market+Limit/실제 main.js 실행형 회귀 보완.
 - frontend 전체 121/121 PASS, JS syntax·backend TypeScript build·HTML ID/중첩·CSP·git diff PASS.
 - 다음 UX-HL-02-D2: 실제 브라우저에서 range input과 오류 안내/키보드/모바일 접근성 인수. 부재 시 실제 코드에서 재현된 결함이 있을 때만 별도 작은 TASK 진행. 실제 거래·API/지갑·push/배포 없음.
+
+## 2026-10-25 UX-HL-02-E1 — 로컬 완료
+
+- frontend/main.js: 이미 선택된 마켓 버튼 재클릭 때 불필요한 updateMarket을 건너뛰도록 해 사용자가 입력한 Limit Price, 오류/수량/레버리지 상태, 읽기 전용 검토 결과를 보존한다. 실제 마켓 변경 시 MOCK 가격 초기화와 기존 결과 숨김 동작 유지.
+- frontend/order-interactions.test.mjs: 정상/비정상 Limit 초안 반복 클릭의 수정 전 실패 2건 및 수정 후 통합 회귀. 프런트 전체 127/127 PASS.
+- JS syntax·backend TypeScript build·HTML 구조/ID·CSP/Git diff 검증 PASS. 계정/지갑·실거래/온체인·백엔드/API 연결 없음.
+- 다음 UX-HL-02-E2: 실제 브라우저가 준비된 경우 동일 시장 클릭 초안 보존·키보드·모바일 인수. 준비되지 않으면 중복 없는 실제 결함이 확인된 경우에만 새 작업을 시작한다.

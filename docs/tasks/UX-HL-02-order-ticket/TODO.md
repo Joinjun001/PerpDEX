@@ -25,3 +25,9 @@
 - [x] D1 화면에서는 원본 leverage string으로 validate, 오류 ARIA·버튼 disabled·키보드 submit 포커스 연결
 - [x] D1 새 검증 5건 포함 프런트 121/121, JS 문법·TypeScript build·HTML/ID/CSP·git diff 검사
 - [ ] D2 실제 브라우저에서 native range slider·키보드/터치/스크린리더 입력 인수 (환경 미가용)
+
+- [x] E1 동일 시장 클릭의 Limit 가격·미리보기 초기화 버그를 실제 main.js 이벤트 기반 테스트 2건으로 수정 전 재현
+- [x] E1 같은 시장 선택에 한해 updateMarket 호출을 건너뛰고 입력 중 초안/에러 상태·검토 결과 보존
+- [x] E1 BTC→ETH 같은 실제 시장 변경 시 MOCK 참조 가격 갱신·기존 검토 숨김 회귀 유지
+- [x] E1 전체 프런트 127/127 PASS, JS 문법/TypeScript 빌드/HTML 고유 ID·CSP/Git diff 검사
+- [ ] E2 실제 브라우저·모바일·키보드로 같은 시장 반복 클릭/초안 유지 시각 인수 (환경 미가용)

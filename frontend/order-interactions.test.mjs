@@ -217,6 +217,50 @@ test('B2-A actual form submit only renders review; Escape and close return focus
   close.dispatch('click');
   assert.equal(id('order-result').hidden,true);
 });
+test('UX-HL-02-E1 clicking current market preserves edited Limit price and valid review',async()=>{
+  const app=await boot(),id=app.id;
+  id('limit-type').dispatch('click');
+  id('limit-price').value='60000.25';
+  id('limit-price').dispatch('input');
+  id('quantity').value='0.2';
+  id('quantity').dispatch('input');
+  id('leverage').value='5';
+  id('leverage').dispatch('input');
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  const before={
+    price:id('limit-price').value,
+    priceText:id('reference-price').textContent,
+    quantity:id('quantity').value,
+    leverage:id('leverage').value,
+    chart:id('chart-line').getAttribute('d'),
+    rows:id('order-result').children[1],
+  };
+  app.market('BTC').dispatch('click');
+  assert.equal(id('limit-price').value,before.price);
+  assert.equal(id('reference-price').textContent,before.priceText);
+  assert.equal(id('quantity').value,before.quantity);
+  assert.equal(id('leverage').value,before.leverage);
+  assert.equal(id('chart-line').getAttribute('d'),before.chart);
+  assert.equal(id('order-result').hidden,false);
+  assert.equal(id('order-result').children[1],before.rows);
+  app.market('ETH').dispatch('click');
+  assert.equal(id('market-stats-symbol').textContent,'ETH-USD-PERP');
+  assert.equal(id('limit-price').value,'3405.20');
+  assert.equal(id('order-result').hidden,true);
+});
+test('UX-HL-02-E1 clicking current market preserves a draft with invalid Limit price',async()=>{
+  const app=await boot(),id=app.id;
+  id('limit-type').dispatch('click');
+  id('limit-price').value='invalid';
+  id('limit-price').dispatch('input');
+  assert.equal(id('limit-price-error').hidden,false);
+  assert.equal(id('preview-order').disabled,true);
+  app.market('BTC').dispatch('click');
+  assert.equal(id('limit-price').value,'invalid');
+  assert.equal(id('limit-price-error').hidden,false);
+  assert.equal(id('preview-order').disabled,true);
+});
 test('B2-A changes in symbol, side, quantity, leverage, limit and type hide stale preview',async()=>{
   const app=await boot(),id=app.id;
   const show=()=>{

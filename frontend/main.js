@@ -187,6 +187,9 @@ byId('order-result').addEventListener('keydown',event=>{
   }
 });
 document.querySelectorAll('[data-market]').forEach(b=>b.addEventListener('click',()=>{
+  // Re-selecting the active market is not a market change. Preserve the user's
+  // Limit draft, inline validation state and existing demo review.
+  if(b.dataset.market===view.market)return;
   view.market=b.dataset.market;
   updateMarket();
 }));
