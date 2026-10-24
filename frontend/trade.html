@@ -32,16 +32,16 @@
       <section class="market-strip" aria-label="시장 선택">
         <div class="strip-heading">MARKETS <span>DEMO DATA</span></div>
         <div class="market-picker" id="market-picker">
-          <button class="market-option selected" type="button" data-market="BTC" aria-pressed="true"><span class="coin coin-btc">₿</span><span><b>BTC <small>PERP</small></b><small class="market-price">$65,240.50</small></span><span class="market-change positive">+2.41%</span></button>
-          <button class="market-option" type="button" data-market="ETH" aria-pressed="false"><span class="coin coin-eth">◆</span><span><b>ETH <small>PERP</small></b><small class="market-price">$3,405.20</small></span><span class="market-change positive">+1.18%</span></button>
-          <button class="market-option" type="button" data-market="SOL" aria-pressed="false"><span class="coin coin-sol">◎</span><span><b>SOL <small>PERP</small></b><small class="market-price">$148.75</small></span><span class="market-change negative">−0.82%</span></button>
+          <button class="market-option selected" type="button" data-market="BTC" aria-pressed="true"><span class="coin coin-btc">₿</span><span><b>BTC <small>PERP</small></b><small class="market-price">$65,240.50</small></span><span id="market-change-BTC" class="market-change positive">+1.33%</span></button>
+          <button class="market-option" type="button" data-market="ETH" aria-pressed="false"><span class="coin coin-eth">◆</span><span><b>ETH <small>PERP</small></b><small class="market-price">$3,405.20</small></span><span id="market-change-ETH" class="market-change positive">+1.34%</span></button>
+          <button class="market-option" type="button" data-market="SOL" aria-pressed="false"><span class="coin coin-sol">◎</span><span><b>SOL <small>PERP</small></b><small class="market-price">$148.75</small></span><span id="market-change-SOL" class="market-change negative">−1.28%</span></button>
         </div>
       </section>
       <section class="market-metrics" aria-label="선택 시장 상태 지표">
         <div class="market-metrics-symbol"><small>SELECTED CONTRACT</small><strong id="market-stats-symbol">BTC-USD-PERP</strong><span>가상 샘플 시장</span></div>
         <dl class="market-metrics-values">
           <div class="metric-cell"><dt>Reference <span>MOCK</span></dt><dd id="market-stats-reference">$65,240.50</dd></div>
-          <div class="metric-cell"><dt>Sample change <span>MOCK</span></dt><dd id="market-stats-change" class="positive">+2.41%</dd></div>
+          <div class="metric-cell"><dt>Sample change <span>MOCK</span></dt><dd id="market-stats-change" class="positive">+1.33%</dd></div>
           <div class="metric-cell" title="실제 Mark Price 미연결"><dt>Mark Price</dt><dd class="metric-unavailable">— <small>미연결</small></dd></div>
           <div class="metric-cell" title="실제 오라클 미연결"><dt>Oracle Price</dt><dd class="metric-unavailable">— <small>미연결</small></dd></div>
           <div class="metric-cell" title="펀딩 정책 및 데이터 미연결"><dt>Funding</dt><dd class="metric-unavailable">— <small>미연결</small></dd></div>
@@ -52,7 +52,7 @@
         <div class="chart-column">
           <section class="panel chart-panel" aria-labelledby="chart-title">
             <div class="panel-heading chart-heading"><div class="pair-identity"><span class="pair-icon" id="pair-icon">₿</span><div><h2 id="chart-title">BTC / USD <span>Perpetual</span></h2><div class="pair-subline">가격 데이터: 고정 데모 샘플</div></div></div><div class="chart-actions" aria-label="예시 차트 시간단위 (변경 미지원)"><span class="pill pill-selected" title="고정 샘플 차트">SAMPLE</span></div></div>
-            <div class="quote-summary"><strong id="chart-price">$65,240.50</strong><span id="chart-change" class="positive">↗ +2.41%</span><span class="quote-label">REFERENCE PRICE · MOCK</span></div>
+            <div class="quote-summary"><strong id="chart-price">$65,240.50</strong><span id="chart-change" class="positive">↗ +1.33%</span><span class="quote-label">REFERENCE PRICE · MOCK</span></div>
             <div class="chart-wrap"><svg id="market-chart" viewBox="0 0 800 284" preserveAspectRatio="none" role="img" aria-label="시장별 고정 모의 가격 선 차트" aria-describedby="chart-sample-description"><defs><linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#43e1b4" stop-opacity=".22"/><stop offset="100%" stop-color="#43e1b4" stop-opacity="0"/></linearGradient></defs><g class="gridlines"><path d="M0 35 H800 M0 95 H800 M0 155 H800 M0 215 H800"/></g><path id="chart-area" fill="url(#chartFill)"/><path id="chart-line" fill="none" stroke="#43e1b4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle id="chart-point" r="5" fill="#43e1b4" stroke="#0e141d" stroke-width="3"/></svg><div class="chart-value-label" id="chart-value-label">$65,240.50</div></div>
             <div class="chart-axis" aria-label="가상 샘플 순서, 실제 시간 아님"><span>#01</span><span>#13</span><span>#26</span><span>#39</span><span>#52</span><span>#64</span></div>
             <div class="chart-sample-range" aria-label="가상 샘플 가격 범위">

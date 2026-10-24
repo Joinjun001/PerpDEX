@@ -87,13 +87,16 @@ export function describeSampleChart(market,points){
     throw new RangeError('Invalid synthetic sample summary');
   }
   const low=Math.min(...points),high=Math.max(...points);
-  const last=points.at(-1);
+  const first=points[0],last=points.at(-1);
+  const changePercent=(last/first-1)*100;
   return Object.freeze({
-    market,count:points.length,low,high,last,
+    market,count:points.length,low,high,first,last,changePercent,
     accessibilityText:
       market+'-USD-PERP 고정 생성 샘플 '+points.length+'개. '+
       '샘플 최저 '+FORMAT_USD.format(low)+', 최고 '+FORMAT_USD.format(high)+
       ', 마지막 '+FORMAT_USD.format(last)+'. '+
+      '샘플 첫 값 대비 마지막 변화 '+(changePercent>=0?'+':'−')+
+      Math.abs(changePercent).toFixed(2)+'%. '+
       '실제 시간축이나 실시간 시세, 거래 또는 오라클 가격이 아닙니다.',
   });
 }

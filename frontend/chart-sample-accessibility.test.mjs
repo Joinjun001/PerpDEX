@@ -24,6 +24,17 @@ test('E1 every market summary is derived only from its existing synthetic sample
     assert.match(result.accessibilityText,/실제 시간축이나 실시간 시세/);
   }
 });
+test('UX-HL-01-I1 synthetic change is derived from first and last sample, not fixture metadata',()=>{
+  for(const market of Object.keys(MARKETS)){
+    const points=sampleChart(market,64);
+    const summary=describeSampleChart(market,points);
+    const expected=(points.at(-1)/points[0]-1)*100;
+    assert.ok(Math.abs(summary.changePercent-expected)<1e-10);
+    assert.match(summary.accessibilityText,/샘플 첫 값 대비 마지막 변화/);
+    assert.ok(Math.abs(summary.changePercent-MARKETS[market].change)>0.01,
+      'known metadata/sample mismatch should be represented honestly');
+  }
+});
 test('E1 accessible summary stays accurate with custom synthetic sample counts',()=>{
   const pts=sampleChart('SOL',8);
   const result=describeSampleChart('SOL',pts);

@@ -18,19 +18,27 @@ function updateMarket(){
     const active=b.dataset.market===view.market;
     b.classList.toggle('selected',active);
     b.setAttribute('aria-pressed',String(active));
+    const sample=describeSampleChart(b.dataset.market,sampleChart(b.dataset.market,64));
+    const delta=sample.changePercent;
+    const pickerChange=byId('market-change-'+b.dataset.market);
+    pickerChange.textContent=(delta>=0?'+':'−')+Math.abs(delta).toFixed(2)+'%';
+    pickerChange.className='market-change '+(delta>=0?'positive':'negative');
   });
   byId('chart-title').replaceChildren(document.createTextNode(m.symbol+' / USD '),node('span','', 'Perpetual'));
   byId('chart-price').textContent=FORMAT_USD.format(m.price);
+  // The visible "Sample change" must describe the generated series itself,
+  // not the static fixture's trend-configuration metadata.
+  const change=describeSampleChart(view.market,sampleChart(view.market,64)).changePercent;
   const ch=byId('chart-change');
-  ch.textContent=(m.change>=0?'↗ +':'↘ −')+Math.abs(m.change).toFixed(2)+'%';
-  ch.className=m.change>=0?'positive':'negative';
+  ch.textContent=(change>=0?'↗ +':'↘ −')+Math.abs(change).toFixed(2)+'%';
+  ch.className=change>=0?'positive':'negative';
   byId('pair-icon').textContent=tickets[view.market];
   byId('pair-icon').className='pair-icon '+(view.market==='BTC'?'coin-btc':view.market==='ETH'?'coin-eth':'coin-sol');
   byId('market-stats-symbol').textContent=m.symbol+'-USD-PERP';
   byId('market-stats-reference').textContent=FORMAT_USD.format(m.price);
   const sampleChange=byId('market-stats-change');
-  sampleChange.textContent=(m.change>=0?'+':'−')+Math.abs(m.change).toFixed(2)+'%';
-  sampleChange.className=m.change>=0?'positive':'negative';
+  sampleChange.textContent=(change>=0?'+':'−')+Math.abs(change).toFixed(2)+'%';
+  sampleChange.className=change>=0?'positive':'negative';
   byId('limit-price').value=m.price.toFixed(2);
   byId('quantity-unit').textContent=m.symbol;
   byId('input-unit').textContent=m.symbol;

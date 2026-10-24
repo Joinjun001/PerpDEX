@@ -86,3 +86,11 @@
 - frontend/preview-model.test.mjs 2건, frontend/chart-sample-accessibility.test.mjs 1건 신규. 수정 전 FAIL 재현 후 전체 프런트 125/125 PASS, JS/TS 빌드·HTML 구조/CSP/diff PASS.
 - 기존 합성 마켓 가격·호가·체결·모의 주문/계정 탭/모바일 UX 보존. 실제 API/DB·지갑/거래/체인, 원격 push/배포 없음.
 - 다음 H2/G2: 브라우저/스크린리더 환경 준비 후 실제 UX 인수. 환경 미가용 시 독립 실제 결함이 재현될 때만 후속 TASK 수행.
+
+## 2026-10-25 UX-HL-01-I1 — 로컬 구현 완료
+
+- frontend/preview-model.mjs: 차트 64개 가상 샘플의 처음/마지막 값에서 변화율을 계산해 summary.changePercent/접근성 텍스트에 노출. 합성 가격 생성·미리보기 계산은 불변.
+- frontend/main.js: 마켓 카드 3곳, 차트 변화, 시장 상태 Sample change를 합성 시계열 변화율로 통일. 기존 색상/부호 표시 및 실제 선택 시장 변경 흐름 유지.
+- frontend/trade.html: 3개 마켓 변화율 동적 요소 ID와 새 정적 초기 샘플 변화율을 설정. mock 데이터/실시간 시세 미연결 고지 유지.
+- chart-sample-accessibility.test.mjs 1건 + order-interactions.test.mjs 1건 신규. hyperliquid-terminal.test.mjs 기존 계약 검사 변경. 전체 프런트 132/132, JS·TS 빌드/HTML ID·구조/CSP/git diff PASS.
+- 미완료 UX-HL-01-I2 실제 브라우저/스크린리더 시각 인수, 기존 H2 및 UX-HL-02-F2/E2. 백엔드 API·지갑·실자금·Sepolia 트랜잭션/운영 DB·push/배포 없음.

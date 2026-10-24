@@ -95,3 +95,11 @@
 - BTC/ETH/SOL primitive 문자열 중 MARKETS own key에 해당하는 것만 유효한 시장 ID로 허용. sampleChart, previewEstimate, describeSampleChart에서 동일 검증 함수를 사용.
 - 기존 합성 가격·수량·차트·주문 미리보기·계정 미연결·CSP/모바일 UX는 변경하지 않는다. 실계정/실거래 정보는 생성하지 않는다.
 - 수정 전 실패 테스트로 prototype key/객체 시장의 NaN 생성과 데이터 출처 검증 결함 재현 후 JS/TypeScript/HTML/CSP/Git 검증.
+
+## UX-HL-01-I1 (2026-10-25) — 가상 샘플 변화율과 UI 정합성
+
+- 발견: MARKETS.change는 합성 시계열 생성의 상승/하락 방향 구성값인데, 이전 시장 선택/차트/시장 지표는 이를 그대로 Sample change로 표시했다. 실제 64개 sampleChart 첫 값과 마지막 값의 변화율은 BTC +1.327...% / ETH +1.343...% / SOL -1.277...%여서 화면의 +2.41% / +1.18% / -0.82%와 불일치했다.
+- 실제 차트 64개 샘플의 첫 값과 마지막 값으로 계산한 changePercent를 describeSampleChart에서 반환하고 대체 설명에 동일 값/샘플 기준을 명시한다.
+- BTC/ETH/SOL 마켓 선택 버튼, 차트 change, Sample change 지표는 모두 같은 생성 샘플의 변화율을 소수 둘째 자리까지 표시한다. JS가 실행되지 않은 초기 정적 화면에도 같은 값과 출처를 반영한다.
+- 기존 MARKET 변경시 초안/검토 무효화·현재 선택 재클릭 보존, Market/Limit 금액, MOCK 차트의 수량/가격, 미연결 계정 및 CSP 유지. 실제 24시간 수익률·실시간 시세·가격 피드라고 주장하지 않는다.
+- 실제 브라우저/스크린리더 픽셀 QA는 별도 미완료. 수정 전 실패 테스트와 전체 오프라인 검증으로 구현 범위를 제한한다.

@@ -107,3 +107,14 @@
 - node --check preview-model.mjs, preview-model.test.mjs, chart-sample-accessibility.test.mjs PASS, npm --prefix backend run build (tsc --noEmit) PASS.
 - Python HTMLParser index.html 고유 ID 4개/trade.html 68개, 태그 중첩/ID 중복 PASS. 계정 tbody 5개 빈 상태, CSP connect-src none, 모델 외부 통신·서명 API 부재, git diff --check PASS.
 - 실제 브라우저/모바일·스크린리더, 지갑/backend API, 실계정/실주문, Sepolia/운영 DB/푸시/배포 미실행.
+
+## 2026-10-25 UX-HL-01-I1 — 샘플 변화율 표시 정합성 QA
+
+- 시작 main HEAD 4038929, Git clean, origin/main 대비 로컬 20커밋 앞섬. PROJECT_STATE, ROADMAP, Hyperliquid UX reference, UX-HL-02 SPEC/TODO/QA/RESULT, main.js/preview-model.mjs/테스트 확인.
+- Chromium/chromium-browser/google-chrome/firefox 및 Node Playwright/Puppeteer 미가용으로 UX-HL-02-F2/E2·UX-HL-01-H2 실브라우저 인수 미실행. 설치·권한 우회 없음.
+- 구체적 재현: sampleChart 64개 첫/마지막 샘플로 계산한 변화율 BTC +1.32715667%, ETH +1.34341744%, SOL -1.27747196%인데 기존 마켓 스트립/market-stats-change/차트 change는 고정 metadata인 +2.41%, +1.18%, -0.82% 표시. 신규 테스트 2건이 수정 전에 실패함.
+- 수정: describeSampleChart에 first/changePercent를 계산하고 screen-reader 설명에 샘플 첫 값 대비 마지막 변화 명시. updateMarket에서 모든 마켓 버튼과 선택 차트·지표를 같은 sampleChart(64)에서 계산한 변화율로 정합; 초기 HTML 숫자도 동기화. MARKETS.change는 MOCK 시계열 방향 생성용 설정으로 유지.
+- 신규 chart-sample-accessibility.test.mjs 1건(실제 샘플 delta와 접근성 설명), order-interactions.test.mjs 1건(BTC/ETH/SOL 클릭, 선택 카드/차트/지표 일치), 기존 hyperliquid-terminal.test.mjs 구조 테스트 1건을 새로운 계약으로 수정.
+- 수정 후 타깃 25/25 PASS, 전체 node --test frontend/*.test.mjs 132/132 PASS (기존 130 + 신규 2). JS node --check main.js/preview-model.mjs/관련 3개 테스트 PASS. npm --prefix backend run build (tsc --noEmit) PASS.
+- Python HTMLParser frontend/index.html 고유 ID 4개 / frontend/trade.html 고유 ID 71개, 태그/중복 ID PASS. 계정 tbody 5개 빈 상태 및 CSP connect-src none, git diff --check PASS.
+- 실제 브라우저 뷰포트/스크린리더·실계정/지갑/실시세 API/체인/DB 및 원격 push·배포는 실행하지 않았다.

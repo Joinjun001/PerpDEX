@@ -33,7 +33,8 @@ test('UX-HL-01-A: market-switch handler updates stats without network or wallet 
   for(const id of ['market-stats-symbol','market-stats-reference','market-stats-change']){
     assert.match(js,new RegExp("byId\\('"+id+"'\\)"));
   }
-  assert.match(js,/sampleChange\.className=m\.change>=0\?'positive':'negative'/);
+  assert.match(js,/sampleChange\.className=change>=0\?'positive':'negative'/);
+  assert.match(js,/describeSampleChart\(view\.market,sampleChart\(view\.market,64\)\)\.changePercent/);
   assert.match(js,/renderChart\(\);\s*renderBook\(\);\s*renderTrades\(\);\s*renderTicket\(\)/);
   assert.doesNotMatch(js,/\b(?:fetch|XMLHttpRequest|WebSocket|eth_sendTransaction)\s*\(/);
 });

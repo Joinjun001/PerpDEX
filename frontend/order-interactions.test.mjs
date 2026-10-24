@@ -100,6 +100,23 @@ test('B2-A main.js actually initializes MOCK chart, orderbook, ticket and blocke
   assert.equal(id('limit-price').disabled,true);
   assert.equal(id('order-result').hidden,true);
 });
+test('UX-HL-01-I1 market picker, metric and chart use the same computed mock sample change',async()=>{
+  const app=await boot(),id=app.id;
+  const {sampleChart,describeSampleChart}=await import('./preview-model.mjs');
+  for(const market of ['BTC','ETH','SOL']){
+    app.market(market).dispatch('click');
+    const summary=describeSampleChart(market,sampleChart(market,64));
+    const abs=Math.abs(summary.changePercent).toFixed(2)+'%';
+    const metric=(summary.changePercent>=0?'+':'−')+abs;
+    const chart=(summary.changePercent>=0?'↗ +':'↘ −')+abs;
+    const picker=id('market-change-'+market);
+    assert.equal(id('market-stats-change').textContent,metric);
+    assert.equal(id('chart-change').textContent,chart);
+    assert.equal(picker.textContent,metric);
+    assert.equal(picker.className,'market-change '+(summary.changePercent>=0?'positive':'negative'));
+  }
+  assert.match(id('chart-sample-description').textContent,/샘플 첫 값 대비 마지막 변화/);
+});
 test('B2-A Market/Limit and Long/Short simulated button clicks update ARIA and quote source',async()=>{
   const app=await boot(),id=app.id;
   id('limit-type').dispatch('click');
