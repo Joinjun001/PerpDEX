@@ -180,3 +180,7 @@ forge build && forge test -vv
 ## M5-T1 — 로컬 무기한 선물 IM/MM·레버리지 위험 평가
 
 `backend/src/perp/risk-engine.ts`는 테스트용 trusted MarketConfig/모의 오라클·M4 LONG/SHORT 포지션·M3 3-버킷 격리 마진 스냅샷을 받아 명목가치, 초기·유지증거금, 아직 계상되지 않은 실현손익과 미실현손익을 포함한 Equity, 레버리지·증거금 부족 등급을 **순수 계산만** 수행합니다. 항상 `SIMULATION_ONLY`와 `executionAuthorized:false`이므로 주문 승인·실 자금/증거금 이전·청산 권한은 없습니다. 테스트용 IM/MM/레버리지 비율을 운영 설정으로 사용하지 않습니다. 회계 전제·정밀도: `docs/tasks/M5-T1-isolated-risk-engine/SPEC.md`.
+
+## M5-T2 — 로컬 reduce-only 및 체결 후 위험 시뮬레이션
+
+`backend/src/perp/pre-trade-risk.ts`의 `evaluateSimPreTrade`는 **주문 전체 수량과 가상 부분 체결 수량을 구분**하고, LONG/SHORT 포지션의 reduce-only 위반/무단 반전·IM/MM/Equity/레버리지·reserved margin 위험을 체결 **전후** 순수 계산으로 평가합니다. 결과 `SIMULATION_ELIGIBLE`은 입력된 **모의 단일 체결의 진단**일 뿐 승인이나 실행권한이 아니며, `executionAuthorized:false`가 고정입니다. 실제 API 주문 접수·M3/M4 원장·실자산·체인·펀딩/수수료/청산에 연결하지 않았습니다. 검증 및 제약: `docs/tasks/M5-T2-pre-trade-risk/{SPEC,QA}.md`.
