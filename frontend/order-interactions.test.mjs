@@ -607,6 +607,26 @@ test('UX-HL-01-L1 recent trade container has non-live accessible list fallback',
   assert.match(html,/id="recent-trades"[^>]*role="list"[^>]*aria-label="BTC 합성 최근 체결 예시 목록/);
   assert.match(html,/실제 체결 시각·블록체인 기록 아님/);
 });
+test('UX-HL-01-O1 visible mock spread matches best displayed ask minus best displayed bid',async()=>{
+  const app=await boot(),id=app.id;
+  const {FORMAT_USD}=await import('./preview-model.mjs');
+  for(const market of ['BTC','ETH','SOL']){
+    app.market(market).dispatch('click');
+    const bestAsk=Number(id('asks').children.at(-1).children[0].textContent.replaceAll(',',''));
+    const bestBid=Number(id('bids').children[0].children[0].textContent.replaceAll(',',''));
+    assert.ok(bestAsk>bestBid,market+' has a positive synthetic spread');
+    assert.equal(id('book-spread').textContent,FORMAT_USD.format(bestAsk-bestBid));
+    assert.match(id('book-spread').getAttribute('aria-label')??'',new RegExp(market+'.*합성.*스프레드.*실제 호가 아님'));
+  }
+});
+
+test('UX-HL-01-O1 static spread defaults to unavailable until synthetic levels render',()=>{
+  const book=html.match(/<section id="market-depth-book"[\s\S]*?<\/section>/)?.[0]??'';
+  assert.match(book,/id="book-spread"[^>]*>—<\/output>/);
+  assert.match(book,/>SPREAD/);
+  assert.match(book,/>MOCK<\/small>/);
+  assert.doesNotMatch(book,/SPREAD <b>DEMO<\/b>/);
+});
 test('UX-HL-01-N1 mock book and trade visible quantity headers follow selected unit',async()=>{
   const app=await boot(),id=app.id;
   for(const market of ['BTC','ETH','SOL']){

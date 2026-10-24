@@ -74,6 +74,8 @@ PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성�
 - **UX-HL-01-M2 (Pending browser)**: 실제 샌드박스 Chromium에서 모바일·색각/스크린리더 4열 가독성 인수 미완료.
 - **UX-HL-01-N1 (Local Completed)**: BTC/ETH/SOL MOCK Order Book의 Size/Total, Recent Trades의 Size 헤더에 실제 선택 자산 수량 단위를 명시. 신규 2건 포함 프런트 152/152 PASS.
 - **UX-HL-01-N2 (Pending browser)**: 좁은 중간 패널에서 가시 단위 헤더와 ARIA 목록·행의 실제 모바일/스크린리더 인수 미완료.
+- **UX-HL-01-O1 (Local Completed)**: Order Book의 형식적인 SPREAD DEMO 문구를 BTC/ETH/SOL 합성 최우선 Ask-Bid 차액인 USD MOCK 스프레드로 변경. 가시 호가 차액·출처/ARIA 설명 테스트 2건 신규, 프런트 156/156 PASS.
+- **UX-HL-01-O2 (Pending browser)**: 스프레드 출력의 실제 모바일 레이아웃·키보드/스크린리더 인수는 Chromium 샌드박스 환경 의존.
 
 ### Hyperliquid 계정 탭 탐색 UX 진행
 

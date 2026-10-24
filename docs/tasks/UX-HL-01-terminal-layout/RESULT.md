@@ -134,3 +134,12 @@
 - frontend/order-interactions.test.mjs: 정적 BTC 단위와 실제 BTC·ETH·SOL 전환의 3개 헤더 및 ARIA 목록 일치 신규 회귀 2건.
 - 전체 프런트 152/152 PASS, 모든 프런트 JavaScript 문법, 백엔드 TypeScript 빌드, HTML/CSP/git diff 검사 PASS. 실제 브라우저 N2 인수는 샌드박스 실행 환경 확보 때만 진행.
 - 서버 API·실잔고·위험/정산 계산, 지갑·Sepolia 거래·운영 DB·push/배포/권한 변경 없음.
+
+## 2026-10-25 UX-HL-01-O1 — 로컬 MOCK Spread 표시 완료
+
+- frontend/trade.html: SPREAD DEMO 문구를 초기 — 출력, MOCK 출처와 실제 호가가 아니라는 접근성 설명을 갖춘 output으로 변경.
+- frontend/main.js: 기존 합성 최우선 Ask/Bid와 일치하는 USD 차액(2*depthStep)을 표시. 시장 변경 시 수치 및 접근성 설명 동기화.
+- frontend/trade.css: MOCK spread 텍스트 가독성 스타일 추가.
+- frontend/order-interactions.test.mjs: 실제 BTC/ETH/SOL 최우선가/스프레드 정합성 및 초기 MOCK 표기 회귀 2건. 수정 전 실패 확인.
+- 전체 프런트 156/156 PASS, JS syntax/TypeScript build/HTML/CSP/Git diff PASS.
+- 실제 호가·주문 체결·유동성·비용·위험 데이터는 미연결이며 백엔드 M5~M9, 지갑·온체인, 운영 DB 및 원격 Push·배포 제한 불변. O2 실브라우저 인수 별도 미완료.

@@ -169,3 +169,14 @@
 - 수정 후 실제 main.js 이벤트 테스트 포함 order-interactions.test.mjs 32/32 PASS, 전체 node --test frontend/*.test.mjs 152/152 PASS (기존 150+신규 2). frontend 모든 JS node --check PASS, npm --prefix backend run build (tsc --noEmit) PASS.
 - Python HTMLParser index.html/trade.html 구조 및 고유 ID, CSP connect-src none/계정 tbody 5개 비어 있음, git diff --check PASS.
 - 실제 Chromium 렌더링/스크린리더·모바일 뷰포트 인수, API·지갑/서명·실거래/실체인·운영 DB·원격 push/배포 미실행.
+
+## 2026-10-25 UX-HL-01-O1 — 합성 호가 스프레드 검증
+
+- 시작 로컬 main HEAD 072d5df, Git clean, origin/main 대비 32개 로컬 커밋 앞섬. PROJECT_STATE.md, ROADMAP.md, Hyperliquid UX reference, UX-HL-01 및 UX-HL-02 SPEC·TODO·QA·RESULT와 trade.html/main.js/모델·회귀 테스트 확인.
+- 브라우저 실행 전 점검: .local-browser-qa 안에 Playwright/Chromium 643MB가 설치돼 있으나 비특권 유저 runuser -u node -- unshare -Ur true는 Operation not permitted. no-sandbox·권한 우회 없이 UX-HL-02-J2/UX-HL-01-N2 및 O2 인수 보류.
+- 확인된 UX 누락: Order Book은 중앙 기준가와 SPREAD DEMO 문구만 노출. 최우선가 실제 차이 금액을 읽을 수 없는 상태. 신규 order-interactions.test.mjs 2건이 수정 전 FAIL(동적 book-spread ID 부재 및 정적 MOCK 상태 누락).
+- 변경: trade.html의 SPREAD 문구에 초기 —인 output#book-spread와 MOCK 고지 추가, trade.css에 출력값/고지 서식. main.js에서 화면에 이미 보이는 합성 최우선 매도가·매수가 사이의 2*depthStep을 FORMAT_USD 통화로 표시하고 시장별 합성 설명을 aria-label로 갱신.
+- 첫 수정의 실행형 테스트에서 Fake DOM이 HTML 초기 aria-label을 자동 수집하지 않아 1건 FAIL. 시장 변경 시 aria-label을 명시적으로 설정하도록 구현을 보완한 뒤 재검증.
+- BTC/ETH/SOL 각각 표시된 최우선 Ask(매도 목록 마지막 행)와 Bid(매수 목록 첫 행) 숫자의 차액을 검사하는 실제 main.js 테스트, 정적 비실거래 출처·초기 — 검사 2건 PASS. 대상 order-interactions 36/36, node --test frontend/*.test.mjs 전체 156/156 PASS (기존 154+신규 2).
+- 전체 frontend JS node --check, npm --prefix backend run build (tsc --noEmit), Python HTMLParser index.html/trade.html 구조·고유 ID 및 CSP connect-src none·계정 tbody 5개 빈 상태, git diff --check PASS.
+- 실제 브라우저/스크린리더 인수는 미수행. 실거래·지갑/서명·Sepolia 트랜잭션·운영 DB·원격 Push·배포/권한 변경 없음.

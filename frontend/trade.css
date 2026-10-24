@@ -308,3 +308,7 @@
 .trade-shell .trade-log-panel .trade-side{
   font-size:9px;font-weight:750;letter-spacing:.01em;text-align:right;
 }
+
+/* UX-HL-01-O1 — distinct synthetic spread label, not a live quote. */
+.trade-shell .market-column .book-mid output{font-weight:700;color:#c5d2dc}
+.trade-shell .market-column .book-mid small{font-size:8px;color:#8ca6b7}
