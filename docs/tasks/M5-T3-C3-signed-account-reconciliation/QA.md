@@ -48,3 +48,13 @@
 - 임시 별도 PGlite 신규 DB에 SQL 001~019 전체 적용: **19/19 PASS**; SQL 019 commit trigger 2개 설치 확인.
 - `git diff --check`: PASS.
 - 단일 전체 `npm test`, 실제 PostgreSQL 복수 세션·role 권한 검증 미실행. SQL 019의 검증 결과는 **현재 FULL-only** 범위에서만 의미 있으며, 부분체결/예약금 비례 배분/부분 취소/실현손익의 DB 실행 경로는 존재하지 않는다.
+
+## 2026-10-24 C3-C2-A 집계 M3 보존 검증
+
+- 신규 `backend/test/perp-signed-account-margin-conservation.test.ts`: **14/14 PASS** (signed 복수 OPEN, FILLED+신규 OPEN, CANCELED+다른 OPEN, 비서명 M3 RESERVE 잔여분 분리, 예약/포지션 잔고 직접 UPDATE 차단, M3 operation 무분개·반쪽 분개 COMMIT 거부, 서로 다른 nonce 동시 admission, signed 취소와 별도 admission 경합, 강제 두 번째 M3 posting 실패 전체 rollback, 중복 nonce 차단, 020 재적용, 과대 RESERVED 레거시 장부 migration preflight 거부).
+- 순차 관련 회귀 **12개 파일 129/129 PASS**: C3-C2-A, C3-C1 수량, C3-B 취소, C3-A 감사, C2-B2 A/B, C2-A, C1·M3·M4 연관 테스트. 실행 `node --experimental-strip-types --test --test-concurrency=1 ...` (이하 테스트 파일 전체는 코드/QA 참고).
+- `cd backend && npm run build`: PASS.
+- 별도 빈 PGlite 테스트 DB SQL 001~020: **20/20 PASS**, 신규 account aggregation 지연 트리거 4개.
+- `git diff --check`: PASS.
+- 전체 `npm test` 단일 실행 및 독립 연결의 실제 PostgreSQL 15/16 복수 트랜잭션 경쟁 검증은 미실행. PGlite Promise.allSettled 및 동일 WASM DB의 경쟁 시험을 PG 세션 교착/직렬성 증명으로 과장하지 않는다.
+- 초기 AVAILABLE 잔고는 fixture seed이며 custody/입금/실자금 존재 증빙이 아니다. SQL DB owner·DDL 권한으로 트리거를 비활성화할 수 있는 공격자 방어는 M5-T4 최소 권한/실 PG QA 이관.

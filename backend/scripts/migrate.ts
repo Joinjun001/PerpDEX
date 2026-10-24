@@ -29,6 +29,7 @@ const migrations = [
   "../sql/017_perp_signed_pair_executions.sql",
   "../sql/018_perp_signed_cancel_integrity.sql",
   "../sql/019_perp_signed_order_fill_progress.sql",
+  "../sql/020_perp_signed_account_margin_conservation.sql",
 ];
 
 try {

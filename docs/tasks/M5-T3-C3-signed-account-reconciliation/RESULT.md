@@ -38,3 +38,13 @@
 - `backend/scripts/migrate.ts`: 관리 전용 SQL 019 추가, 운영/실DB 실행하지 않음.
 - **검증**: 신규 focused 9/9 PASS, 관련 11파일 회귀 115/115 PASS, TypeScript build PASS, 별도 빈 PGlite SQL 001~019 적용 PASS, diff check PASS.
 - **미구현**: 부분 체결을 위한 잔여 IM 배분·취소/펀딩/수수료/실현 PnL·동시 외부 PostgreSQL 세션 안전성은 C3-C2/C3-C3/M5-T4로 이관. 정책값 임의 결정 없음.
+
+## 2026-10-24 C3-C2-A 실제 구현 결과
+
+**상태: 정책 없는 로컬 SIMULATION_ONLY M3 집계 커밋 검증 완료. C3-C2-B 별도 실 PostgreSQL 경합 QA 대기.**
+
+- 신규 `backend/sql/020_perp_signed_account_margin_conservation.sql`: signed 주문이 있는 계정/시장/담보 단위로 OPEN 예약 IM, FILLED 완료 IM, RESERVED/POSITION 버킷, append-only M3 posting 누적값 및 비서명 M3 잔여분을 COMMIT에서 대조한다. 불완전한 M3 작업 분개, 잘못된 계정 소유자, 버킷 경로 오류, 직접 SQL 잔고 변경을 거부한다.
+- SQL 020은 signed order, margin balance, margin operation, margin entry 쓰기에 별도의 DEFERRABLE 트리거 4개를 설치한다. 기존 signed 계정 장부가 불일치하면 관리자 마이그레이션 시 FAIL-CLOSED 사전 점검. `backend/scripts/migrate.ts`는 관리자 수동 실행 목록에 020을 포함하지만 운영 DB에 실행하지 않음.
+- 이전 SQL 015~019, EIP-712·nonce·FILLED terminal 영수증·취소 영수증 및 현재 FULL-only 실행 경로에는 기능 변경 없음. 비서명 예약의 남은 금액은 사용·인출 허가로 볼 수 없다.
+- 신규 focused **14/14 PASS**, 관련 회귀 **129/129 PASS**, TypeScript build PASS, SQL 001~020 빈 로컬 PGlite 적용 PASS, Git diff check PASS.
+- **잔여 작업:** C3-C2-B 실제 로컬 개발 PostgreSQL 독립 세션의 동시 admission·cancel·FULL race, lock ordering 및 role 최소 권한 검증. C3-C3 분할 증거금 할당/부분 체결은 안전 정책·영속 receipt 완성 전 비활성.
