@@ -207,6 +207,7 @@ function dismissDemoReview(){
   byId('preview-order').focus();
 }
 let reviewedQuantity=null;
+let reviewedLimitPrice=null;
 function displayOrderPreview(event){
   event.preventDefault();
   const panel=byId('order-result');
@@ -219,6 +220,7 @@ function displayOrderPreview(event){
     panel.classList.remove('error');
     renderDemoOrderReview(panel,document,review,{onClose:dismissDemoReview});
     reviewedQuantity=Number(byId('quantity').value);
+    reviewedLimitPrice=view.orderType==='LIMIT'?Number(byId('limit-price').value):null;
   }catch{
     // A keyboard-triggered form submission can occur even when the preview
     // button is disabled. Route focus to the failing field rather than a
@@ -270,8 +272,13 @@ for(const [type,id] of [['MARKET','market-type'],['LIMIT','limit-type']]){
   });
 }
 byId('limit-price').addEventListener('input',()=>{
+  const price=byId('limit-price').value;
+  // Only a currently visible Limit review with an unchanged valid price
+  // survives equivalent formatting edits (e.g. 60000.50 -> 60000.5).
+  const unchanged=view.orderType==='LIMIT'&&!byId('order-result').hidden&&
+    validPreviewLimitPrice(price)&&Number(price)===reviewedLimitPrice;
   renderTicket();
-  byId('order-result').hidden=true;
+  if(!unchanged)byId('order-result').hidden=true;
 });
 byId('leverage').addEventListener('input',()=>{
   renderTicket();

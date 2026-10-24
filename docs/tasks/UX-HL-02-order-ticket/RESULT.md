@@ -94,3 +94,10 @@
 - frontend/order-interactions.test.mjs: 실제 main.js 이벤트 2건 회귀 추가. 수정 전 실패 확인; 프리셋 버튼·모의 주문 리뷰/데이터·접근성 상태 보존.
 - 전체 프런트 160/160 PASS, JS 문법·TypeScript 빌드·HTML 구조/CSP/Git diff PASS. 서버/API/지갑/실거래 코드 변경 없음.
 - UX-HL-02-K2 실제 브라우저·스크린리더/모바일 인수는 샌드박스 지원 환경에서만 진행. 백엔드 M5~M9 상태·원격 Push/배포 제한 불변.
+
+## 2026-10-25 UX-HL-02-L1 — Limit Price 표기 동치 검토 보존 로컬 완료
+
+- frontend/main.js: 성공한 Limit DEMO 검토의 가격을 저장하고 유효한 가격 표현만 바뀐 경우 기존 검토 DOM을 유지. 실제 Limit 가격 변경·부적합 입력·닫힌 리뷰는 기존처럼 무효화.
+- frontend/order-interactions.test.mjs: 실제 main.js 입력 이벤트로 가격 동치의 리뷰 보존/9항목 동일성·검증 불합격/가격 변경 후 자동 복구 금지를 검증하는 신규 2건(수정 전 FAIL).
+- 전체 프런트 162/162 PASS, 모든 JS 문법/TypeScript build/HTML 구조·고유 ID/CSP/Git diff PASS.
+- 실제 브라우저 UX-HL-02-L2 인수 미완료. 주문 금액/위험 정책 변경, 서버·지갑·실거래·DB/Push/배포 없음.

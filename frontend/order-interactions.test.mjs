@@ -377,6 +377,52 @@ test('UX-HL-02-H1 active preset does not replace invalid draft unless quantity c
   assert.equal(id('quantity').value,'0.25');
   assert.equal(id('order-result').hidden,true);
 });
+test('UX-HL-02-L1 valid equivalent Limit Price editing preserves reviewed terms and DOM',async()=>{
+  const app=await boot(),id=app.id;
+  id('limit-type').dispatch('click');
+  id('limit-price').value='60000.50';
+  id('limit-price').dispatch('input');
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  const review=id('order-result').children[1];
+  const margin=id('margin').textContent;
+  for(const equivalent of ['60000.5','60000.50','60000.5']){
+    id('limit-price').value=equivalent;
+    id('limit-price').dispatch('input');
+    assert.equal(id('order-result').hidden,false,equivalent+' should not invalidate review');
+    assert.equal(id('order-result').children[1],review,'review should be reused');
+    assert.equal(id('margin').textContent,margin);
+    assert.equal(id('limit-price').getAttribute('aria-invalid'),'false');
+  }
+  id('limit-price').value='60000.51';
+  id('limit-price').dispatch('input');
+  assert.equal(id('order-result').hidden,true,'different Limit Price invalidates review');
+  id('limit-price').value='60000.50';
+  id('limit-price').dispatch('input');
+  assert.equal(id('order-result').hidden,true,'stale review must never be resurrected');
+});
+
+test('UX-HL-02-L1 invalid Limit Price remains blocked after equivalent changes',async()=>{
+  const app=await boot(),id=app.id;
+  id('limit-type').dispatch('click');
+  id('limit-price').value='60000.50';
+  id('limit-price').dispatch('input');
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  id('limit-price').value='60000.5';
+  id('limit-price').dispatch('input');
+  assert.equal(id('order-result').hidden,false);
+  for(const invalid of ['60000.500','6e4','0','60000.5x']){
+    id('limit-price').value=invalid;
+    id('limit-price').dispatch('input');
+    assert.equal(id('order-result').hidden,true,invalid+' must invalidate review');
+    assert.equal(id('limit-price').getAttribute('aria-invalid'),'true');
+    assert.equal(id('preview-order').disabled,true);
+  }
+  id('limit-price').value='60000.50';
+  id('limit-price').dispatch('input');
+  assert.equal(id('order-result').hidden,true);
+});
 test('UX-HL-02-K1 manual numeric-equivalent quantity editing preserves an existing demo review',async()=>{
   const app=await boot(),id=app.id;
   id('order-form').dispatch('submit');

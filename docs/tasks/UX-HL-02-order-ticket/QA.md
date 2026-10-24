@@ -129,3 +129,14 @@
 - 수정 후 대상 node --test frontend/order-interactions.test.mjs 40/40 PASS, 전체 node --test frontend/*.test.mjs 160/160 PASS (기존 158+신규 2), 모든 프런트 JS node --check PASS, npm --prefix backend run build (tsc --noEmit) PASS.
 - Python HTMLParser frontend/index.html, frontend/trade.html 중첩 태그·고유 ID, CSP connect-src none 및 빈 계정 tbody 5개, git diff --check PASS.
 - 실제 브라우저/보조공학/모바일 검증 미수행. 지갑/실계정/서명·실체인 거래·운영 DB·원격 Push·배포 미실행.
+
+## 2026-10-25 UX-HL-02-L1 — Limit Price 수치 동치 편집 검증
+
+- 시작 HEAD 545a6cc, main 작업 트리 clean, origin/main보다 35개 커밋 앞섬. PROJECT_STATE, ROADMAP, Hyperliquid UX 레퍼런스, UX-HL-02 SPEC/TODO/QA/RESULT 및 frontend/trade.html/main.js/preview-model.mjs/회귀 테스트 확인.
+- 브라우저: 프로젝트 로컬 .local-browser-qa Playwright/Chromium 약 643MB, 비권한 runuser -u node -- unshare -Ur true 실행은 Operation not permitted. Chromium 샌드박스 지원 불가. UX-HL-01-P2/UX-HL-02-K2/L2 실제 브라우저 인수는 미완료, --no-sandbox 우회 미실행.
+- 결함: DEMO Limit 검토 생성 후 입력 60000.50→60000.5는 동일 가격인데도 limit-price input 처리에서 검토가 무조건 닫힘. 신규 main.js 이벤트 테스트 2건 수정 전 FAIL.
+- 변경: frontend/main.js의 성공한 DEMO 검토 경로에 reviewedLimitPrice(유효 Limit 가격 숫자) 저장. limit-price 입력 시 LIMIT·가시적 검토·validPreviewLimitPrice 통과·reviewedLimitPrice와 수치 동치일 경우에만 검토를 유지. 다른 가격/부적합 문자열은 기존처럼 숨김.
+- 회귀: 동일값 표현 60000.50/60000.5 왕복의 기존 리뷰 DOM·참고 증거금 유지, 60000.51 실제 변경 시 숨김, 원래 가격 복귀 시 자동 복구 금지, 부적합 60000.500/6e4/0/60000.5x 차단 및 aria-invalid/disabled 확인.
+- 수정 후 node --test frontend/order-interactions.test.mjs 42/42 PASS, 전체 node --test frontend/*.test.mjs 162/162 PASS(기존 160+신규 2). 모든 프런트 JavaScript node --check, npm --prefix backend run build (tsc --noEmit) PASS.
+- Python HTMLParser 두 HTML의 태그/고유 ID, 정적 CSP connect-src none·미연결 계정 tbody 5개·실주문 차단, git diff --check PASS.
+- 실제 브라우저·스크린리더 인수 미실행. 지갑/실거래·Sepolia 트랜잭션·운영 DB·원격 push/배포·권한 우회 없음.

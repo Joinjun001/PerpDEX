@@ -68,3 +68,10 @@
 - [x] K1 Market/Limit 경로, 빠른 수량 프리셋/ARIA, MOCK 계정·Reduce Only 및 기존 입력 검증 모두 유지
 - [x] K1 프런트 전체 160/160·JS syntax·TypeScript 빌드·HTML 고유 ID·구조/CSP/git diff 검사
 - [ ] K2 실제 Chromium 모바일·키보드/스크린리더에서 표기만 바꾸는 입력과 검토 유지·무효화 동작 확인 (샌드박스 지원 환경 필요)
+
+- [x] L1 동일한 Limit Price 숫자 60000.50→60000.5 입력이 DEMO 검토를 불필요하게 숨기는 문제를 실제 main.js 이벤트 회귀 신규 2건 수정 전 FAIL로 재현
+- [x] L1 성공한 Limit 검토의 가격을 저장하고 유효한 수치 동치·가시적 리뷰일 때만 기존 리뷰 DOM 보존
+- [x] L1 가격 변경/부적합한 가격 입력은 결과 무효화하며 원래 가격 복귀 시 오래된 결과를 다시 보이지 않도록 검증
+- [x] L1 Market/Limit·수량/레버리지·MOCK 입력/리뷰 계산/실주문 차단 등 기존 기능 회귀 유지
+- [x] L1 프런트 전체 162/162, 전체 JS 문법·TypeScript build·HTML 구조·고유 ID/CSP/git diff 검사
+- [ ] L2 실제 샌드박스 Chromium의 모바일·키보드/스크린리더에서 Limit Price 동일값 편집/리뷰 유지·무효화 인수
