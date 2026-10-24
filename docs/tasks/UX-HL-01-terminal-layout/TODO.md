@@ -45,3 +45,9 @@
 - [x] I1 기존 고정 fixture change를 강제한 구조 회귀를 실제 샘플 change 검증으로 교체
 - [x] I1 전체 프런트 132/132, JS 문법/TypeScript build/HTML 구조·고유 ID/CSP/git diff 검증
 - [ ] I2 실제 브라우저·모바일·스크린리더에서 샘플 변화율과 부호/색상 동작 시각 인수 (브라우저 미가용)
+
+- [x] J1 임의 CSS --depth 패턴이 실제 누적 Total과 일치하지 않는 오류를 실제 main.js 이벤트 테스트 수정 전 FAIL로 재현
+- [x] J1 ASK/BID의 누적 Total을 기준으로 행 깊이를 해당 호가 측 전체 합성 수량 대비 백분율로 변경
+- [x] J1 BTC/ETH/SOL × ASK/BID 각 7행의 깊이/Total 비례, 최상위 100%/단조 방향, 범위·유효 숫자 검증
+- [x] J1 프런트 144/144, JS syntax/TypeScript build/HTML 구조·ID/CSP/git diff 검사
+- [ ] J2 실제 브라우저/모바일·키보드/스크린리더에서 깊이 막대/누적 수량 시각 인수 (샌드박스 환경 미가용)

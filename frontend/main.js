@@ -71,6 +71,7 @@ function renderBook(){
     const container=byId(containerId);container.replaceChildren();
     const sizes=Array.from({length:7},(_,i)=>
       (.018+(i*7+3)%9*.009)*(view.market==='SOL'?12:1));
+    const maxDepth=sizes.reduce((sum,size)=>sum+size,0);
     for(let i=0;i<sizes.length;i++){
       const price=m.price+sign*m.depthStep*(side==='ask'?7-i:i+1);
       const size=sizes[i];
@@ -79,7 +80,9 @@ function renderBook(){
       const total=(side==='ask'?sizes.slice(i):sizes.slice(0,i+1))
         .reduce((sum,value)=>sum+value,0);
       const row=node('div','book-row'+(side==='bid'?' bid':''));
-      row.style.setProperty('--depth',String(12+(i*19)%76)+'%');
+      // Mock depth shading represents the displayed cumulative Total, not an
+      // unrelated decorative percentage. Both sides reach 100% at outermost level.
+      row.style.setProperty('--depth',(total/maxDepth*100).toFixed(2)+'%');
       row.append(
         node('span',side==='ask'?'negative':'positive',prices.format(price)),
         node('span','',FORMAT_QTY.format(size)),

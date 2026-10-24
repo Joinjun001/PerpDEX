@@ -94,3 +94,10 @@
 - frontend/trade.html: 3개 마켓 변화율 동적 요소 ID와 새 정적 초기 샘플 변화율을 설정. mock 데이터/실시간 시세 미연결 고지 유지.
 - chart-sample-accessibility.test.mjs 1건 + order-interactions.test.mjs 1건 신규. hyperliquid-terminal.test.mjs 기존 계약 검사 변경. 전체 프런트 132/132, JS·TS 빌드/HTML ID·구조/CSP/git diff PASS.
 - 미완료 UX-HL-01-I2 실제 브라우저/스크린리더 시각 인수, 기존 H2 및 UX-HL-02-F2/E2. 백엔드 API·지갑·실자금·Sepolia 트랜잭션/운영 DB·push/배포 없음.
+
+## 2026-10-25 UX-HL-01-J1 — 로컬 완료
+
+- frontend/main.js: 임의 패턴 호가 깊이 막대 CSS --depth를 합성 누적 Total / 전체 합성 Size 비율로 대체. 같은 합성 가격·Size/Total 값과 MOCK 출처 문구 그대로 유지.
+- frontend/order-interactions.test.mjs: 실제 main.js 렌더/시장 전환으로 BTC/ETH/SOL Ask/Bid 누적 Total 비율과 막대 깊이 1건 신규 검증; 수정 전 실패 확인.
+- 프런트 전체 144/144 PASS, JS 문법/TypeScript 빌드/HTML 구조·ID/CSP/git diff PASS.
+- 실브라우저 J2/G2 검증은 샌드박스 허용 환경에서만 진행; 실제 주문·API·지갑·체인·DB 연결/푸시/배포 없음.

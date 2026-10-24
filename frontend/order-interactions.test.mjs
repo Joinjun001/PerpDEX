@@ -524,6 +524,32 @@ test('UX-HL-01-G1 orderbook totals accumulate from best price, not row index tim
     }
   }
 });
+test('UX-HL-01-J1 synthetic depth bars scale with cumulative displayed book totals',async()=>{
+  const app=await boot(),id=app.id;
+  const amount=cell=>Number(cell.textContent.replaceAll(',',''));
+  for(const market of ['BTC','ETH','SOL']){
+    app.market(market).dispatch('click');
+    for(const side of ['asks','bids']){
+      const rows=id(side).children;
+      assert.equal(rows.length,7);
+      const totals=rows.map(row=>amount(row.children[2]));
+      const maxTotal=Math.max(...totals);
+      const widths=rows.map(row=>Number(row.style['--depth']?.replace('%','')));
+      for(let i=0;i<rows.length;i++){
+        assert.ok(Number.isFinite(widths[i]),market+' '+side+' depth at '+i+' is numeric');
+        assert.ok(widths[i]>0&&widths[i]<=100,market+' '+side+' depth bounded');
+        const expected=totals[i]/maxTotal*100;
+        assert.ok(Math.abs(widths[i]-expected)<0.20,
+          market+' '+side+' row '+i+' has '+widths[i]+'%, but total requires '+expected+'%');
+        if(i>0){
+          if(side==='asks')assert.ok(widths[i]<widths[i-1],market+' ask cumulative depth decreases toward best');
+          else assert.ok(widths[i]>widths[i-1],market+' bid cumulative depth increases from best');
+        }
+      }
+      assert.ok(Math.abs(Math.max(...widths)-100)<0.02);
+    }
+  }
+});
 test('B2-A no network or wallet connection side effects in simulated event execution',async()=>{
   const app=await boot(),id=app.id;
   id('limit-type').dispatch('click');

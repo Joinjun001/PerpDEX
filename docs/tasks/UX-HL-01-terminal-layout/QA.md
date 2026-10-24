@@ -118,3 +118,14 @@
 - 수정 후 타깃 25/25 PASS, 전체 node --test frontend/*.test.mjs 132/132 PASS (기존 130 + 신규 2). JS node --check main.js/preview-model.mjs/관련 3개 테스트 PASS. npm --prefix backend run build (tsc --noEmit) PASS.
 - Python HTMLParser frontend/index.html 고유 ID 4개 / frontend/trade.html 고유 ID 71개, 태그/중복 ID PASS. 계정 tbody 5개 빈 상태 및 CSP connect-src none, git diff --check PASS.
 - 실제 브라우저 뷰포트/스크린리더·실계정/지갑/실시세 API/체인/DB 및 원격 push·배포는 실행하지 않았다.
+
+## 2026-10-25 UX-HL-01-J1 — 모의 누적 호가 시각 깊이 정합성 QA
+
+- 시작 HEAD a0ec5f3, main Git clean, origin/main 대비 로컬 26개 커밋 앞섬. PROJECT_STATE, ROADMAP, Hyperliquid UX reference 및 UX-HL-01와 UX-HL-04-A1/B1 SPEC·TODO·QA·RESULT, 실제 frontend/main.js, 기존 누적 Total 회귀 및 CSS 확인.
+- 브라우저: 프로젝트 내부 Playwright/Chromium 파일 존재(약 643MB). 비권한 유저 user namespace 생성이 Operation not permitted이며 Chromium 샌드박스 실행 불가. 보안 옵션 우회/추가 권한 사용 없이 실제 UI 인수 보류.
+- 문제 재현: 기존 renderBook은 누적 Total 계산과 무관한 --depth=12+(i*19)%76을 사용. BTC Ask 가장 먼 호가 첫 행은 전체 누적 Total에 해당하여 깊이 100%가 맞지만 12%로 표시. 신규 실제 main.js DOM 회귀 1건 수정 전 FAIL.
+- 변경: sizes의 전체 합 maxDepth를 산출한 후 각 행이 이미 계산한 total을 maxDepth로 나눠 백분율 toFixed(2) CSS --depth에 적용. 가격/size/total 합성 생성 및 순서/실행 동작 불변.
+- 신규 order-interactions.test.mjs 1건은 BTC/ETH/SOL 시장 변경 후 Ask/Bid 7행 Total과 depth의 비례 관계(가시 숫자 반올림 허용 0.20%p), 0~100%·유효값, Ask 단조 감소/Bid 단조 증가와 최대 100% 검증.
+- 수정 후 대상 이벤트 24/24 PASS, node --test frontend/*.test.mjs 전체 144/144 PASS (기존 143+신규 1). node --check frontend/main.js 및 order-interactions.test.mjs PASS, npm --prefix backend run build (tsc --noEmit) PASS.
+- Python HTMLParser index.html/trade.html 고유 ID·태그 검사, CSP connect-src none 및 빈 계정 tbody 5개, git diff --check PASS.
+- 실제 브라우저·터치/스크린리더 픽셀 인수, 실자금/계정 API/지갑/체인, 운영 DB·원격 push/배포 미실행.
