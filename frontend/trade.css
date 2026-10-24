@@ -112,3 +112,62 @@
   .trade-shell .terminal-grid>.market-column{display:flex;flex-direction:column}
   .trade-shell .chart-panel .chart-wrap{height:220px;min-height:195px}
 }
+
+/* UX-HL-01-B: full-width account activity terminal with roving-focus tabs. */
+.trade-shell .account-panel{width:100%}
+.trade-shell .account-heading{padding:17px 20px}
+.trade-shell .account-tab-scroll{
+  max-width:100%;overflow-x:auto;overscroll-behavior-x:contain;
+  border-bottom:1px solid var(--border);scrollbar-color:#314d4e transparent;
+}
+.trade-shell .account-tablist{display:flex;min-width:max-content;align-items:stretch;padding:0 17px;gap:7px}
+.trade-shell .account-tab{
+  border:0;border-bottom:2px solid transparent;background:none;
+  color:#90a1b3;padding:15px 14px 13px;font-size:12px;font-weight:700;
+  white-space:nowrap;transition:color .15s,background .15s;
+}
+.trade-shell .account-tab:hover{background:#1a2934;color:#d9e8ef}
+.trade-shell .account-tab[aria-selected="true"]{
+  color:var(--green);border-bottom-color:var(--green);
+}
+.trade-shell .account-tab:focus-visible{
+  outline:2px solid var(--blue);outline-offset:-3px;border-radius:4px;
+}
+.trade-shell .account-tab-panel[hidden]{display:none!important}
+.trade-shell .account-table-scroll{
+  overflow-x:auto;max-width:100%;scrollbar-color:#304754 transparent;
+}
+.trade-shell .account-table{width:100%;min-width:740px;border-collapse:collapse;table-layout:auto}
+.trade-shell .account-table th{
+  padding:14px 20px;border-bottom:1px solid #253440;
+  color:#7890a2;background:#131f2a;text-align:left;
+  font-weight:650;font-size:10px;letter-spacing:.025em;white-space:nowrap;
+}
+.trade-shell .account-empty{
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  text-align:center;padding:28px 16px 33px;min-height:185px;gap:7px;
+}
+.trade-shell .account-empty-symbol{
+  width:39px;height:39px;border-radius:12px;display:flex;
+  align-items:center;justify-content:center;border:1px solid #33584c;
+  background:#1a302e;color:#69deb7;font-size:25px;margin-bottom:3px;
+}
+.trade-shell .account-empty strong{font-size:13px;color:#dde8ef}
+.trade-shell .account-empty p{
+  color:#8296a9;font-size:11px;line-height:1.75;
+  margin:0;max-width:520px;word-break:keep-all;
+}
+.trade-shell .account-footer-note{
+  border-top:1px solid #223440;background:#121d28;
+  padding:12px 20px;color:#71889a;font-size:10px;letter-spacing:.01em;
+}
+@media(max-width:760px){
+  .trade-shell .account-heading{padding:15px}
+  .trade-shell .account-heading h2{font-size:14px}
+  .trade-shell .account-heading .pill-outline{font-size:8px}
+  .trade-shell .account-tablist{padding:0 9px;gap:0}
+  .trade-shell .account-tab{padding:13px 11px;font-size:11px}
+  .trade-shell .account-table th{padding:12px 14px}
+  .trade-shell .account-empty{padding:25px 14px 28px}
+  .trade-shell .account-footer-note{padding:11px 14px}
+}

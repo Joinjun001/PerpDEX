@@ -8,6 +8,7 @@ Hyperliquid의 거래 정보 구조·사용자 흐름을 주요 UX 레퍼런스�
 
 - index.html (서비스 소개): 프로젝트 비전, 기술 구조, 개발 로드맵, 거래 화면 진입 버튼. 거래 입력/차트를 포함하지 않습니다.
 - trade.html (전용 거래 화면): 모의 시장 정보 바, 차트·호가/최근 체결·주문 3열, Long/Short 데모 미리보기. 실제 Mark/Oracle/Funding/OI는 미연결 상태로 표시.
+- 계정 하단 탭은 Positions/Open Orders/Order History/Trade History/Funding History로 구분하며 클릭 및 화살표/Home/End 키로 이동합니다. 지갑 미연결로 기록은 가공하지 않고 빈 표만 제공합니다.
 - landing.css / trade.css: 각 페이지 전용 스타일. styles.css의 공통 UI 토큰·컴포넌트를 재사용합니다.
 - main.js: 거래 페이지에서만 불러오며, 소개 페이지에는 실행되지 않습니다.
 

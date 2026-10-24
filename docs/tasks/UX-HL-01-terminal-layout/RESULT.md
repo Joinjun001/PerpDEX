@@ -9,3 +9,13 @@
 - frontend/hyperliquid-terminal.test.mjs: 6개 보호 테스트 추가. 프런트 전체 15/15 PASS, backend TypeScript build PASS.
 - 서버/API/지갑/계약/주문 실행·배포·원격 push 없음. 시각 렌더링은 미확인.
 - 다음 미완료 UX-HL-01-B: 하단 포지션·미체결·주문·체결·펀딩 이력 탭.
+
+## 2026-10-25 UX-HL-01-B1 — 로컬 완료
+
+- frontend/trade.html: 기존 단일 Portfolio Overview 빈 카드 대신 5개 독립 계정 탭(Positions / Open Orders / Order History / Trade History / Funding History) 및 각각의 표 컬럼/빈 tbody 추가.
+- frontend/account-tabs-model.mjs: 탭 목록, 좌우/Home/End 이동 함수 및 disconnected/loading/empty/error 차이 모델. 실제 기록을 만들지 않음.
+- frontend/account-tabs.js: 클릭/키보드 roving tabindex, aria-selected와 inactive panel hidden, 키보드 포커스. 현재 정적 사이트는 지갑 미연결만 출력.
+- frontend/trade.css: 활성 탭/포커스 강조, 모바일 탭과 테이블 가로 스크롤, 독립 빈 상태.
+- frontend/account-tabs.test.mjs: 신규 테스트 6개 포함 21/21 PASS, HTML·JS·TypeScript 빌드 통과.
+- 실계정/API/온체인/실거래 구현 없음, 실제 브라우저 시각 QA 미실행, push 및 배포 금지 준수.
+- 다음 UX-HL-01-B2-B: 승인된 백엔드·지갑 연동 전제의 계정 조회 계약 및 안전한 상태 전환 구현·검증. 다음 UX-HL-01-C: 실제 브라우저 렌더링 QA.
