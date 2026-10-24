@@ -524,6 +524,34 @@ test('UX-HL-01-G1 orderbook totals accumulate from best price, not row index tim
     }
   }
 });
+test('UX-HL-01-K1 synthetic book rows have explicit non-live side, price, size and cumulative labels',async()=>{
+  const app=await boot(),id=app.id;
+  for(const market of ['BTC','ETH','SOL']){
+    app.market(market).dispatch('click');
+    for(const [containerId,side] of [['asks','매도'],['bids','매수']]){
+      const list=id(containerId);
+      assert.equal(list.getAttribute('role'),'list');
+      assert.match(list.getAttribute('aria-label')??'',new RegExp(market+'.*합성.*'+side));
+      assert.equal(list.children.length,7);
+      for(const [i,row] of list.children.entries()){
+        assert.equal(row.getAttribute('role'),'listitem');
+        const label=row.getAttribute('aria-label')??'';
+        assert.match(label,new RegExp('모의 '+side+'호가'));
+        assert.match(label,new RegExp(' '+String(i+1)+'\\.'));
+        assert.ok(label.includes('가격 '+row.children[0].textContent+' USD'),label);
+        assert.ok(label.includes('수량 '+row.children[1].textContent+' '+market),label);
+        assert.ok(label.includes('누적 '+row.children[2].textContent+' '+market),label);
+        assert.match(label,/실제 주문장 아님/);
+        assert.ok(row.children.every(cell=>cell.getAttribute('aria-hidden')==='true'));
+      }
+    }
+  }
+});
+test('UX-HL-01-K1 pre-JS markup identifies distinct mock book lists',()=>{
+  assert.match(html,/id="asks"[^>]*role="list"[^>]*aria-label="BTC 합성 매도호가 목록/);
+  assert.match(html,/id="bids"[^>]*role="list"[^>]*aria-label="BTC 합성 매수호가 목록/);
+  assert.match(html,/SYNTHETIC LIQUIDITY/);
+});
 test('UX-HL-01-J1 synthetic depth bars scale with cumulative displayed book totals',async()=>{
   const app=await boot(),id=app.id;
   const amount=cell=>Number(cell.textContent.replaceAll(',',''));

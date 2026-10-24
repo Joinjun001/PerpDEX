@@ -101,3 +101,11 @@
 - frontend/order-interactions.test.mjs: 실제 main.js 렌더/시장 전환으로 BTC/ETH/SOL Ask/Bid 누적 Total 비율과 막대 깊이 1건 신규 검증; 수정 전 실패 확인.
 - 프런트 전체 144/144 PASS, JS 문법/TypeScript 빌드/HTML 구조·ID/CSP/git diff PASS.
 - 실브라우저 J2/G2 검증은 샌드박스 허용 환경에서만 진행; 실제 주문·API·지갑·체인·DB 연결/푸시/배포 없음.
+
+## 2026-10-25 UX-HL-01-K1 — 로컬 접근성 마크업 구현 완료
+
+- frontend/trade.html: 합성 매수·매도호가를 독립 ARIA 목록으로 표기.
+- frontend/main.js: renderBook에서 시장에 맞는 목록 이름과 7개씩의 모의 호가 행 설명(role=listitem, aria-label)을 실제 표시 Price/Size/Total로 생성하고, 시각적 값의 중복 발표를 제한.
+- frontend/order-interactions.test.mjs: 정적 목록 및 실제 main.js × BTC/ETH/SOL/양측 7행 설명 검증 2건 신규.
+- 프런트 146/146 PASS, JS syntax/TypeScript build/HTML 구조·CSP/Git diff PASS. 호가/차트/주문/계정 실제 데이터·계산 및 네트워크 호출은 변경하지 않음.
+- UX-HL-01-K2 실제 브라우저·스크린리더 인수 미완료. 프로젝트 내부 브라우저 샌드박스 제한은 우회하지 않음.

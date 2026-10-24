@@ -51,3 +51,10 @@
 - [x] J1 BTC/ETH/SOL × ASK/BID 각 7행의 깊이/Total 비례, 최상위 100%/단조 방향, 범위·유효 숫자 검증
 - [x] J1 프런트 144/144, JS syntax/TypeScript build/HTML 구조·ID/CSP/git diff 검사
 - [ ] J2 실제 브라우저/모바일·키보드/스크린리더에서 깊이 막대/누적 수량 시각 인수 (샌드박스 환경 미가용)
+
+- [x] K1 합성 호가의 시각적 Price/Size/Total 헤더가 행의 보조공학 이름과 연결되지 않은 상태를 정적/실제 DOM 신규 테스트 2건 수정 전 FAIL로 확인
+- [x] K1 매수/매도 각각 ARIA list와 합성 출처 명시, row role=listitem + 시장/방향/순번/가격/수량/누적/비실거래 설명
+- [x] K1 시장 전환 시 목록과 모든 행의 접근성 설명이 가시 수치와 동기화되는 BTC/ETH/SOL 통합 테스트
+- [x] K1 가시 숫자 span에는 aria-hidden=true를 적용하여 행 단위 레이블 중복 발표 방지
+- [x] K1 전체 프런트 146/146, JS 문법·TypeScript 빌드·HTML 태그/고유 ID/CSP/Git diff 검사
+- [ ] K2 실제 샌드박스 브라우저·스크린리더에서 합성 호가 목록·행/언어 안내 확인 (현재 실행 제한)

@@ -129,3 +129,12 @@
 - 수정 후 대상 이벤트 24/24 PASS, node --test frontend/*.test.mjs 전체 144/144 PASS (기존 143+신규 1). node --check frontend/main.js 및 order-interactions.test.mjs PASS, npm --prefix backend run build (tsc --noEmit) PASS.
 - Python HTMLParser index.html/trade.html 고유 ID·태그 검사, CSP connect-src none 및 빈 계정 tbody 5개, git diff --check PASS.
 - 실제 브라우저·터치/스크린리더 픽셀 인수, 실자금/계정 API/지갑/체인, 운영 DB·원격 push/배포 미실행.
+
+## 2026-10-25 UX-HL-01-K1 — 합성 호가 ARIA 목록·행 검증
+
+- 시작 로컬 main HEAD 205d7b0, Git clean, origin/main 대비 27개 로컬 커밋 앞섬. PROJECT_STATE, ROADMAP, Hyperliquid UX 레퍼런스 및 UX-HL-01/04 관련 SPEC/TODO/QA/RESULT, main.js/trade.html/통합 테스트 확인.
+- 프로젝트 내부 Playwright/Chromium은 설치됐으나 비특권 사용자 unshare -Ur가 Operation not permitted로 Linux 샌드박스를 시작할 수 없어 실 브라우저 UX-HL-01-J2 및 K2 인수 미실행. --no-sandbox·권한 우회는 시도하지 않음.
+- 재현: 기존 asks/bids 영역과 각 div.book-row는 ARIA list/listitem/방향·열 의미가 없었다. 정적 마크업과 실제 main.js 렌더용 테스트 신규 2건이 수정 전 FAIL.
+- 수정: trade.html의 두 목록 role=list 및 합성 매수/매도 구분·실주문 아님 레이블. main.js의 renderBook이 시장 전환마다 목록 이름을 갱신하고 각 행에 role=listitem 및 현재 표시된 Price/Size/Total과 방향/출처를 포함한 aria-label을 부여. 시각용 span에 aria-hidden=true를 추가, 데이터 산출/화면 배열은 불변.
+- 테스트: order-interactions.test.mjs 신규 2건. BTC/ETH/SOL 전환 × asks/bids × 7행에서 가시적인 가격·수량·누적값과 행 설명, 원본 시장 및 정적 마크업을 확인. 테스트 레이블 정규식 단어 순서 수정 뒤 target 26/26 PASS, 전체 node --test frontend/*.test.mjs 146/146 PASS (기존 144+신규 2). 모든 frontend JS 문법, npm --prefix backend run build (tsc --noEmit), HTMLParser 중첩·고유 ID, CSP connect-src none/5개 계정 tbody 빈 상태, git diff --check PASS.
+- 실제 스크린리더/브라우저 접근성 트리, 모바일 터치·시각 검증은 미실행. 실거래·백엔드 연결·지갑/서명·Sepolia 트랜잭션·운영 DB·원격 push/배포 없음.

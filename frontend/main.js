@@ -69,6 +69,9 @@ function renderBook(){
   const m=MARKETS[view.market];
   for(const [side,containerId,sign] of [['ask','asks',1],['bid','bids',-1]]){
     const container=byId(containerId);container.replaceChildren();
+    const sideName=side==='ask'?'매도':'매수';
+    container.setAttribute('role','list');
+    container.setAttribute('aria-label',view.market+' 합성 '+sideName+'호가 목록 · 실제 주문장 아님');
     const sizes=Array.from({length:7},(_,i)=>
       (.018+(i*7+3)%9*.009)*(view.market==='SOL'?12:1));
     const maxDepth=sizes.reduce((sum,size)=>sum+size,0);
@@ -83,11 +86,19 @@ function renderBook(){
       // Mock depth shading represents the displayed cumulative Total, not an
       // unrelated decorative percentage. Both sides reach 100% at outermost level.
       row.style.setProperty('--depth',(total/maxDepth*100).toFixed(2)+'%');
-      row.append(
-        node('span',side==='ask'?'negative':'positive',prices.format(price)),
-        node('span','',FORMAT_QTY.format(size)),
-        node('span','',FORMAT_QTY.format(total))
-      );container.append(row);
+      const priceLabel=prices.format(price);
+      const sizeLabel=FORMAT_QTY.format(size);
+      const totalLabel=FORMAT_QTY.format(total);
+      // Each synthetic level announces its column meanings and data source,
+      // rather than relying on unassociated visual-only grid headings.
+      row.setAttribute('role','listitem');
+      row.setAttribute('aria-label','모의 '+sideName+'호가 '+(i+1)+'. 가격 '+priceLabel+
+        ' USD, 수량 '+sizeLabel+' '+view.market+', 누적 '+totalLabel+' '+view.market+
+        '. 실제 주문장 아님.');
+      const cells=[node('span',side==='ask'?'negative':'positive',priceLabel),
+        node('span','',sizeLabel),node('span','',totalLabel)];
+      cells.forEach(cell=>cell.setAttribute('aria-hidden','true'));
+      row.append(...cells);container.append(row);
     }
   }
   byId('book-mid').textContent=FORMAT_USD.format(m.price);
