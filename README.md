@@ -204,3 +204,7 @@ forge build && forge test -vv
 ## M5-T3-B3-B — Reduce-only 원장 직접 조작 방어 (모의 전용)
 
 `backend/sql/014_perp_reduce_ledger_integrity.sql`은 예약 guard·주문·이벤트에 대한 독립 SQL 변조를 커밋 단계에서 차단하도록 신원 불변성·영속 수량 보존·정책/포지션 버전·paired/shadow 소진 합계를 검사합니다. 내부 양측 Reduce-only 모의 체결은 이제 SQL 013과 014의 필수 제약 활성 여부를 모두 확인합니다. **DB 역할별 접근 통제·동시 고권한 조작·실 자금 안전을 보장하지는 않습니다.** 실제 PostgreSQL 비소유자 계정·기존 데이터 감사·마이그레이션 및 트리거 성능은 별도 승인/검증 대상입니다. `docs/tasks/M5-T3-B3-B-reduce-ledger-integrity/`에 범위·QA·역할 계획을 기록했습니다.
+
+## M5-T3-C1 — 서명된 모의 주문·증거금·포지션 위험 거래 전 검사
+
+`backend/src/perp/signed-sim-risk-gate.ts`는 기존 M3 EIP-712 v2 **SIMULATION_ONLY 비-Reduce-only 주문**의 영속 Nonce·RESERVE 이중분개·3개 margin bucket, M4 position/시장 OI와 M5 pre/post 위험을 **단일 DB 트랜잭션에서 검증·읽기 전용 평가**합니다. 서명 인증 및 초기증거금 수식은 기존 M3 `sim-order.ts`와 공유합니다. 결과의 `executionAuthorized`는 항상 `false`이며, 실제 체결·증거금 버킷 이동·PnL 정산·실 계정 자산 입출금·M2 공개 매칭에 연결되지 않습니다. 이 주문은 M5 reduce-only 예약과 별개이므로 직접 혼용하지 않습니다. 제한 및 후속 M5-T3-C2/C3/M5-T4: `docs/tasks/M5-T3-C1-signed-collateral-risk-gate/SPEC.md`.

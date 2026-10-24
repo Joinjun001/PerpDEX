@@ -108,8 +108,9 @@ function cancelId(orderId:string){return keccak256(toHex(`perp-sim-cancel:${orde
  * The approval source, snapshot and domain MUST originate from a trusted test harness.
  * A simulation-only v2 signature cannot be substituted with an M2 v1 order signature.
  */
-export async function admitSimPerpOrder(
-  raw:SimPerpOrderInput,signature:string,domain:OrderSigningDomainInput,transactions:OrderTransactionManager,
+/** Reusable v2 cryptographic + trusted-policy proof; NO DB write or authority to fill. */
+export async function authenticateSimPerpOrderIntent(
+  raw:SimPerpOrderInput,signature:string,domain:OrderSigningDomainInput,
   rawConfig:PerpMarketConfig,trustedSourceId:string,rawSnapshot:PerpPriceSnapshot,
   nowSeconds=Math.floor(Date.now()/1000),
 ){
@@ -133,6 +134,17 @@ export async function admitSimPerpOrder(
   const notional=BigInt(collateralNotional(order.quantity,riskPrice,config,'UP'));
   const reserve=mulDivUnsigned(notional,BigInt(config.initialMarginBps),10000n,'UP');
   if(reserve<=0n)throw new SimPerpOrderError('required reservation rounded to zero');
+  return Object.freeze({order,config,snapshot,orderId,initialMargin:reserve.toString()});
+}
+
+export async function admitSimPerpOrder(
+  raw:SimPerpOrderInput,signature:string,domain:OrderSigningDomainInput,transactions:OrderTransactionManager,
+  rawConfig:PerpMarketConfig,trustedSourceId:string,rawSnapshot:PerpPriceSnapshot,
+  nowSeconds=Math.floor(Date.now()/1000),
+){
+  const {order,config,snapshot,orderId,initialMargin}=await authenticateSimPerpOrderIntent(
+    raw,signature,domain,rawConfig,trustedSourceId,rawSnapshot,nowSeconds);
+  const reserve=BigInt(initialMargin);
   return transactions.withTransaction(async db=>{
     if(!(await new PostgresNonceRegistry(db).consume(order as OrderInput,domain,orderId))){
       throw new NonceAlreadyUsedError();
