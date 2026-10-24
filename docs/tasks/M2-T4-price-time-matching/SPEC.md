@@ -49,3 +49,12 @@ M2-T3의 `orders.created_at`만으로는 동시각 주문의 접수 순서가 �
 - 안전성 QA: 실 HTTP 구매/판매 교차와 같은 호가 FIFO·부분 체결, 동시 주문 수량 보존, 직접 자가체결 제외, 취소와 체결의 경합, 체결 INSERT 실패 시 Nonce·주문·접수 순서 롤백, 디스크 DB 재시작 후 원장·잔량 지속성.
 - 서버 실행 전 001~004 마이그레이션이 모두 적용되어 있어야 한다. 004 누락 시 기존 POST가 작동하지 않으며 자동 적용/실배포는 수행하지 않는다.
 - 미검증: 독립 실제 PostgreSQL 연결/멀티프로세스·운영 환경 잠금 및 DB 적용, 온체인 정산과 위험/수수료 정책은 후속 TASK에서 확인한다.
+
+## M2-T4-D — 체결원장 정산 입력 계약 (12회차)
+
+- `backend/src/settlement/fill-source.ts`의 `listSettlementSourceFills(db, trustedDomain, {afterFillId, limit})`는 **커밋된** `order_fills`와 인증 주문/오더북을 JOIN해 신뢰된 서명 도메인에 속한 체결 후보만 읽는다. 읽기 전용이며 지급·RPC·운영 DB 변경은 없다.
+- 각 `SettlementSourceFill`은 `chainId`, `verifyingContract`, `market`, `fillId`, `tradeId`, `makerOrderId`, `takerOrderId`, `buyOrderId`, `sellOrderId`, `buyer`, `seller`, `price`, `quantity`를 가진다. `price`/`quantity`/`fillId`는 정확한 정수 문자열이며 `buyer`/`seller`는 DB 저장 주문에서 도출한다.
+- `tradeId`는 EVM `keccak256(abi.encode(uint256(chainId), address(verifyingContract), uint256(fillId)))`로 계산하여 같은 DB 원장행·서명 도메인의 재조회/재시도에서 변하지 않는다. 서로 다른 체인/검증 컨트랙트/원장 ID는 다른 키를 가진다. 이는 `CollateralVault.settle`이 받는 `bytes32 tradeId`에 대응하는 **후보 식별자**이며 정산 승인이 아니다.
+- 정산 후보는 구매·판매 방향, 메이커/테이커와 주문 식별자 일치, 구매자가 제시한 최대 가격/판매자가 제시한 최저 가격, 메이커 원래 가격, 개별 체결 수량 한계를 검사한다. 잘못된 행은 건너뛰지 않고 예외로 차단한다.
+- `afterFillId`는 배타적 커서. `fillId ASC` 및 `limit <= 100`으로 반환. 체크포인트/실제 정산/멱등성 영속 기록은 M2-T5에서 별도로 구현해야 한다. 단순 조회 커서를 소비했다고 체결이 정산된 것은 아니다.
+- **경제 정책 미결정:** `market`, 가격과 거래 수량만으로 `CollateralVault.settle(token, from, to, amount, tradeId)`의 ERC-20 토큰 주소·원자 단위 지급량·방향을 정할 수 없다. `price * quantity`를 토큰 수량으로 암묵 변환하거나 거래 실행을 직접 승인하지 않는다. M2-T5에서 명시적인 시장 자산/정밀도/수수료/마진·위험 정책과 자금 부족 처리, 재시도/확정성 및 권한 경계를 정의해야 한다.

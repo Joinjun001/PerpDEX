@@ -6,18 +6,18 @@
 - 브랜치: `main`
 - 기준: 실제 소스 코드와 Git 상태를 최우선으로 판단
 - 현재 마일스톤: **M2 — Off-chain Order API & Matching MVP**
-- 현재 TASK: **M2-T4 — Matching Engine / M2-T4-D 체결 정산 입력 형식·최종 QA** (다음 작업)
-- 상태: In Progress (M2-T4-A 순수 코어 완료, M2-T4-B 영속 오더북 등록·시장별 FIFO 접수 순서·트랜잭션 체결 저장 구현, M2-T4-C 주문 API 원자적 등록/매칭 구현, M2-T4-D 정산 입력 계약·최종 QA 미완료)
-- 최근 완료: M1 전체 및 M2-T1/T2/T3 로컬 완료. M2-T4-A 순수 가격·시간 우선 엔진과 M2-T4-B 시장별 DB 접수 순서·원자적 체결·영속 원장 구현, 신규 HTTP 6개 추가, 전체 백엔드 97/97 통과 및 TypeScript 검사 성공 (2026-10-24). 운영 PostgreSQL QA 별도 이관
-- 다음 미완료 항목: M2-T4-D 체결원장 → M2-T5 정산 입력 형식 정의, 전체 TASK QA 및 회귀 → M2-T5 정산 구현. 운영 PostgreSQL 멀티프로세스 및 003/004 마이그레이션은 환경/승인 준비 시 별도 수행
-- 사람 확인 필요: 실제 PostgreSQL 서버/CLI/Docker가 없어 운영 환경의 DB 다중 연결·멀티프로세스 검증은 미실행. `forge`가 없어 Foundry 회귀 미실행. DB 실제 마이그레이션·API 배포·Sepolia broadcast는 승인 없이 수행하지 않음. 원격 push는 AutoPilot 작업에서 제외한다.
+- 현재 TASK: **M2-T5 — 온체인 Settlement 연동** (다음 작업)
+- 상태: M2-T4 로컬 완료 (A 코어/B 영속 매칭/C API 자동 체결/D 검증된 정산 원장 후보 어댑터); M2-T5 예정
+- 최근 완료: M1 전체 및 M2-T1/T2/T3 로컬 완료. M2-T4-A 순수 가격·시간 우선 엔진과 M2-T4-B 시장별 DB 접수 순서·원자적 체결·영속 원장 구현, 신규 영속 정산 후보 6개 추가, 백엔드 전체 103/103 통과 및 TypeScript 검사 성공 (2026-10-24). 운영 PostgreSQL QA 별도 이관
+- 다음 미완료 항목: M2-T5 자산 매핑/정산 단위 및 경제 정책 설계·검증, 영속 정산 상태/멱등성/체인 트랜잭션 연동(실행·배포는 승인 필요). 운영 PostgreSQL 멀티프로세스 및 003/004 마이그레이션은 환경/승인 준비 시 별도 수행
+- 사람 확인 필요: 실제 PostgreSQL 서버/CLI/Docker가 없어 운영 환경의 DB 다중 연결·멀티프로세스 검증은 미실행. 시장별 토큰/정밀도/마진·위험 정책 및 정산 금액·방향은 경제 정책 확인이 필요하여 자동 결정하지 않음. `forge`가 없어 Foundry 회귀 미실행. DB 실제 마이그레이션·API 배포·Sepolia broadcast는 승인 없이 수행하지 않음. 원격 push는 AutoPilot 작업에서 제외한다.
 
 ## 현재 TASK 문서
 
 - M2-T1 결과: `docs/tasks/M2-T1-order-domain/RESULT.md`, `QA.md` (완료)
 - M2-T2 로컬 완료: `docs/tasks/M2-T2-eip712-auth/{SPEC,TODO,RESULT,QA}.md` (운영 실서버 QA 이관)
 - M2-T3 로컬 완료: `docs/tasks/M2-T3-order-api/{SPEC,TODO,RESULT,QA}.md` (운영 DB QA 이관)
-- 현재 M2-T4: `docs/tasks/M2-T4-price-time-matching/{SPEC,TODO,RESULT,QA}.md` (A/B/C 로컬 구현 완료; D 최종 QA 예정)
+- M2-T4 완료 문서: `docs/tasks/M2-T4-price-time-matching/{SPEC,TODO,RESULT,QA}.md` (A~D 로컬 구현/검증 완료, 운영 E2E 이관)
 
 ## 저장소 복원 결과
 

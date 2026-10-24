@@ -1,6 +1,6 @@
 # M2-T4 RESULT
 
-상태: In Progress — M2-T4-A/B/C 로컬 구현 완료, M2-T4-D 정산 입력 형식/최종 QA 및 운영 PostgreSQL 검증 미완료
+상태: Completed (M2-T4-A/B/C/D 로컬 구현·테스트, 운영 PostgreSQL 및 온체인 정산은 후속 승인/환경 및 M2-T5 별도)
 
 ## 2026-10-24
 - M2-T3의 로컬 테스트 및 재전송 멱등성 구현 완료 이후 시작 준비.
@@ -50,3 +50,11 @@
 - TypeScript `npm run build` 통과, 신규 API 매칭 테스트 **6/6 통과**, 백엔드 전체 `npm test` **97/97 통과**.
 - 스키마 004는 운영 DB에 적용하지 않음. 실 PostgreSQL 다중 연결/멀티프로세스·Foundry·배포/실정산·원격 push 미실행. 기능은 PGlite 테스트 환경 기준 검증됨.
 - 다음: M2-T4-D 체결 결과를 M2-T5 온체인 정산에 넘길 입력 계약, 전체 TASK QA/회귀 및 누락된 불변식 검증.
+
+## 2026-10-24 — M2-T4-D 영속 체결 정산 후보 입력 계층 (12회차)
+
+- 시작 Git: `main`, 미커밋 변경 없음, 직전 로컬 커밋 `52f76eb`, 원격 `origin/main`보다 1커밋 앞섬. M2-T4-D가 실제 최상위 미완료.
+- `backend/src/settlement/fill-source.ts` 신규: 원장과 인증 주문/오더북 JOIN, 도메인별 정렬·배타적 커서 페이지 조회, 메이커/테이커/매수·매도 계정 정합성, 체결 호가·수량 및 uint256 정밀도 검사, 결정적 `keccak256(abi.encode(chainId, verifyingContract, fillId))` 정산 후보 tradeId 생성.
+- 손상된 체결값(가격 불일치·수량 초과·매수·매도 연결 붕괴/참조 누락)을 조용히 누락하지 않고 거부하는 fail-closed 정책. ERC20 자산/정산 수량/지급 방향은 **안전한 경제 정책이 없어 미생성**. 자금 이동 또는 온체인 트랜잭션 없음.
+- `backend/test/settlement-fill-source.test.ts`: PGlite/실제 서명·주문·매칭 기반 신규 6개 통합 테스트. 메이커 BUY/SELL 방향·가격, 시장/도메인 격리·커서 재조회, BigInt 초대형 수량, 잘못된 입력 및 변조 원장 거부. `npm run build` 타입 검사 성공, 전체 `npm test` **103/103 통과**.
+- 다음: M2-T5를 소규모 TASK로 나누어 시장별 자산/단위/마진 및 지급 정책 검증부터 구현하고, idempotent settlement outbox·on-chain submission/receipt reconciliation 구현을 준비. 라이브 배포·키 사용은 사람 승인 필요.

@@ -1,6 +1,6 @@
 # M2-T4 QA
 
-상태: In Progress — M2-T4-A/B/C 로컬 완료, M2-T4-D 및 실제 PostgreSQL 다중 연결 운영 QA 미완료
+상태: Completed (M2-T4 로컬 회귀 성공, 실제 PostgreSQL 멀티프로세스/Foundry/실정산 미검증)
 
 - M2-T3 로컬 최종 회귀: npm run build 통과, npm test 67/67 통과 (2026-10-24).
 - 실제 운영 PostgreSQL, Foundry, 배포 검증은 별도 작업.
@@ -30,3 +30,9 @@
 - 기존 생성/취소/조회/멱등성 테스트는 실제 API 의존성에 따라 SQL 001~004를 로컬 적용하도록 변경. 모든 비밀키는 메모리에서 생성한 테스트 임시 계정만 사용.
 - `cd backend && npm run build` (`tsc --noEmit`) 성공, `cd backend && npm test` 전체 **97 passed / 0 failed** (`--test-concurrency=1`), 기존 91개와 신규 HTTP 통합 6개.
 - **운영 한계:** 로컬 HTTP/PGlite 기반 테스트이며, 운영 PostgreSQL 다중 세션/프로세스 잠금, 004 실마이그레이션, Foundry, 온체인 정산, 실제 배포는 검증하지 않았다.
+
+## 2026-10-24 — M2-T4-D 체결 정산 후보 검증 (12회차)
+
+- `node --experimental-strip-types --test test/settlement-fill-source.test.ts`: **6/6 통과**. 서명 주문 생성 및 실제 로컬 SQL 매칭 후 read-only 체결원장 조회 테스트. maker BUY/SELL 정상 배정, maker price와 서명 지정가 비교, 시장/체인·계약 단위 격리, 배타적 커서·고유 tradeId, uint256 정수 정확성, 잘못된 입력/누락된 참조 및 변조된 체결 데이터 거부.
+- `cd backend && npm run build` (`tsc --noEmit`) 성공, `cd backend && npm test` 전체 **103/103 passed, 0 failed** (기존 97개 + 신규 6개).
+- **미검증/비범위:** 실 PostgreSQL 별도 서버/복수 연결 트랜잭션 일관성, 온체인 Solidity 테스트(호스트 forge 없음), 실제 운영 DB 003/004 마이그레이션, API 배포·온체인 트랜잭션 전송, ERC-20 정산 위험/자산 정책.
