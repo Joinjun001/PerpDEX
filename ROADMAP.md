@@ -40,6 +40,23 @@
 
 주의: M1 Vault의 현재 `withdraw()`는 오프체인 locked margin을 강제하지 않으며, M2 `BUYER_TO_SELLER` direct settlement는 선물 포지션 회계가 아니다. 새 로컬 위험 엔진이 마련되어도 M8 이전에 사용자 실자금·운영 활성화를 금지한다.
 
+## M9 — Sepolia 테스트넷 무기한 선물 거래 MVP (신규 최종 목표)
+
+**사용자 목표:** 메인넷 실자금이 아닌 Ethereum Sepolia에서 무가치 테스트 담보로 MetaMask 연결 → 입금 → EIP-712 signed 주문 → BTC-USD-PERP Long/Short 체결 → 포지션 종료/정산 → 출금까지 검증 가능한 서비스. 상세 인수 조건: docs/releases/SEPOLIA-TESTNET-TRADING-MVP.md.
+
+| 단계 | 내용 | 상태 |
+|---|---|---|
+| M9-T1 | 지갑 연결·Sepolia chainId 검증, 테스트 토큰·approve UI | Planned |
+| M9-T2 | M8 선물 전용 Vault/ClearingHouse의 Sepolia 테스트 담보 입출금 결속 | Planned |
+| M9-T3 | 백엔드 공개 HTTPS API·테스트 DB·서명 주문/포지션 화면 연결 | Planned |
+| M9-T4 | 선물 포지션/PnL·증거금 잠금의 온체인 검증 정산과 재조정 | Planned |
+| M9-T5 | 2개 테스트 계정 전체 입금→체결→종료→정산→출금 E2E | Planned |
+| M9-T6 | 전용 테스트넷 배포 및 안전·운영 인수 | Approval required |
+
+**필수 선행 단계:** 현재 M5 이후 M6 funding/M7 liquidation/M8 선물 담보·정산 안전성 및 실제 PG 검증. 기존 M1 direct settle/withdraw는 선물 청산·증거금 잠금을 보장하지 않으며 바로 활성화하지 않는다. 시작 범위는 단일 BTC-USD-PERP, 테스트용 무가치 ERC-20, 검증 전 partial fill 비활성. GitHub Pages는 현재 정적 Simulation Preview이므로 실제 체결처럼 소개하지 않는다. 이 목표 확정은 on-chain 배포/지갑 키/가스 사용 승인이 아니다.
+
+---
+
 M3 시작 TASK: `docs/tasks/M3-T1-market-risk-foundation/{SPEC,TODO,RESULT,QA}.md`.
 
 
