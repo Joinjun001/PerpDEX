@@ -40,3 +40,11 @@
 - 별도 빈 PGlite에 SQL 001~016 순서대로 설치: **16/16 PASS**, 016 PREPARED immutable/commit trigger 2종 설치 확인.
 - 단일 전체 `npm test`는 이번 회차 미실행. 실제 PostgreSQL 멀티 연결·권한/복구 검증, 실자산/온체인 검증도 미실행.
 - PREPARED 기록은 미래 체결에 사용할 권한 토큰이 아니다. 시장·원장·오라클·서명·주문 취소 상태는 앞으로 새 트랜잭션에서 다시 검증해야 한다.
+
+## 2026-10-24 C2-B2-B — 서명 양측 실제 모의 체결 QA
+
+- 신규 SQL `017_perp_signed_pair_executions.sql`: 기존 SQL 015/016 유지, FILLED 상태/terminal receipt/FK/지연 트리거로 M4 양측 신청·paired fill/OI, M3 양측 ALLOCATE 저널, order_nonces USED의 합치성 검사
+- 신규 `backend/test/perp-signed-pair-execution.test.ts` **13/13 PASS**: 정상 양측 전량 FILLED/M3 RESERVED→POSITION, 동시 중복 1건만 커밋, 서명 위조/서명 취소 거부, terminal INSERT 및 두 번째 allocation 예외 전체 rollback, receipt 없는 단독 FILLED 거부, terminal append-only, receipt 없는 직접 SQL 위조 거부, 이후 M3 버킷·M4 포지션·시장 OI 직접 변조 차단, 취소 vs 체결 경합, PGlite 디스크 재시작 후 영속 검증과 replay 거부, SQL 017 재적용.
+- `npm run build` PASS; 신규 focused 13/13 PASS
+- 기존 관련 8개 테스트 파일 선행 회귀 **84/84 PASS** (신규 내에서 10개 테스트까지 포함, 이후 3개 focused 추가로 검증). 완전 통합 전체 `npm test`를 단일 실행한 것은 아님.
+- 확인 필요: 실제 PostgreSQL 멀티세션·role/권한·migration safety/기존 장부 preflight, 보안 역할의 DML 권한, 운영·실자금·실체인 접근은 이번 회차 미실행. PGlite의 Promise.allSettled는 실제 PostgreSQL 프로세스 간 경합 시험을 대체하지 않음.

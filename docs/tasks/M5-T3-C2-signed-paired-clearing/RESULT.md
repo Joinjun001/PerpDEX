@@ -28,3 +28,13 @@
 - 원본 SQL 015 차단 트리거는 변경 없음. 포지션·OI, 증거금, signed order 소비, 실거래·실자금·온체인 이동은 **전혀 실행하지 않음**. 반환 `executionAuthorized:false`.
 - 내부 관리 마이그레이션 목록에 016 등록 (운영 DB 적용 안 함). 새로운 테스트 8/8, 관련 회귀 62/62, TypeScript build, SQL 001~016 빈 DB 설치 검증 PASS.
 - **다음 B2-B:** 지금의 PREPARED 레코드는 승인 근거가 될 수 없음. signed 전량 OPEN 주문 2개를 새로운 거래에서 재인증·락 → 양측 M4 paired journal/OI, M3 RESERVED→POSITION, 영속 주문 소진·nonce/영수증의 정확한 SQL 불변식을 동시에 보장하는 최종 체결 경로를 추가할 것. 위험/정산 불변식이 누락되면 계속 fail-closed.
+
+## 2026-10-24 C2-B2-B — 서명 양측 영속 전량 모의 체결
+
+**상태: 내부 SIMULATION_ONLY C2-B2-B 로컬 구현 완료. 운영/실자금/실체인 비활성.**
+
+- `backend/src/perp/signed-sim-pair-execution.ts` 구현: PREPARED 영수증과 현재 서명 주문을 새 트랜잭션 안에서 재검증(EIP-712, nonce, OPEN, trusted market/oracle, M3 예약 원장, M4 position/OI, M5 양측 pre/post risk). FLAT·전량 opening·계정별 OPEN 주문 1건으로 엄격히 제한. M4 paired fill+OI, 두 계정 M3 RESERVED→POSITION 2개 작업, terminal 영수증·주문 FILLED 상태를 동일 TX에서 완료.
+- `backend/sql/017_perp_signed_pair_executions.sql`: 기존 SQL 015 무단 실행 차단을 인증된 terminal 영수증 경로에 한해서만 허용. M3 이중분개, M4 양측 영속 신청과 현재 position, 시장 OI, nonce 상태 및 서명 주문을 deferred COMMIT 제약에서 재대조한다. 이후 독립 SQL 버킷/position/OI 변조도 차단한다. `backend/scripts/migrate.ts`에 017 추가 (실제 DB 적용 없음).
+- 신규 집중 회귀 **13/13 PASS**, 기존 관련 8개 파일 선행 회귀 **84/84 PASS**, TypeScript build PASS. 초기 재시작 fixture 중복삽입 오류는 재시드 제거로 수정 후 성공. 전체 npm test는 이번 회차 미실행.
+- 경계: `executionAuthorized:false`는 **실제 주문 체결/자금 이체/온체인 권한을 부여하지 않는다**는 뜻이며 이번 함수는 로컬 모의 원장만 변경. 데이터베이스 owner/DDL 권한자 또는 전체 영수증·체결·원장을 일관되게 위조할 수 있는 DB 쓰기 역할까지 신뢰하지 않으므로 M5-T4 최소 권한·독립 PostgreSQL QA가 필요하다.
+- 다음 `M5-T3-C3`: 부분 체결/다중 OPEN 예약, 반대 방향 reduction, realized PnL 및 수수료·펀딩 등 미정 회계 요건은 승인된 정책을 먼저 확인하고 안전한 작은 TASK로 분할할 것.
