@@ -118,3 +118,14 @@
 - 수정 후 대상 node --test frontend/order-interactions.test.mjs 34/34 PASS, 전체 node --test frontend/*.test.mjs 154/154 PASS (기존 152+신규 2), 모든 프런트 JS node --check PASS, npm --prefix backend run build (tsc --noEmit) PASS.
 - Python HTMLParser frontend/index.html·trade.html 태그/중복 ID, 정적 CSP connect-src none·계정 tbody 5개 빈 상태, git diff --check PASS.
 - 실제 브라우저/스크린리더 입력 포맷 및 모바일 인수 미실행. 서버/지갑·실주문·Sepolia 트랜잭션·운영 DB·원격 push/배포 미실행.
+
+## 2026-10-25 UX-HL-02-K1 — 수량 직접 입력과 모의 검토 일관성
+
+- 시작 main HEAD 10b612b, 작업 트리 clean, origin/main 대비 34커밋 ahead. PROJECT_STATE/ROADMAP/Hyperliquid UX 레퍼런스, UX-HL-01/P1 및 UX-HL-02 SPEC/TODO/QA/RESULT, frontend/main.js/trade.html/model/이벤트 회귀 확인.
+- Playwright/Chromium은 .local-browser-qa/에 존재(약 643MB). 비특권 사용자 unshare -Ur true 실행은 Operation not permitted. UX-HL-01-P2 및 UX-HL-02-K2 실제 브라우저 인수 보류, --no-sandbox·안전 제한 우회 없음.
+- 수정 전 실제 main.js 입력 이벤트 테스트 신규 2건 FAIL. DEMO 검토 후 Quantity를 0.05에서 0.050처럼 같은 유효 수치로 직접 바꾸면 order-result.hidden=true로 바뀌던 문제 확인.
+- 수정: 성공적으로 생성한 DEMO 검토의 당시 Quantity 숫자값을 보관. quantity input 시 현재 검토가 열려 있고 새 값이 validPreviewQuantity를 만족하며 검토 당시 수치와 같은 경우에만 숨김 처리 생략. 실제 0.06 변경, 비정상 0.05bad 입력과 다시 원래 수치로 되돌아가는 경우는 검토 숨김 지속.
+- 신규 회귀는 Market 0.05→0.050→5e-2→.05→0.05의 기존 리뷰 DOM/명목가치 유지, 수량 변경 시 무효화·이전 값 복귀 시 재표시 금지 및 Limit 주문 중 유효 표기 변경 후 부적합 입력 차단을 실제 DOM 이벤트로 검사.
+- 수정 후 대상 node --test frontend/order-interactions.test.mjs 40/40 PASS, 전체 node --test frontend/*.test.mjs 160/160 PASS (기존 158+신규 2), 모든 프런트 JS node --check PASS, npm --prefix backend run build (tsc --noEmit) PASS.
+- Python HTMLParser frontend/index.html, frontend/trade.html 중첩 태그·고유 ID, CSP connect-src none 및 빈 계정 tbody 5개, git diff --check PASS.
+- 실제 브라우저/보조공학/모바일 검증 미수행. 지갑/실계정/서명·실체인 거래·운영 DB·원격 Push·배포 미실행.

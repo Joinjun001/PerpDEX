@@ -206,6 +206,7 @@ function dismissDemoReview(){
   byId('order-result').hidden=true;
   byId('preview-order').focus();
 }
+let reviewedQuantity=null;
 function displayOrderPreview(event){
   event.preventDefault();
   const panel=byId('order-result');
@@ -217,6 +218,7 @@ function displayOrderPreview(event){
     });
     panel.classList.remove('error');
     renderDemoOrderReview(panel,document,review,{onClose:dismissDemoReview});
+    reviewedQuantity=Number(byId('quantity').value);
   }catch{
     // A keyboard-triggered form submission can occur even when the preview
     // button is disabled. Route focus to the failing field rather than a
@@ -276,8 +278,13 @@ byId('leverage').addEventListener('input',()=>{
   byId('order-result').hidden=true;
 });
 byId('quantity').addEventListener('input',()=>{
+  const quantity=byId('quantity').value;
+  // A text-only change (0.05 -> 0.050) does not change the reviewed order.
+  // Never restore a dismissed/stale review or retain it for invalid input.
+  const unchanged=!byId('order-result').hidden&&
+    validPreviewQuantity(quantity)&&Number(quantity)===reviewedQuantity;
   renderTicket();
-  byId('order-result').hidden=true;
+  if(!unchanged)byId('order-result').hidden=true;
 });
 document.querySelectorAll('[data-qty]').forEach(b=>b.addEventListener('click',()=>{
   // Keep the review for the same valid amount even if text differs (e.g. 0.050).

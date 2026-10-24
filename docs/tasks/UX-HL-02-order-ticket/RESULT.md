@@ -87,3 +87,10 @@
 - frontend/order-interactions.test.mjs: 실제 main.js DOM 이벤트에서 검토 보존과 서로 다른 수량 전환, 수치 동치/부적합 입력의 ARIA·CSS 일치 신규 2건 (수정 전 2/2 FAIL).
 - 전체 프런트 154/154 PASS, JS syntax/TypeScript 빌드/HTML 구조·CSP/git diff PASS.
 - 실제 브라우저 UX-HL-02-J2 인수 미완료. DEMO/계정 미연결/백엔드 현재 M5 상태 및 실거래·push·배포 금지 불변.
+
+## 2026-10-25 UX-HL-02-K1 — 로컬 완료
+
+- frontend/main.js: 성공한 모의 주문 검토 수량을 저장해 직접 입력에서 0.05/0.050/5e-2 같은 유효 동치 표기만 바꾼 경우 리뷰를 유지. 실제 수량 변화, 비정상 값, 이미 숨겨진 리뷰는 기존처럼 차단.
+- frontend/order-interactions.test.mjs: 실제 main.js 이벤트 2건 회귀 추가. 수정 전 실패 확인; 프리셋 버튼·모의 주문 리뷰/데이터·접근성 상태 보존.
+- 전체 프런트 160/160 PASS, JS 문법·TypeScript 빌드·HTML 구조/CSP/Git diff PASS. 서버/API/지갑/실거래 코드 변경 없음.
+- UX-HL-02-K2 실제 브라우저·스크린리더/모바일 인수는 샌드박스 지원 환경에서만 진행. 백엔드 M5~M9 상태·원격 Push/배포 제한 불변.

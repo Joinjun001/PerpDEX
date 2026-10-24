@@ -61,3 +61,10 @@
 - [x] J1 0.050, 5e-2, 0.0100 및 일치하지 않는 0.07/부적합 입력의 aria-pressed·CSS active 상태 확인
 - [x] J1 프런트 전체 154/154 PASS, 모든 JS syntax/TypeScript build/HTML 고유 ID·태그 구조/CSP/git diff 검사
 - [ ] J2 실제 브라우저/모바일·키보드/스크린리더에서 수량 등가 표현·재선택·미리보기 유지 인수 (Chromium 샌드박스 권한 미가용)
+
+- [x] K1 0.05→0.050 직접 입력처럼 수량 숫자는 그대로인데 검토가 닫히는 결함을 실제 main.js 회귀 2건 수정 전 FAIL로 재현
+- [x] K1 성공한 DEMO 검토 수량을 기억하고 유효한 수치 동치 입력에서만 기존 검토 DOM 유지
+- [x] K1 실제 수량 변경·비정상 입력과 한 번 숨겨진 검토를 원래 수량으로 복귀시켜도 다시 보여주지 않는 차단 확인
+- [x] K1 Market/Limit 경로, 빠른 수량 프리셋/ARIA, MOCK 계정·Reduce Only 및 기존 입력 검증 모두 유지
+- [x] K1 프런트 전체 160/160·JS syntax·TypeScript 빌드·HTML 고유 ID·구조/CSP/git diff 검사
+- [ ] K2 실제 Chromium 모바일·키보드/스크린리더에서 표기만 바꾸는 입력과 검토 유지·무효화 동작 확인 (샌드박스 지원 환경 필요)

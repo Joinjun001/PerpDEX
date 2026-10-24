@@ -377,6 +377,45 @@ test('UX-HL-02-H1 active preset does not replace invalid draft unless quantity c
   assert.equal(id('quantity').value,'0.25');
   assert.equal(id('order-result').hidden,true);
 });
+test('UX-HL-02-K1 manual numeric-equivalent quantity editing preserves an existing demo review',async()=>{
+  const app=await boot(),id=app.id;
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  const review=id('order-result').children[1];
+  const notional=id('notional').textContent;
+  for(const equivalent of ['0.050','5e-2','.05','0.05']){
+    id('quantity').value=equivalent;
+    id('quantity').dispatch('input');
+    assert.equal(id('order-result').hidden,false,'equivalent quantity must keep review: '+equivalent);
+    assert.equal(id('order-result').children[1],review,'review must not be regenerated');
+    assert.equal(id('notional').textContent,notional);
+    assert.equal(id('quantity').getAttribute('aria-invalid'),'false');
+  }
+  id('quantity').value='0.06';
+  id('quantity').dispatch('input');
+  assert.equal(id('order-result').hidden,true,'actual quantity change invalidates review');
+  id('quantity').value='0.05';
+  id('quantity').dispatch('input');
+  assert.equal(id('order-result').hidden,true,'returning to previous amount must not resurrect stale review');
+});
+
+test('UX-HL-02-K1 invalid manual quantity input hides review even when previous reviewed amount matched',async()=>{
+  const app=await boot(),id=app.id;
+  id('limit-type').dispatch('click');
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  id('quantity').value='0.0500';
+  id('quantity').dispatch('input');
+  assert.equal(id('order-result').hidden,false);
+  id('quantity').value='0.05bad';
+  id('quantity').dispatch('input');
+  assert.equal(id('order-result').hidden,true);
+  assert.equal(id('preview-order').disabled,true);
+  assert.equal(id('quantity').getAttribute('aria-invalid'),'true');
+  id('quantity').value='0.05';
+  id('quantity').dispatch('input');
+  assert.equal(id('order-result').hidden,true);
+});
 test('UX-HL-02-J1 numeric-equivalent quick quantity keeps demo review and original input representation',async()=>{
   const app=await boot(),id=app.id;
   const quantity=id('quantity');
