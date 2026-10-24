@@ -56,6 +56,19 @@ test('UX-HL-02-B1 invalid side and invalid Market/Limit input never creates a re
    assert.throws(()=>createDemoOrderReview({...input,...changes}),RangeError);
  }
 });
+test('UX-HL-02-F1 review preserves nonzero sub-cent Limit notional and margin',()=>{
+  const review=createDemoOrderReview({...input,quantity:'0.0001',leverage:'10',limitPrice:'0.01'});
+  assert.equal(review.rows.at(-2).value,'<$0.01');
+  assert.equal(review.rows.at(-1).value,'<$0.01');
+  assert.equal(review.rows[4].value,'$0.01');
+  assert.equal(review.orderExecutable,false);
+  // A normal Market SOL order also has a sub-cent illustrative margin.
+  const marketReview=createDemoOrderReview({
+    ...input,market:'SOL',orderType:'MARKET',quantity:'0.0001',leverage:'10',
+  });
+  assert.equal(marketReview.rows.at(-2).value,'$0.01');
+  assert.equal(marketReview.rows.at(-1).value,'<$0.01');
+});
 test('UX-HL-02-B1 renderer creates safe text nodes, fixed row count and accessible close',()=>{
  const panel=new FakeElement('div');
  let closed=0;

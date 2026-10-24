@@ -50,3 +50,11 @@
 - frontend/order-interactions.test.mjs: 정상/비정상 Limit 초안 반복 클릭의 수정 전 실패 2건 및 수정 후 통합 회귀. 프런트 전체 127/127 PASS.
 - JS syntax·backend TypeScript build·HTML 구조/ID·CSP/Git diff 검증 PASS. 계정/지갑·실거래/온체인·백엔드/API 연결 없음.
 - 다음 UX-HL-02-E2: 실제 브라우저가 준비된 경우 동일 시장 클릭 초안 보존·키보드·모바일 인수. 준비되지 않으면 중복 없는 실제 결함이 확인된 경우에만 새 작업을 시작한다.
+
+## 2026-10-25 UX-HL-02-F1 — 로컬 완료
+
+- frontend/preview-model.mjs: 양수 1센트 미만의 MOCK USD 금액이 0으로 오해되지 않도록 <$0.01를 반환하는 공통 표시 함수를 추가. 산술 값/주문 실행 게이트 불변.
+- frontend/main.js: 모의 주문 패널의 명목가치·참고 증거금 표시 개선. 사용자 Limit Price/기준 시세는 원래 포맷 그대로.
+- frontend/order-review.mjs: 읽기 전용 9항목 검토의 동일 두 금액을 같은 표시 정책으로 변환.
+- frontend/preview-model.test.mjs, order-review.test.mjs, order-interactions.test.mjs: 소액 금액과 MARKET/LIMIT/화면 일치 검증 3건, 전체 130/130 PASS. JS syntax/TS build/HTML/CSP/diff PASS.
+- 브라우저·모바일·스크린리더 검증 UX-HL-02-F2 미실행; 서버/지갑/온체인·실주문·운영 DB/푸시/배포 미연결·미실행.

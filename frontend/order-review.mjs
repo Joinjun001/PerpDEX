@@ -2,7 +2,7 @@
  * UX-HL-02-B1 — structured *demo-only* review.
  * Generates presentation values only; no signature, transfer or execution.
  */
-import {FORMAT_USD,previewOrderEstimate} from './preview-model.mjs';
+import {FORMAT_USD,formatDemoUsdAmount,previewOrderEstimate} from './preview-model.mjs';
 
 export function createDemoOrderReview({market,side,orderType,quantity,leverage,limitPrice}){
   if(side!=='BUY'&&side!=='SELL')throw new RangeError('Unsupported preview side');
@@ -15,8 +15,8 @@ export function createDemoOrderReview({market,side,orderType,quantity,leverage,l
     Object.freeze({label:'가격',value:FORMAT_USD.format(value.price)}),
     Object.freeze({label:'수량',value:String(value.quantity)+' '+value.market}),
     Object.freeze({label:'레버리지',value:String(value.leverage)+'× (모의)'}),
-    Object.freeze({label:'가상 명목가치',value:FORMAT_USD.format(value.notional)}),
-    Object.freeze({label:'참고 증거금',value:FORMAT_USD.format(value.indicativeMargin)}),
+    Object.freeze({label:'가상 명목가치',value:formatDemoUsdAmount(value.notional)}),
+    Object.freeze({label:'참고 증거금',value:formatDemoUsdAmount(value.indicativeMargin)}),
   ]);
   return Object.freeze({
     title:'모의 주문 검토 · 주문 전송 없음',

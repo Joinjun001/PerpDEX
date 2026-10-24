@@ -9,6 +9,13 @@ export const MARKETS = Object.freeze({
 });
 export const FORMAT_USD = new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2});
 export const FORMAT_QTY = new Intl.NumberFormat('en-US',{minimumFractionDigits:3,maximumFractionDigits:4});
+/** Display-only currency formatter. A positive sub-cent preview is not $0.00. */
+export function formatDemoUsdAmount(value){
+  if(typeof value!=='number'||!Number.isFinite(value)||value<0)
+    throw new RangeError('Invalid nonnegative demo USD amount');
+  return value>0&&value<0.01?'<$0.01':FORMAT_USD.format(value);
+}
+
 // Do not resolve Object.prototype properties or coerce arbitrary objects into
 // supported market IDs; no synthetic data may be generated for unknown symbols.
 function validMarketId(market){

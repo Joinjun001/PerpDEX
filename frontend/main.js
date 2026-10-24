@@ -1,4 +1,4 @@
-import {MARKETS,FORMAT_USD,FORMAT_QTY,previewOrderEstimate,validPreviewQuantity,validPreviewLeverage,validPreviewLimitPrice,sampleChart,describeSampleChart} from './preview-model.mjs';
+import {MARKETS,FORMAT_USD,FORMAT_QTY,formatDemoUsdAmount,previewOrderEstimate,validPreviewQuantity,validPreviewLeverage,validPreviewLimitPrice,sampleChart,describeSampleChart} from './preview-model.mjs';
 import {createDemoOrderReview,renderDemoOrderReview} from './order-review.mjs';
 
 const byId=(id)=>document.getElementById(id);
@@ -134,8 +134,8 @@ function renderTicket(){
       limitPrice:byId('limit-price').value,
     });
     byId('reference-price').textContent=FORMAT_USD.format(result.price);
-    byId('notional').textContent=FORMAT_USD.format(result.notional);
-    byId('margin').textContent=FORMAT_USD.format(result.indicativeMargin);
+    byId('notional').textContent=formatDemoUsdAmount(result.notional);
+    byId('margin').textContent=formatDemoUsdAmount(result.indicativeMargin);
     button.disabled=false;
   }catch{
     byId('reference-price').textContent='—';

@@ -83,6 +83,8 @@ PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성�
 - **UX-HL-02-D2 (Pending browser)**: 실제 range slider의 키보드·모바일/스크린리더 인수 미실행.
 - **UX-HL-02-E1 (Local Completed)**: 현재 시장 버튼 재선택 때 직접 입력한 Limit Price·오류·검토 결과가 초기화되는 실제 결함 수정. 실제 시장 변경 때만 기존 갱신 수행, 실행형 2건 신규 포함 프런트 127/127 PASS.
 - **UX-HL-02-E2 (Pending browser)**: 모바일/키보드 실제 브라우저에서 같은 마켓 반복 클릭과 초안 보존 인수 미실행.
+- **UX-HL-02-F1 (Local Completed)**: 소액 MARKET/LIMIT 양수 명목가치·증거금이 $0.00으로 잘못 표시되는 문제 수정, 1센트 미만은 <$0.01로 정직하게 표시. 신규 3건 포함 전체 프런트 130/130 PASS.
+- **UX-HL-02-F2 (Pending browser)**: 실제 모바일·키보드·스크린리더에서 소액 금액 표기 인수 미실행.
 - 계정별 실제 read API/wallet 인증이 준비되지 않아 UX-HL-01-B2-B2-B2는 게이트 보류.
 
 ## M9 — Sepolia 테스트넷 무기한 선물 거래 MVP (신규 최종 목표)

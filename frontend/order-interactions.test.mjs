@@ -261,6 +261,23 @@ test('UX-HL-02-E1 clicking current market preserves a draft with invalid Limit p
   assert.equal(id('limit-price-error').hidden,false);
   assert.equal(id('preview-order').disabled,true);
 });
+test('UX-HL-02-F1 positive sub-cent simulated cost appears as less than one cent in ticket and review',async()=>{
+  const app=await boot(),id=app.id;
+  id('limit-type').dispatch('click');
+  id('quantity').value='0.0001';id('quantity').dispatch('input');
+  id('limit-price').value='0.01';id('limit-price').dispatch('input');
+  id('leverage').value='10';id('leverage').dispatch('input');
+  assert.equal(id('preview-order').disabled,false);
+  assert.equal(id('reference-price').textContent,'$0.01');
+  assert.equal(id('notional').textContent,'<$0.01');
+  assert.equal(id('margin').textContent,'<$0.01');
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  const rows=id('order-result').children[1].children;
+  assert.equal(rows.at(-2).children[1].textContent,'<$0.01');
+  assert.equal(rows.at(-1).children[1].textContent,'<$0.01');
+  assert.equal(id('order-result').children[2].textContent.includes('서버 전송 0건'),true);
+});
 test('B2-A changes in symbol, side, quantity, leverage, limit and type hide stale preview',async()=>{
   const app=await boot(),id=app.id;
   const show=()=>{

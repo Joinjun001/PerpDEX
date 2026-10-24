@@ -64,3 +64,13 @@
 - node --check frontend/main.js 및 frontend/order-interactions.test.mjs PASS, npm --prefix backend run build (tsc --noEmit) PASS.
 - HTMLParser와 고유 ID 검사/CSP connect-src none·계정 empty state 및 git diff --check PASS (커밋 전 재검증).
 - 실제 Chromium 키보드·터치/보조공학·픽셀 배치, 지갑/인증 API·실거래/온체인·운영 DB/배포·원격 push 미실행.
+
+## 2026-10-25 UX-HL-02-F1 — 1센트 미만 양수 표시 QA
+
+- 시작 Git main HEAD f6ab7b7, clean, origin/main보다 19커밋 앞섬. PROJECT_STATE, ROADMAP, Hyperliquid UX 참고, UX-HL-02 SPEC/TODO/QA/RESULT, frontend 모델/화면/검토 코드 확인.
+- Chromium/chromium-browser/google-chrome/firefox 및 Node Playwright/Puppeteer 실행 도구 미가용. 설치/안전 검사 우회 없음. UX-HL-02-E2, UX-HL-01-H2 브라우저 인수 계속 미완료.
+- 결함 재현: BTC LIMIT Qty=0.0001, Price=0.01, Leverage=10인 유효한 주문의 명목가치 약 0.000001 USD 및 참고 증거금 약 0.0000001 USD는 양수지만 FORMAT_USD.format로 두 값 모두 $0.00으로 표시. 수정 전 리뷰/실제 main.js 신규 회귀 실패 확인.
+- 변경: preview-model.mjs의 formatDemoUsdAmount는 유한 비음수에 대하여 양수 1센트 미만만 <$0.01 표시, 0 또는 1센트 이상 기존 포맷 유지. main.js/ order-review.mjs의 명목가치·참고 증거금 표시만 수정, 원본 계산/사용자 가격 변경 없음.
+- 신규 preview-model.test.mjs 1건(소액·0/경계/비정상), order-review.test.mjs 1건(LIMIT 소액 및 SOL MARKET 소액 증거금), order-interactions.test.mjs 1건(실제 main.js 이벤트 기반 소액 입력·읽기 전용 검토 일치), 총 3건.
+- 수정 후 관련 대상 37/37 PASS, frontend 전체 node --test frontend/*.test.mjs 130/130 PASS (기존 127 + 신규 3). JS node --check/TypeScript tsc --noEmit/HTML/CSP/git diff 검사 PASS.
+- 실제 브라우저 화면·스크린리더/모바일 터치 인수, 실지갑·인증 API/실체인·운영 DB 변경/푸시/배포는 미실행.

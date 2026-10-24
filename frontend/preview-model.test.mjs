@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {MARKETS,previewEstimate,validPreviewQuantity,sampleChart} from './preview-model.mjs';
+import {MARKETS,previewEstimate,validPreviewQuantity,sampleChart,formatDemoUsdAmount,FORMAT_USD} from './preview-model.mjs';
 test('시장별 모의 표시 데이터는 고정되고 외부 시세 호출이 없다',()=>{
   assert.deepEqual(Object.keys(MARKETS),['BTC','ETH','SOL']);
   assert.ok(Object.values(MARKETS).every(m=>m.price>0&&Number.isFinite(m.price)));
@@ -72,6 +72,17 @@ test('UX-HL-01-H1: all data model entry points reject non-string IDs, including 
     assert.throws(()=>sampleChart(market,4),RangeError);
     assert.throws(()=>previewEstimate(market,'0.05',3),RangeError);
   }
+});
+test('UX-HL-02-F1 nonzero sub-cent amounts must not be displayed as $0.00',()=>{
+  for(const amount of [0.0000001,0.000001,0.004,0.009]){
+    assert.equal(FORMAT_USD.format(amount),amount>=0.005?'$0.01':'$0.00');
+    assert.equal(formatDemoUsdAmount(amount),'<$0.01');
+  }
+  assert.equal(formatDemoUsdAmount(0),'$0.00');
+  assert.equal(formatDemoUsdAmount(0.01),'$0.01');
+  assert.equal(formatDemoUsdAmount(2.5),'$2.50');
+  assert.throws(()=>formatDemoUsdAmount(NaN),RangeError);
+  assert.throws(()=>formatDemoUsdAmount(-1),RangeError);
 });
 test('샘플 차트는 요청하지 않은 외부 데이터나 음수 가격 없이 생성한다',()=>{
   for(const market of Object.keys(MARKETS)){
