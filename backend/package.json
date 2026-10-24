@@ -6,6 +6,7 @@
     "test": "node --experimental-strip-types --test --test-concurrency=1 test/*.test.ts",
     "test:postgres-local": "node --experimental-strip-types --test qa/postgres-local.test.ts",
     "test:postgres-perp": "node --experimental-strip-types --test qa/postgres-perp-sim.test.ts",
+    "test:postgres-paired": "node --experimental-strip-types --test qa/postgres-paired-clearing.test.ts",
     "build": "tsc --noEmit",
     "db:migrate": "node --experimental-strip-types scripts/migrate.ts",
     "start": "node --experimental-strip-types src/http/server.ts"

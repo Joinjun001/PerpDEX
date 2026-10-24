@@ -172,3 +172,7 @@ forge build && forge test -vv
 `backend/src/perp/paired-clearing.ts`는 신뢰된 테스트용 정책과 시세를 받아 같은 `fillId`, 수량, 가격의 BUY/SELL을 서로 다른 두 계정에 **하나의 PostgreSQL 트랜잭션**으로 적용하고 시장별 LONG/SHORT Open Interest가 일치하는지 검증합니다. 신규 `backend/sql/011_perp_pair_clearing.sql`은 시장별 OI/PAIRED·UNPAIRED 모드와 append-only 공통 모의 체결 기록을 저장합니다. M4-T2 기존 단일 계정 원장과 시장 모드를 섞지 않도록 DB 락 및 고유 시장 상태로 차단합니다.
 
 이는 **실제 거래나 증거금 이동이 없는 SIMULATION_ONLY 구현**이며, 실제 체결 검증·양측 담보/위험 승인·펀딩·청산·온체인 정산에 연결하지 않았습니다. 로컬 PGlite 신규 15/15, 전체 백엔드 233/233 통과. 실제 PostgreSQL 다중 연결은 M4-T4에 별도 검증합니다.
+
+## M4-T4 — 로컬 PostgreSQL 실제 양측 체결/시장 OI QA
+
+개발용 PostgreSQL 15.19 임시 Unix 소켓만 사용해 `010`, `011` 스키마와 `paired-clearing.ts`의 동시 중복 체결/다른 ID 충돌, 시장 모드 최초 접근, 한쪽 journal 실패 시 전체 롤백 및 서버 재시작 후 체결 ID/OI 복구를 확인했습니다. 옵트인 명령은 `cd backend && PERPDEX_TEST_PG_SOCKET=/tmp/perpdex-pg-check/socket PERPDEX_TEST_PG_SCHEMA=perp_qa_<새 12자리 hex> PERPDEX_TEST_PG_PHASE=seed npm run test:postgres-paired`이며, 실제 테스트 서버 재시작 뒤 같은 schema로 `PERPDEX_TEST_PG_PHASE=verify` 실행합니다. 개발용 전용 DB에서만 사용 가능하며 **실거래/운영 DB에 적용하지 않습니다**. 자세한 검증 범위: `docs/tasks/M4-T4-postgres-paired-concurrency/QA.md`.
