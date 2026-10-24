@@ -10,7 +10,8 @@ import type {OrderTransactionManager} from '../src/orders/order-transactions.ts'
 import type {PerpPositionContext} from '../src/perp/position-engine.ts';
 import {applySimPairedFill,verifySimMarketOpenInterest,type SimPairedFill} from '../src/perp/paired-clearing.ts';
 import {applySimReservedPairedFill,type SimReservedPairedFill} from '../src/perp/reserved-paired-clearing.ts';
-import {reserveSimReduceOnly,type SimReduceOrderRequest,consumeSimReduceReservation} from '../src/perp/reduce-reservations.ts';
+import {applySimPartialReservedPair} from '../src/perp/partial-reserved-paired-clearing.ts';
+import {reserveSimReduceOnly,type SimReduceOrderRequest,consumeSimReduceReservation,cancelSimReduceReservation} from '../src/perp/reduce-reservations.ts';
 const ALICE=privateKeyToAccount(generatePrivateKey()).address;
 const BOB=privateKeyToAccount(generatePrivateKey()).address;
 const NOW=1800000000;
@@ -164,3 +165,181 @@ test('disk restart preserves linked receipts, replay fencing and updated OI',{ti
     assert.equal((await counts(db)).perp_sim_paired_fills,2);
   }finally{if(db)await db.close();await rm(folder,{recursive:true,force:true});}
 });
+
+async function more(db:PGlite,o:{buy:SimReduceOrderRequest;sell:SimReduceOrderRequest},qty='30000000'){
+  const c=context();
+  const b:SimReduceOrderRequest={...o.buy,orderId:id(),orderQuantityAtomic:qty};
+  const s:SimReduceOrderRequest={...o.sell,orderId:id(),orderQuantityAtomic:qty};
+  await reserveSimReduceOnly(mgr(db),b,c);await reserveSimReduceOnly(mgr(db),s,c);
+  return {buy:b,sell:s};
+}
+async function liveOrders(db:PGlite){
+  const q=await db.query(`SELECT account,order_id,remaining_qty_atomic,consumed_qty_atomic,
+    status,position_version,requested_qty_atomic,cancelled_qty_atomic
+    FROM perp_reduce_orders ORDER BY account,order_id`);
+  return q.rows as Array<{account:string;order_id:string;remaining_qty_atomic:string;
+    consumed_qty_atomic:string;status:string;position_version:number|string;
+    requested_qty_atomic:string;cancelled_qty_atomic:string}>;
+}
+
+test('B2 two simultaneous outstanding orders per account: partial reduces selected, reanchors other',()=>run(async db=>{
+  await prepare(db);const first=await reserve(db,'60000000');const other=await more(db,first);
+  const t=trade(first,'20000000');
+  const output=await applySimPartialReservedPair(mgr(db),t,context());
+  assert.equal(output.openInterest.openInterestAtomic,'80000000');
+  assert.equal(output.buyer.position.sizeSignedAtomic,'-80000000');
+  const orders=await liveOrders(db);
+  assert.equal(orders.length,4);
+  for(const row of orders){
+    assert.equal(Number(row.position_version),2);
+    assert.equal(row.status,'OPEN');
+    assert.equal(row.remaining_qty_atomic, row.order_id===first.buy.orderId||row.order_id===first.sell.orderId?'40000000':'30000000');
+    assert.equal(row.consumed_qty_atomic,row.order_id===first.buy.orderId||row.order_id===first.sell.orderId?'20000000':'0');
+    assert.equal(BigInt(row.requested_qty_atomic),BigInt(row.remaining_qty_atomic)+BigInt(row.consumed_qty_atomic)+BigInt(row.cancelled_qty_atomic));
+  }
+  assert.equal((await counts(db)).perp_reduce_events,2);
+  assert.equal((await verifySimMarketOpenInterest(db,context())).openInterestAtomic,'80000000');
+}));
+
+test('B2 repeated partial from SAME order retains real paired history and fresh versions',()=>run(async db=>{
+  await prepare(db);const first=await reserve(db,'60000000');await more(db,first);
+  await applySimPartialReservedPair(mgr(db),trade(first,'20000000'),context());
+  const second={...trade(first,'20000000'),buyerExpectedVersion:2,sellerExpectedVersion:2};
+  const next=await applySimPartialReservedPair(mgr(db),second,context());
+  assert.equal(next.openInterest.openInterestAtomic,'60000000');
+  const rows=await liveOrders(db);
+  assert.equal(rows.filter(x=>x.consumed_qty_atomic==='40000000').length,2);
+  assert.ok(rows.every(x=>Number(x.position_version)===3));
+  assert.equal((await counts(db)).perp_reduce_events,4);
+}));
+
+test('B2 cannot exceed updated exposure with a new reservation',()=>run(async db=>{
+  await prepare(db);const first=await reserve(db,'60000000');await more(db,first);
+  await applySimPartialReservedPair(mgr(db),trade(first,'20000000'),context());
+  await assert.rejects(reserveSimReduceOnly(mgr(db),{
+    ...first.buy,orderId:id(),expectedPositionVersion:2,orderQuantityAtomic:'20000000',
+  },context()),/capacity|exceeds position/i);
+  assert.equal((await liveOrders(db)).length,4);
+}));
+
+test('B2 cancellation after partial releases only unconsumed remaining and retains consumed accounting',()=>run(async db=>{
+  await prepare(db);const first=await reserve(db,'60000000');const other=await more(db,first);
+  await applySimPartialReservedPair(mgr(db),trade(first,'20000000'),context());
+  await cancelSimReduceReservation(mgr(db),{executionMode:'SIMULATION_ONLY',orderId:other.buy.orderId,
+    account:BOB,eventId:id()},context());
+  const orders=await liveOrders(db);
+  const cancel=orders.find(x=>x.order_id===other.buy.orderId)!;
+  assert.equal(cancel.status,'CANCELLED');
+  assert.equal(cancel.cancelled_qty_atomic,'30000000');
+  const used=orders.find(x=>x.order_id===first.buy.orderId)!;
+  assert.equal(used.remaining_qty_atomic,'40000000');
+  assert.equal(used.consumed_qty_atomic,'20000000');
+  await reserveSimReduceOnly(mgr(db),{...first.buy,orderId:id(),expectedPositionVersion:2,
+    orderQuantityAtomic:'40000000'},context());
+}));
+
+test('B2 stale position version, oracle sequence and margin version reject without journal writes',()=>run(async db=>{
+  await prepare(db);const first=await reserve(db,'60000000');await more(db,first);
+  const t=trade(first,'20000000');
+  await assert.rejects(applySimPartialReservedPair(mgr(db),{...t,buyerExpectedVersion:0},context()));
+  await assert.rejects(applySimPartialReservedPair(mgr(db),t,context('999')));
+  await db.query("UPDATE perp_margin_balances SET version=version+1 WHERE account=$1 AND bucket='AVAILABLE'",[BOB.toLowerCase()]);
+  await assert.rejects(applySimPartialReservedPair(mgr(db),t,context()));
+  assert.deepEqual(await counts(db),{perp_sim_paired_fills:1,perp_position_applications:2,perp_reduce_events:0});
+}));
+
+test('B2 rejection of oversize fill and improper BUY/SELL bindings rolls back both accounts',()=>run(async db=>{
+  await prepare(db);const first=await reserve(db,'60000000');await more(db,first);
+  const t=trade(first,'20000000');
+  await assert.rejects(applySimPartialReservedPair(mgr(db),{...t,quantityAtomic:'70000000'},context()));
+  await assert.rejects(applySimPartialReservedPair(mgr(db),{...t,buyerOrderId:first.sell.orderId},context()));
+  assert.equal((await verifySimMarketOpenInterest(db,context())).openInterestAtomic,'100000000');
+  assert.equal((await liveOrders(db)).reduce((n,o)=>n+BigInt(o.consumed_qty_atomic),0n),0n);
+}));
+
+test('B2 force SQL event failure after M4 paired journal triggers entire rollback then retry succeeds',()=>run(async db=>{
+  await prepare(db);const first=await reserve(db,'60000000');await more(db,first);
+  const t=trade(first,'20000000');
+  await db.exec(`ALTER TABLE perp_reduce_events ADD CONSTRAINT deny_partial CHECK (event_id <> '${t.fillId}')`);
+  await assert.rejects(applySimPartialReservedPair(mgr(db),t,context()));
+  assert.deepEqual(await counts(db),{perp_sim_paired_fills:1,perp_position_applications:2,perp_reduce_events:0});
+  assert.equal((await verifySimMarketOpenInterest(db,context())).openInterestAtomic,'100000000');
+  assert.ok((await liveOrders(db)).every(o=>Number(o.position_version)===1));
+  await db.exec('ALTER TABLE perp_reduce_events DROP CONSTRAINT deny_partial');
+  assert.equal((await applySimPartialReservedPair(mgr(db),t,context())).openInterest.openInterestAtomic,'80000000');
+}));
+
+test('B2 concurrent duplicate partial fill ID records exactly once and replay is fenced',()=>run(async db=>{
+  await prepare(db);const first=await reserve(db,'60000000');await more(db,first);
+  const t=trade(first,'20000000');
+  const all=await Promise.allSettled(Array.from({length:7},()=>applySimPartialReservedPair(mgr(db),t,context())));
+  assert.equal(all.filter(x=>x.status==='fulfilled').length,1);
+  assert.equal((await counts(db)).perp_sim_paired_fills,2);
+  assert.equal((await counts(db)).perp_reduce_events,2);
+  assert.equal((await verifySimMarketOpenInterest(db,context())).openInterestAtomic,'80000000');
+}));
+
+test('B2 unpaired shadow consumption must not be accepted as paired historic receipt',()=>run(async db=>{
+  await prepare(db);const first=await reserve(db,'60000000');await more(db,first);
+  await consumeSimReduceReservation(mgr(db),{executionMode:'SIMULATION_ONLY',account:BOB,
+    eventId:id(),orderId:first.buy.orderId,quantityAtomic:'10000000'},context());
+  await assert.rejects(applySimPartialReservedPair(mgr(db),trade(first,'20000000'),context()),/shadow/i);
+  assert.equal((await counts(db)).perp_sim_paired_fills,1);
+}));
+
+test('B2 persistent disk restart restores partial order sizes, paired receipts and OI',{timeout:45000},async()=>{
+  const folder=await mkdtemp(join(tmpdir(),'perp-partial-reserved-'));let db:PGlite|undefined;
+  try{
+    db=await open(folder);await prepare(db);const first=await reserve(db,'60000000');await more(db,first);
+    const t=trade(first,'20000000');await applySimPartialReservedPair(mgr(db),t,context());
+    await db.close();db=undefined;db=await open(folder);
+    assert.equal((await verifySimMarketOpenInterest(db,context())).openInterestAtomic,'80000000');
+    assert.equal((await counts(db)).perp_reduce_events,2);
+    assert.ok((await liveOrders(db)).every(o=>Number(o.position_version)===2));
+    await assert.rejects(applySimPartialReservedPair(mgr(db),t,context()));
+    const remaining={...trade(first,'20000000'),buyerExpectedVersion:2,sellerExpectedVersion:2};
+    assert.equal((await applySimPartialReservedPair(mgr(db),remaining,context())).openInterest.openInterestAtomic,'60000000');
+  }finally{if(db)await db.close();await rm(folder,{recursive:true,force:true});}
+});
+
+test('B2 one-sided SQL failure on SECOND sorted account rolls back both previously written M4 fills',()=>run(async db=>{
+  await prepare(db);const first=await reserve(db,'60000000');await more(db,first);
+  const t=trade(first,'20000000');const later=[ALICE,BOB].map(x=>x.toLowerCase()).sort()[1];
+  await db.exec(`ALTER TABLE perp_reduce_events ADD CONSTRAINT qa_fail_second_account
+    CHECK (NOT (event_id = '${t.fillId}' AND account = '${later}'))`);
+  await assert.rejects(applySimPartialReservedPair(mgr(db),t,context()));
+  assert.deepEqual(await counts(db),{perp_sim_paired_fills:1,perp_position_applications:2,perp_reduce_events:0});
+  assert.equal((await verifySimMarketOpenInterest(db,context())).openInterestAtomic,'100000000');
+  assert.ok((await liveOrders(db)).every(o=>o.consumed_qty_atomic==='0'&&Number(o.position_version)===1));
+  await db.exec('ALTER TABLE perp_reduce_events DROP CONSTRAINT qa_fail_second_account');
+  assert.equal((await applySimPartialReservedPair(mgr(db),t,context())).openInterest.openInterestAtomic,'80000000');
+}));
+
+test('B2 cancel versus partial fill is serializable and never exceeds resulting position',()=>run(async db=>{
+  await prepare(db);const first=await reserve(db,'60000000');await more(db,first);
+  const t=trade(first,'20000000');
+  const c={executionMode:'SIMULATION_ONLY' as const,account:BOB,orderId:first.buy.orderId,eventId:id()};
+  const [fill,cancel]=await Promise.allSettled([
+    applySimPartialReservedPair(mgr(db),t,context()),
+    cancelSimReduceReservation(mgr(db),c,context()),
+  ]);
+  const oi=(await verifySimMarketOpenInterest(db,context())).openInterestAtomic;
+  assert.ok(oi==='100000000'||oi==='80000000');
+  assert.ok(fill.status==='fulfilled'||cancel.status==='fulfilled');
+  const orders=await liveOrders(db);
+  for(const account of [ALICE,BOB]){
+    const rows=orders.filter(x=>x.account===account.toLowerCase()&&x.status==='OPEN');
+    const openTotal=rows.reduce((n,r)=>n+BigInt(r.remaining_qty_atomic),0n);
+    const expected=oi==='100000000'?100000000n:80000000n;
+    assert.ok(openTotal<=expected);
+  }
+  assert.equal((await counts(db)).perp_sim_paired_fills,oi==='80000000'?2:1);
+}));
+
+test('B2 changed OTHER open order oracle fingerprint rejects partial without consuming selected',()=>run(async db=>{
+  await prepare(db);const first=await reserve(db,'60000000');const other=await more(db,first);
+  await db.query('UPDATE perp_reduce_orders SET snapshot_hash=$1 WHERE order_id=$2',[
+    '0x'+'a'.repeat(64),other.buy.orderId]);
+  await assert.rejects(applySimPartialReservedPair(mgr(db),trade(first,'20000000'),context()));
+  assert.deepEqual(await counts(db),{perp_sim_paired_fills:1,perp_position_applications:2,perp_reduce_events:0});
+}));

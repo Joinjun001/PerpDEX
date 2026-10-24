@@ -336,3 +336,183 @@ export async function finalizeReservedReduceForPair(db:SqlRunner,ctx:PerpPositio
     [...key,nextVersion,nextSize,config.revision,hashPerpMarketConfig(config)]);
   if(updated.rows.length!==1)throw new SimReduceReservationError('post-fill capacity anchor CAS failed');
 }
+
+/** M5-T3-B2: locked, trusted account snapshot for one partial paired reduction.
+ * The market lock and BOTH account guards must already be held, in that order.
+ * Rejects unreconciled shadow CONSUME events, old quote bindings, and other
+ * open orders whose risk cannot be reevaluated against this version.
+ */
+export async function checkPartialReservedReduceForPair(db:SqlRunner,ctx:PerpPositionContext,
+  account:string,orderId:string,side:'BUY'|'SELL',priceAtomic:string,
+  quantityAtomic:string,expectedVersion:number):Promise<void>{
+  const {config,key}=accountKey(ctx,account);
+  const guard=await lockGuard(db,key);
+  const position=await existingPositionLocked(db,key,ctx);
+  const {balances,hash:marginHash}=await lockedMargin(db,key,ctx);
+  await ensureAnchored(db,key,position,hashPerpMarketConfig(config),guard);
+  if(guard.consumed_qty_atomic!=='0'){
+    throw new SimReduceReservationError('unreconciled shadow consumption prevents paired execution');
+  }
+  const open=await getOpenPairOrders(db,key);
+  const order=open.find(row=>row.order_id===eventId(orderId));
+  const qty=safeQuantity(quantityAtomic);
+  if(!order||order.side!==side||order.price_atomic!==priceAtomic||
+     asNumber(order.position_version)!==expectedVersion||position.version!==expectedVersion||
+     qty>uint256(order.remaining_qty_atomic,'remaining')||
+     qty%BigInt(config.lotSize)!==0n){
+    throw new SimReduceReservationError('missing/stale/insufficient partial order reservation');
+  }
+  if(await totalOpen(db,key)>abs(BigInt(position.sizeSignedAtomic))){
+    throw new SimReduceReservationError('outstanding reserve exceeds position');
+  }
+  for(const current of open){
+    await validatePairedOrder(db,ctx,key,config,current,position,balances,marginHash);
+  }
+  // Check the specific proposed partial fill, not the entire outstanding order.
+  const result=evaluateSimPreTrade(position,riskMargin(key,balances),{
+    ...riskRequest(key,config,order,position.version),fillId:eventId(orderId),
+    orderQuantityAtomic:order.remaining_qty_atomic,
+    simulatedFillQuantityAtomic:qty.toString(),
+  },ctx);
+  if(result.decision!=='SIMULATION_ELIGIBLE'||
+      result.candidate?.closedQuantityAtomic!==qty.toString()||
+      result.candidate.openedQuantityAtomic!=='0'){
+    throw new SimReduceReservationError('partial paired risk or actual reduction rejected');
+  }
+}
+
+async function getOpenPairOrders(db:SqlRunner,key:readonly unknown[]):Promise<OrderRow[]>{
+  const found=await db.query(`SELECT order_id,side,price_atomic,requested_qty_atomic,
+    remaining_qty_atomic,consumed_qty_atomic,cancelled_qty_atomic,status,position_version,
+    config_revision,config_hash,snapshot_hash,margin_fingerprint
+    FROM perp_reduce_orders WHERE chain_id=$1 AND verifying_contract=$2 AND market=$3
+      AND collateral_token=$4 AND account=$5 AND status='OPEN' ORDER BY order_id FOR UPDATE`,key);
+  return found.rows as OrderRow[];
+}
+function riskMargin(key:readonly unknown[],balances:Awaited<ReturnType<typeof lockedMargin>>['balances']){
+  return {executionMode:'SIMULATION_ONLY' as const,chainId:Number(key[0]),
+    verifyingContract:String(key[1]),market:String(key[2]),collateralToken:String(key[3]),
+    account:String(key[4]),balances,realizedPnlBookedAtomic:'0' as const};
+}
+function riskRequest(key:readonly unknown[],config:PerpPositionContext['config'],
+  order:OrderRow,version:number):SimPreTradeRequest{
+  return {executionMode:'SIMULATION_ONLY',fillId:order.order_id,account:String(key[4]),
+    chainId:Number(key[0]),verifyingContract:String(key[1]),market:String(key[2]),
+    collateralToken:String(key[3]),configRevision:config.revision,expectedVersion:version,
+    side:order.side,priceAtomic:order.price_atomic,orderQuantityAtomic:order.remaining_qty_atomic,
+    simulatedFillQuantityAtomic:order.remaining_qty_atomic,reduceOnly:true};
+}
+/** A previously consumed order is safe only if every consumption event is
+ * provably paired to a durable M4 fill where this account was a participant.
+ * Never promote the A-stage shadow CONSUME to an actual position fill. */
+async function verifiedPairedConsumption(db:SqlRunner,key:readonly unknown[],order:OrderRow):Promise<void>{
+  const consumed=uint256(order.consumed_qty_atomic,'consumed');
+  const history=await db.query(`SELECT e.event_id,e.quantity_atomic,p.quantity_atomic AS paired_quantity,
+    p.buyer_account,p.seller_account,p.market AS paired_market,
+    p.collateral_token AS paired_collateral FROM perp_reduce_events e
+    LEFT JOIN perp_sim_paired_fills p ON e.chain_id=p.chain_id
+      AND e.verifying_contract=p.verifying_contract AND e.event_id=p.fill_id
+    WHERE e.chain_id=$1 AND e.verifying_contract=$2 AND e.account=$3
+      AND e.order_id=$4 AND e.action='CONSUME'`,[key[0],key[1],key[4],order.order_id]);
+  let proven=0n;
+  for(const h of history.rows as Array<{event_id:string;quantity_atomic:string;paired_quantity:string|null;
+    buyer_account:string|null;seller_account:string|null;paired_market:string|null;paired_collateral:string|null}>){
+    if(h.paired_quantity!==h.quantity_atomic||
+       (h.buyer_account!==key[4]&&h.seller_account!==key[4])||
+       h.paired_market!==key[2]||h.paired_collateral!==key[3]){
+      throw new SimReduceReservationError('unpaired shadow consumption in reservation history');
+    }
+    proven+=uint256(h.quantity_atomic,'historic consumption');
+  }
+  if(proven!==consumed){
+    throw new SimReduceReservationError('reserved consumption journal inconsistent');
+  }
+}
+async function validatePairedOrder(db:SqlRunner,ctx:PerpPositionContext,key:readonly unknown[],
+  config:PerpPositionContext['config'],order:OrderRow,position:Readonly<PerpPosition>,
+  balances:Awaited<ReturnType<typeof lockedMargin>>['balances'],marginHash:string){
+  if(order.status!=='OPEN'||asNumber(order.position_version)!==position.version||
+     asNumber(order.config_revision)!==config.revision||
+     order.config_hash!==hashPerpMarketConfig(config)||
+     order.snapshot_hash!==snapshotHash(ctx)||order.margin_fingerprint!==marginHash||
+     order.cancelled_qty_atomic!=='0'){
+    throw new SimReduceReservationError('stale outstanding order policy/oracle/margin/position');
+  }
+  await verifiedPairedConsumption(db,key,order);
+  const candidate=evaluateSimPreTrade(position,riskMargin(key,balances),
+    riskRequest(key,config,order,position.version),ctx);
+  if(candidate.decision!=='SIMULATION_ELIGIBLE'){
+    throw new SimReduceReservationError(`outstanding reduce-only risk invalid: ${candidate.reason}`);
+  }
+}
+
+/** Reconcile BOTH true M4 position changes and ALL still-open reservations.
+ * Called only after paired journal & OI update in the SAME market-locked TX.
+ */
+export async function finalizePartialReservedReduceForPair(db:SqlRunner,
+  ctx:PerpPositionContext,account:string,orderId:string,fillId:string,
+  quantityAtomic:string,nextSize:string,nextVersion:number):Promise<void>{
+  const {key,config}=accountKey(ctx,account);
+  const guard=await lockGuard(db,key);
+  if(guard.consumed_qty_atomic!=='0'){
+    throw new SimReduceReservationError('unexpected shadow quota in paired finalization');
+  }
+  const oid=eventId(orderId),fid=eventId(fillId);
+  const before=await getOpenPairOrders(db,key);
+  const selected=before.find(v=>v.order_id===oid);
+  const qty=safeQuantity(quantityAtomic);
+  if(!selected||qty>uint256(selected.remaining_qty_atomic,'remaining')){
+    throw new SimReduceReservationError('missing or insufficient reserved fill capacity');
+  }
+  const remaining=BigInt(selected.remaining_qty_atomic)-qty;
+  const updated=await db.query(`UPDATE perp_reduce_orders SET remaining_qty_atomic=$7,
+    consumed_qty_atomic=(consumed_qty_atomic::numeric+$8::numeric)::text,
+    status=$9 WHERE chain_id=$1 AND verifying_contract=$2 AND market=$3
+      AND collateral_token=$4 AND account=$5 AND order_id=$6 AND status='OPEN'
+      AND remaining_qty_atomic=$10 RETURNING order_id`,
+    [...key,oid,remaining.toString(),qty.toString(),remaining===0n?'EXHAUSTED':'OPEN',selected.remaining_qty_atomic]);
+  if(updated.rows.length!==1)throw new SimReduceReservationError('partial order CAS failure');
+  await db.query(`INSERT INTO perp_reduce_events
+    (chain_id,verifying_contract,account,event_id,order_id,market,collateral_token,
+     action,quantity_atomic,remaining_after) VALUES($1,$2,$3,$4,$5,$6,$7,'CONSUME',$8,$9)`,
+    [key[0],key[1],key[4],fid,oid,key[2],key[3],qty.toString(),remaining.toString()]);
+  const fresh=await existingPositionLocked(db,key,ctx);
+  if(fresh.version!==nextVersion||fresh.sizeSignedAtomic!==nextSize){
+    throw new SimReduceReservationError('post-fill position snapshot/version mismatch');
+  }
+  const {balances,hash:marginHash}=await lockedMargin(db,key,ctx);
+  const open=await getOpenPairOrders(db,key);
+  let outstanding=0n;
+  for(const order of open){outstanding+=uint256(order.remaining_qty_atomic,'remaining');}
+  if(outstanding>abs(BigInt(nextSize))){
+    throw new SimReduceReservationError('remaining reserved quantities exceed new position');
+  }
+  // Revalidate all surviving orders on the NEW position version; keep same
+  // trusted oracle/margin fingerprint and conservative price for each order.
+  for(const order of open){
+    if(order.snapshot_hash!==snapshotHash(ctx)||order.margin_fingerprint!==marginHash||
+       asNumber(order.config_revision)!==config.revision||
+       order.config_hash!==hashPerpMarketConfig(config)){
+      throw new SimReduceReservationError('outstanding quote changed during clearing');
+    }
+    await verifiedPairedConsumption(db,key,order);
+    const check=evaluateSimPreTrade(fresh,riskMargin(key,balances),
+      riskRequest(key,config,order,nextVersion),ctx);
+    if(check.decision!=='SIMULATION_ELIGIBLE'){
+      throw new SimReduceReservationError('remaining order fails post-fill risk gate');
+    }
+  }
+  // Orders that are now EXHAUSTED keep their historical position version.
+  if(open.length){
+    await db.query(`UPDATE perp_reduce_orders SET position_version=$6
+      WHERE chain_id=$1 AND verifying_contract=$2 AND market=$3
+        AND collateral_token=$4 AND account=$5 AND status='OPEN'`,[...key,nextVersion]);
+  }
+  const g=await db.query(`UPDATE perp_reduce_guards SET position_size_atomic=$6,
+    position_version=$7,consumed_qty_atomic='0',revision=revision+1
+    WHERE chain_id=$1 AND verifying_contract=$2 AND market=$3
+      AND collateral_token=$4 AND account=$5 AND config_revision=$8
+      AND config_hash=$9 RETURNING revision`,
+    [...key,nextSize,nextVersion,config.revision,hashPerpMarketConfig(config)]);
+  if(g.rows.length!==1)throw new SimReduceReservationError('post-fill quota reanchor failure');
+}

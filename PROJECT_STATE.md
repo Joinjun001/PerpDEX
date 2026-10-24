@@ -6,11 +6,16 @@
 - 브랜치: `main`
 - 기준: 실제 소스 코드와 Git 상태를 최우선으로 판단
 - 현재 마일스톤: **M5 — Perpetual Futures 초기·유지증거금/레버리지 위험 엔진 (로컬 모의 구현)**
-- 현재 TASK: **M5-T3-B2 — 다중/부분 Reduce-only 예약을 M4 양측 체결과 원자적으로 화해 (Next)**
+- 현재 TASK: **M5-T3-B3 — Reduce-only 저수준 writer 우회 폐쇄·DB 계층 안전 강화 (Next)**
 - 상태: M2-T4 로컬 완료 (A 코어/B 영속 매칭/C API 자동 체결/D 검증된 정산 원장 후보 어댑터); M2-T5-A~E 로컬 검증 완료 (E HTTP→체결→Outbox→정산 후보→모의 영수증 종단간 인수). 실제 PostgreSQL 15 임시 개발 서버의 복수 연결 검증과 Foundry 로컬 회귀 완료; 경제/위험 정책·실체인 정산·운영/스테이징 DB는 미승인/미완료
 - 최근 완료: M1 전체 및 M2-T1/T2/T3/T4 로컬 완료. M2-T5-A policy-gated 영속 Settlement Outbox, 동시 claim·lease fencing·retry·DB 재시작 복구 구현. M2-T5-C 영속 dry-run/ABI 인코딩·중복 의도 차단/UNKNOWN 격리 구현, M2-T5-E 신규 HTTP~정산 전 단계 E2E 통합 테스트 3개 포함 백엔드 전체 149/149 통과 및 TypeScript 검사 성공 (2026-10-24). 임시 실제 PostgreSQL 15 다중 연결 4/4×3 및 Foundry 35/35 검증 추가 완료; 스테이징/운영 PostgreSQL QA 별도 이관
 - 다음 작업은 사람 확인/승인 필요: 실제 스테이징/운영 PostgreSQL의 정책·백업·멀티프로세스/001~007 인수 (임시 개발용 DB 서버는 검증 후 정지), 정책/리스크·승인자/자산/금액 결정, 실제 체인 정산 실행과 read-only 영수증/settledTrades·최종성 통합, 운영 배포·push. 로컬 PostgreSQL 복수 연결 및 Foundry 테스트는 현재 완료. 검증 가이드 `docs/releases/M2-LOCAL-ACCEPTANCE.md`. 미확정 신규 기능을 임의로 생성하지 않음. M2-T5-A는 policy-gated Outbox/임대·재시도 기반으로 로컬 완료. 운영 PostgreSQL 멀티프로세스 및 003/004/005/006/007 마이그레이션은 환경/승인 준비 시 별도 수행
 - 사람 확인 필요: 개발용 PostgreSQL 15.19는 별도 임시 Unix socket 클러스터에서 다중 연결을 검증했지만, 운영/스테이징 DB의 멀티프로세스/권한/백업 및 마이그레이션은 여전히 미실행. 신규 `005_settlement_outbox.sql`/`006_settlement_intents.sql`/`007_settlement_reconciliations.sql` 운영 마이그레이션도 미실행. 실제 시장별 토큰·정밀도/마진·위험·수수료 정책과 신뢰된 정책 승인자/금액은 운영자 확인이 필요하며 자동 생성·승인하지 않음. M2-T5-B는 정책 입력과 체결별 EIP-712 서명 검증만 구현. Foundry 1.8.5 로컬 테스트 35/35 통과, Solidity invariant 128,000 calls 통과. 실제 배포/체인 RPC/영수증 검증은 미실행. 명시적으로 승인된 임시 PostgreSQL/Foundry 로컬 QA는 완료했으며, 실제 릴리스/온체인 연결은 추가 사람 승인 및 외부 환경 준비 대기. 운영/스테이징 DB 실제 마이그레이션·API 배포·Sepolia broadcast는 승인 없이 수행하지 않음. 원격 push는 AutoPilot 작업에서 제외한다.
+
+## 2026-10-24 M5-T3-B2 다중 예약·부분 체결 원자 화해
+
+- 신규 `backend/src/perp/partial-reserved-paired-clearing.ts`는 기존 PAIRED 시장의 양측 SIMULATION_ONLY reduce-only 주문에 대해 **다중 OPEN 예약을 유지하면서 일부 수량만 체결**하고 M4 양측 포지션/공통 fillId·OI, M5 주문별 reserved→consumed 이벤트, 다른 미체결 주문의 새 position version/risk 검사를 한 TX에 묶음. 시장 OI → 주소순 guard → 포지션 → 마진 버킷 잠금 순서 유지. 이후 `SUM(OPEN remaining)<=abs(new position.size)` 필수. 과거 체결 없는 A-stage shadow consume를 실제 M4 fill로 인정하지 않음. 불일치·경합·SQL 장애 시 전체 rollback.
+- 신규 B2 PGlite **13/13**, 백엔드 전체 **314/314 통과** 및 TypeScript 빌드 성공, 문서 `docs/tasks/M5-T3-B2-partial-reservations/` 추가. **SIMULATION_ONLY / M3 돈 이동·M2 주문·온체인 미연결**. 다음 M5-T3-B3는 공개 writer뿐 아니라 저수준 SqlRunner 경로/DB 직접 SQL 우회까지 보안 경계 강화, 이후 M5-T3-C margin+order 원자 통합/M5-T4 실제 PostgreSQL QA.
 
 ## 2026-10-24 M5-T3-B1 제한된 양측 Reduce-only 체결·OI 원자 연계
 

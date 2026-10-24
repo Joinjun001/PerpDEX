@@ -192,3 +192,7 @@ forge build && forge test -vv
 ## M5-T3-B1 — 제한된 양측 Reduce-only 모의 체결의 원자적 연결
 
 `backend/src/perp/reserved-paired-clearing.ts`는 기존 `PAIRED` 시장에서 양쪽 계정의 **단일 온전한 Reduce-only 예약을 각각 전량 소진하는 모의 포지션 축소**만 지원합니다. M4 양측 포지션·시장 OI·공통 영수증과 M5-T3-A의 두 계정 예약 소진 이벤트를 하나의 DB 트랜잭션에서 원자 저장합니다. 예약 guard가 존재하는 계정은 기존 M4의 직접 paired 및 standalone 공개 writer 경로를 거부합니다. 여러 주문의 부분 체결·일반 주문과의 매칭·실 증거금/자금 이동·온체인 송신은 미구현이며, 실 PostgreSQL 다중 연결과 모든 저수준 writer 우회 차단은 후속 검증이 필요합니다. `docs/tasks/M5-T3-B-reserved-paired/SPEC.md`를 참조하세요.
+
+## M5-T3-B2 — 다중 Reduce-only 예약 부분 체결·위험 화해 (모의 전용)
+
+`backend/src/perp/partial-reserved-paired-clearing.ts`는 양쪽 모두 기존 포지션을 줄이는 **SIMULATION_ONLY** 체결에서 여러 열린 Reduce-only 주문의 예약 용량을 같은 M4 양측 포지션·OI 트랜잭션 안에서 유지합니다. 일부 체결 후 남은 주문 각각을 새 포지션/증거금/오라클/정책 조건으로 재검사하여 `SUM(남은 예약) <= abs(새 포지션)`을 보장합니다. 체결 없는 shadow consume는 기존 position fill 기록으로 인정하지 않습니다. **실 주문·실 자금·M3 자금 버킷 이동·저수준 writer 전체 잠금은 아직 지원하지 않습니다.** 세부 내용: `docs/tasks/M5-T3-B2-partial-reservations/SPEC.md`.
