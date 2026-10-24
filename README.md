@@ -184,3 +184,7 @@ forge build && forge test -vv
 ## M5-T2 — 로컬 reduce-only 및 체결 후 위험 시뮬레이션
 
 `backend/src/perp/pre-trade-risk.ts`의 `evaluateSimPreTrade`는 **주문 전체 수량과 가상 부분 체결 수량을 구분**하고, LONG/SHORT 포지션의 reduce-only 위반/무단 반전·IM/MM/Equity/레버리지·reserved margin 위험을 체결 **전후** 순수 계산으로 평가합니다. 결과 `SIMULATION_ELIGIBLE`은 입력된 **모의 단일 체결의 진단**일 뿐 승인이나 실행권한이 아니며, `executionAuthorized:false`가 고정입니다. 실제 API 주문 접수·M3/M4 원장·실자산·체인·펀딩/수수료/청산에 연결하지 않았습니다. 검증 및 제약: `docs/tasks/M5-T2-pre-trade-risk/{SPEC,QA}.md`.
+
+## M5-T3-A — Reduce-only 모의 예약 수량 원장
+
+`backend/src/perp/reduce-reservations.ts`와 수동 SQL `backend/sql/012_perp_reduce_reservations.sql`는 **SIMULATION_ONLY**에서 단일 계정의 `미체결 reduce-only 합계 + 가상 소진 누적 <= 해당 버전 포지션 절댓값`을 영속 계정 잠금으로 검증합니다. M3 마진 3버킷·M4 포지션 스냅샷/이력·M5-T2 위험계산을 읽기 잠금 안에서 재검증합니다. 주문 예약·가상 부분 소진·미소진 취소/이벤트 중복 처리만 제공하며 **M2 실주문, M4 실제 양측 체결/포지션 변경, M3 자금 버킷 이동, Vault/온체인 거래에 연결하지 않았습니다**. 가상 소진은 실제 체결을 뜻하지 않습니다. 잔여 위험과 검증 범위는 `docs/tasks/M5-T3-reduce-capacity-ledger/SPEC.md`에 기록했습니다.

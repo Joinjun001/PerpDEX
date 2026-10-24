@@ -1,0 +1,261 @@
+/** M5-T3-A. Durable SIMULATION_ONLY reduce-only capacity reservation lifecycle.
+ * No M4 position updates, real fills, M3 balance movements, or actual trade admission.
+ */
+import {createHash} from 'node:crypto';
+import {getAddress} from 'viem';
+import type {SqlRunner} from '../orders/nonce-registry.ts';
+import type {OrderTransactionManager} from '../orders/order-transactions.ts';
+import {uint256,MAX_UINT256} from './fixed-point.ts';
+import {validatePerpMarketConfig} from './market-config.ts';
+import {validateMockPriceSnapshot} from './price-snapshot.ts';
+import type {PerpPosition,PerpPositionContext} from './position-engine.ts';
+import {readSimPerpPosition} from './position-ledger.ts';
+import {getIsolatedMarginBalances} from './margin-ledger.ts';
+import {evaluateSimPreTrade,type SimPreTradeRequest} from './pre-trade-risk.ts';
+import {hashPerpMarketConfig} from './sim-order.ts';
+
+export class SimReduceReservationError extends Error {
+  constructor(message:string){super(message);this.name='SimReduceReservationError';}
+}
+export interface SimReduceOrderRequest {
+  executionMode:'SIMULATION_ONLY';
+  orderId:string;
+  account:string;
+  side:'BUY'|'SELL';
+  priceAtomic:string;
+  orderQuantityAtomic:string;
+  expectedPositionVersion:number;
+}
+export interface SimReduceEventRequest {
+  executionMode:'SIMULATION_ONLY';
+  orderId:string;
+  eventId:string;
+  account:string;
+  /** CONSUME means reservation-only dry run, not an executed position fill. */
+  quantityAtomic?:string;
+}
+export interface SimReduceOrderView {
+  orderId:string;status:'OPEN'|'CANCELLED'|'EXHAUSTED';
+  requestedQuantityAtomic:string;remainingQuantityAtomic:string;
+  consumedQuantityAtomic:string;cancelledQuantityAtomic:string;
+  positionVersion:number;replayed:boolean;executionAuthorized:false;
+}
+const HEX=/^0x[0-9a-f]{64}$/;
+const ZERO='0x0000000000000000000000000000000000000000';
+function evm(value:unknown):string{
+  if(typeof value!=='string')throw new SimReduceReservationError('missing account');
+  try{const normalized=getAddress(value).toLowerCase();if(normalized===ZERO)throw Error();return normalized;}
+  catch{throw new SimReduceReservationError('invalid/zero account');}
+}
+function eventId(s:unknown){if(typeof s!=='string'||!HEX.test(s))throw new SimReduceReservationError('noncanonical ID');return s;}
+function digest(value:unknown){return '0x'+createHash('sha256').update(JSON.stringify(value)).digest('hex');}
+function safeQuantity(s:unknown){return uint256(s,'quantityAtomic',true);}
+function asNumber(raw:unknown){const v=Number(raw);if(!Number.isSafeInteger(v)||v<0)throw new SimReduceReservationError('unsafe DB version');return v;}
+function accountKey(ctx:PerpPositionContext,account:string){
+  const config=validatePerpMarketConfig(ctx.config,ctx.domain,ctx.trustedSourceId,ctx.nowSeconds);
+  validateMockPriceSnapshot(ctx.snapshot,config,ctx.domain,ctx.nowSeconds);
+  return {config,key:[config.chainId,config.verifyingContract,config.market,config.collateralToken,evm(account)] as const};
+}
+function snapshotHash(ctx:PerpPositionContext){
+  const s=ctx.snapshot;
+  return digest([s.chainId,evm(s.verifyingContract),s.market,s.configRevision,
+    s.sourceId,s.sourceSequence,s.indexPrice,s.markPrice,s.publishedAt,s.confidenceBps]);
+}
+type MarginRow={bucket:string;balance:string;version:number|string};
+async function lockedMargin(db:SqlRunner,key:readonly unknown[],ctx:PerpPositionContext){
+  const r=await db.query(`SELECT bucket,balance,version FROM perp_margin_balances
+    WHERE chain_id=$1 AND verifying_contract=$2 AND market=$3 AND collateral_token=$4 AND account=$5
+    ORDER BY bucket FOR SHARE`,key);
+  const rows=r.rows as MarginRow[];
+  // Absent buckets must NOT be mistaken for custody proof.
+  if(rows.length!==3||rows.map(v=>v.bucket).sort().join(',')!=='AVAILABLE,POSITION,RESERVED'){
+    throw new SimReduceReservationError('all 3 explicitly seeded margin buckets required');
+  }
+  const balances=await getIsolatedMarginBalances(db,ctx.domain,
+    {market:ctx.config.market,collateralToken:ctx.config.collateralToken,account:String(key[4])});
+  return {balances,hash:digest(rows.map(row=>[row.bucket,row.balance,asNumber(row.version)]))};
+}
+async function existingPositionLocked(db:SqlRunner,key:readonly unknown[],ctx:PerpPositionContext):Promise<Readonly<PerpPosition>>{
+  const locked=await db.query(`SELECT version FROM perp_position_snapshots
+    WHERE chain_id=$1 AND verifying_contract=$2 AND market=$3 AND collateral_token=$4 AND account=$5 FOR UPDATE`,key);
+  if(locked.rows.length!==1)throw new SimReduceReservationError('persistent position required; no synthetic exposure');
+  return readSimPerpPosition(db,String(key[4]),ctx);
+}
+async function lockGuard(db:SqlRunner,key:readonly unknown[]){
+  await db.query(`INSERT INTO perp_reduce_guards
+    (chain_id,verifying_contract,market,collateral_token,account)
+    VALUES($1,$2,$3,$4,$5) ON CONFLICT DO NOTHING`,key);
+  const r=await db.query(`SELECT position_version,position_size_atomic,config_revision,config_hash,
+    consumed_qty_atomic FROM perp_reduce_guards
+    WHERE chain_id=$1 AND verifying_contract=$2 AND market=$3 AND collateral_token=$4 AND account=$5 FOR UPDATE`,key);
+  const row=r.rows[0] as {position_version:number|string|null;position_size_atomic:string|null;
+    config_revision:number|string|null;config_hash:string|null;consumed_qty_atomic:string}|undefined;
+  if(!row)throw new SimReduceReservationError('missing capacity guard');
+  return row;
+}
+function abs(value:bigint){return value<0n?-value:value;}
+async function ensureAnchored(db:SqlRunner,key:readonly unknown[],position:Readonly<PerpPosition>,
+  hash:string,guard:Awaited<ReturnType<typeof lockGuard>>){
+  const size=position.sizeSignedAtomic;
+  if(guard.position_version===null){
+    await db.query(`UPDATE perp_reduce_guards SET position_version=$6,position_size_atomic=$7,
+      config_revision=$8,config_hash=$9 WHERE chain_id=$1 AND verifying_contract=$2
+      AND market=$3 AND collateral_token=$4 AND account=$5`,
+    [...key,position.version,size,position.configRevision,hash]);
+    return;
+  }
+  if(asNumber(guard.position_version)!==position.version||
+    guard.position_size_atomic!==size||guard.config_revision===null||
+    asNumber(guard.config_revision)!==position.configRevision||guard.config_hash!==hash){
+    throw new SimReduceReservationError('position or policy changed: explicit capacity reconciliation required');
+  }
+}
+type OrderRow={order_id:string;side:'BUY'|'SELL';price_atomic:string;requested_qty_atomic:string;
+  remaining_qty_atomic:string;consumed_qty_atomic:string;cancelled_qty_atomic:string;
+  status:SimReduceOrderView['status'];position_version:number|string;config_revision:number|string;
+  config_hash:string;snapshot_hash:string;margin_fingerprint:string};
+async function orderById(db:SqlRunner,key:readonly unknown[],order:string){
+  const r=await db.query(`SELECT order_id,side,price_atomic,requested_qty_atomic,
+    remaining_qty_atomic,consumed_qty_atomic,cancelled_qty_atomic,status,position_version,
+    config_revision,config_hash,snapshot_hash,margin_fingerprint FROM perp_reduce_orders
+    WHERE chain_id=$1 AND verifying_contract=$2 AND market=$3 AND collateral_token=$4
+      AND account=$5 AND order_id=$6`,[...key,order]);
+  return r.rows[0] as OrderRow|undefined;
+}
+function view(r:OrderRow,replayed:boolean):Readonly<SimReduceOrderView>{
+  return Object.freeze({orderId:r.order_id,status:r.status,
+    requestedQuantityAtomic:r.requested_qty_atomic,remainingQuantityAtomic:r.remaining_qty_atomic,
+    consumedQuantityAtomic:r.consumed_qty_atomic,cancelledQuantityAtomic:r.cancelled_qty_atomic,
+    positionVersion:asNumber(r.position_version),replayed,executionAuthorized:false});
+}
+async function totalOpen(db:SqlRunner,key:readonly unknown[]){
+  const r=await db.query(`SELECT remaining_qty_atomic FROM perp_reduce_orders
+    WHERE chain_id=$1 AND verifying_contract=$2 AND market=$3 AND collateral_token=$4 AND account=$5
+      AND status='OPEN'`,key);
+  let sum=0n;for(const row of r.rows as Array<{remaining_qty_atomic:string}>){
+    sum+=uint256(row.remaining_qty_atomic,'stored remaining');
+    if(sum>MAX_UINT256)throw new SimReduceReservationError('reservation sum overflow');
+  }
+  return sum;
+}
+/** Reservation only: every concurrent writer must first own this account guard. */
+export async function reserveSimReduceOnly(transactions:OrderTransactionManager,
+  raw:SimReduceOrderRequest,ctx:PerpPositionContext):Promise<Readonly<SimReduceOrderView>>{
+  if(!raw||raw.executionMode!=='SIMULATION_ONLY')throw new SimReduceReservationError('simulation-only required');
+  const id=eventId(raw.orderId),{config,key}=accountKey(ctx,raw.account);
+  const size=safeQuantity(raw.orderQuantityAtomic);
+  const hash=hashPerpMarketConfig(config),snapshot=snapshotHash(ctx);
+  if(!Number.isSafeInteger(raw.expectedPositionVersion)||raw.expectedPositionVersion<0){
+    throw new SimReduceReservationError('invalid expected position version');
+  }
+  return transactions.withTransaction(async db=>{
+    const guard=await lockGuard(db,key);
+    const position=await existingPositionLocked(db,key,ctx);
+    const {balances,hash:marginHash}=await lockedMargin(db,key,ctx);
+    await ensureAnchored(db,key,position,hash,guard);
+    const prev=await orderById(db,key,id);
+    if(prev){
+      if(prev.side!==raw.side||prev.price_atomic!==raw.priceAtomic||
+         prev.requested_qty_atomic!==size.toString()||prev.position_version!=raw.expectedPositionVersion||
+         prev.config_hash!==hash||prev.snapshot_hash!==snapshot||prev.margin_fingerprint!==marginHash){
+        throw new SimReduceReservationError('order ID reused with changed inputs');
+      }
+      return view(prev,true);
+    }
+    const order:SimPreTradeRequest={executionMode:'SIMULATION_ONLY',fillId:id,
+      account:String(key[4]),chainId:config.chainId,verifyingContract:config.verifyingContract,
+      market:config.market,collateralToken:config.collateralToken,configRevision:config.revision,
+      expectedVersion:raw.expectedPositionVersion,side:raw.side,priceAtomic:raw.priceAtomic,
+      orderQuantityAtomic:size.toString(),simulatedFillQuantityAtomic:size.toString(),reduceOnly:true};
+    const evaluation=evaluateSimPreTrade(position,{executionMode:'SIMULATION_ONLY',
+      chainId:config.chainId,verifyingContract:config.verifyingContract,market:config.market,
+      collateralToken:config.collateralToken,account:String(key[4]),balances,realizedPnlBookedAtomic:'0'},
+    order,ctx);
+    if(evaluation.decision!=='SIMULATION_ELIGIBLE'){
+      throw new SimReduceReservationError(`reduce-only risk gate rejected: ${evaluation.reason}`);
+    }
+    const old=BigInt(position.sizeSignedAtomic),consumed=uint256(guard.consumed_qty_atomic,'consumed');
+    const remaining=await totalOpen(db,key);
+    if(remaining+consumed+size>abs(old)){
+      throw new SimReduceReservationError('total outstanding and consumed reduce quota exceeds position');
+    }
+    await db.query(`INSERT INTO perp_reduce_orders (chain_id,verifying_contract,market,
+      collateral_token,account,order_id,side,price_atomic,requested_qty_atomic,
+      remaining_qty_atomic,position_version,config_revision,config_hash,snapshot_hash,margin_fingerprint)
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
+    [...key,id,raw.side,raw.priceAtomic,size.toString(),size.toString(),position.version,
+      config.revision,hash,snapshot,marginHash]);
+    return view((await orderById(db,key,id))!,false);
+  });
+}
+/** Consumption only records a hypothetical fill and permanently uses quota. */
+export async function consumeSimReduceReservation(transactions:OrderTransactionManager,
+  raw:SimReduceEventRequest,ctx:PerpPositionContext):Promise<Readonly<SimReduceOrderView>>{
+  return mutateReservation(transactions,raw,ctx,'CONSUME');
+}
+/** Cancellation only releases the unconsumed remainder; never releases used quota. */
+export async function cancelSimReduceReservation(transactions:OrderTransactionManager,
+  raw:SimReduceEventRequest,ctx:PerpPositionContext):Promise<Readonly<SimReduceOrderView>>{
+  return mutateReservation(transactions,raw,ctx,'CANCEL');
+}
+async function mutateReservation(transactions:OrderTransactionManager,
+  raw:SimReduceEventRequest,ctx:PerpPositionContext,action:'CONSUME'|'CANCEL'){
+  if(!raw||raw.executionMode!=='SIMULATION_ONLY')throw new SimReduceReservationError('simulation-only required');
+  const id=eventId(raw.orderId),eid=eventId(raw.eventId),{key,config}=accountKey(ctx,raw.account);
+  if(action==='CANCEL'&&raw.quantityAtomic!==undefined){
+    throw new SimReduceReservationError('cancel must not specify a fill quantity');
+  }
+  const quantity=action==='CONSUME'?safeQuantity(raw.quantityAtomic):null;
+  if(quantity!==null&&quantity%BigInt(config.lotSize)!==0n){
+    throw new SimReduceReservationError('simulated consumed quantity violates lot size');
+  }
+  return transactions.withTransaction(async db=>{
+    const guard=await lockGuard(db,key);
+    const position=await existingPositionLocked(db,key,ctx);
+    const {hash:marginHash}=await lockedMargin(db,key,ctx);
+    await ensureAnchored(db,key,position,hashPerpMarketConfig(config),guard);
+    const order=await orderById(db,key,id);
+    if(!order)throw new SimReduceReservationError('unknown reservation');
+    const existing=await db.query(`SELECT order_id,action,quantity_atomic FROM perp_reduce_events
+      WHERE chain_id=$1 AND verifying_contract=$2 AND account=$3 AND event_id=$4`,
+      [key[0],key[1],key[4],eid]);
+    const event=existing.rows[0] as {order_id:string;action:string;quantity_atomic:string}|undefined;
+    if(event){
+      if(event.order_id!==id||event.action!==action||
+          action==='CONSUME'&&event.quantity_atomic!==quantity!.toString()){
+        throw new SimReduceReservationError('event ID reused with different payload');
+      }
+      return view(order,true);
+    }
+    if(order.status!=='OPEN')throw new SimReduceReservationError('reservation is no longer open');
+    if(action==='CONSUME'&&(order.snapshot_hash!==snapshotHash(ctx)||order.margin_fingerprint!==marginHash)){
+      throw new SimReduceReservationError('oracle or margin changed: stale risk admission');
+    }
+    const available=uint256(order.remaining_qty_atomic,'remaining');
+    const used=action==='CONSUME'?quantity!:available;
+    if(used>available)throw new SimReduceReservationError('event exceeds remaining reserved quantity');
+    const rem=available-used;
+    const newConsumed=BigInt(order.consumed_qty_atomic)+(action==='CONSUME'?used:0n);
+    const newCancelled=BigInt(order.cancelled_qty_atomic)+(action==='CANCEL'?used:0n);
+    const status=action==='CANCEL'?'CANCELLED':rem===0n?'EXHAUSTED':'OPEN';
+    await db.query(`UPDATE perp_reduce_orders SET remaining_qty_atomic=$7,
+      consumed_qty_atomic=$8,cancelled_qty_atomic=$9,status=$10
+      WHERE chain_id=$1 AND verifying_contract=$2 AND market=$3 AND collateral_token=$4
+        AND account=$5 AND order_id=$6`,
+    [...key,id,rem.toString(),newConsumed.toString(),newCancelled.toString(),status]);
+    if(action==='CONSUME'){
+      const total=uint256(guard.consumed_qty_atomic,'cumulative consumed')+used;
+      if(total>abs(BigInt(position.sizeSignedAtomic))){
+        throw new SimReduceReservationError('simulated consumption exceeds anchored exposure');
+      }
+      await db.query(`UPDATE perp_reduce_guards SET consumed_qty_atomic=$6,revision=revision+1
+        WHERE chain_id=$1 AND verifying_contract=$2 AND market=$3 AND collateral_token=$4 AND account=$5`,
+        [...key,total.toString()]);
+    }
+    await db.query(`INSERT INTO perp_reduce_events
+      (chain_id,verifying_contract,account,event_id,order_id,market,collateral_token,action,
+       quantity_atomic,remaining_after) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+    [key[0],key[1],key[4],eid,id,key[2],key[3],action,used.toString(),rem.toString()]);
+    return view((await orderById(db,key,id))!,false);
+  });
+}
