@@ -3,7 +3,7 @@
 ## 분할 및 범위
 
 - **C3-A (이번 회차)**: 정책값 없는 읽기 전용 계정별 signed 주문 OPEN/CANCELED/FILLED 책임·M3 RESERVED/POSITION·M4 포지션/표시손익 교차 대조. 어떠한 체결·입출금·PnL 반영도 하지 않고 실행 권한 반환 금지.
-- **C3-B (다음 우선)**: 직접 SQL이 주문과 nonce를 함께 CANCELED로 바꾸고 RELEASE 기록을 누락해도 현 SQL 015~017에서 커밋되는 취소 무결성 결함을 해결. 취소 요청의 EIP-712 인증은 서비스에서 수행하며 DB에서는 불변 취소 영수증-주문-ID-M3 RELEASE 양쪽 분개와 RESERVED 잔고를 COMMIT 제약으로 검증해야 함. 기존 서명된 취소 API 호환 및 롤백 검증 필수.
+- **C3-B (로컬 구현 완료)**: 직접 SQL이 주문과 nonce를 함께 CANCELED로 바꾸고 RELEASE 기록을 누락해도 현 SQL 015~017에서 커밋되는 취소 무결성 결함을 해결. 취소 요청의 EIP-712 인증은 서비스에서 수행하며 DB에서는 불변 취소 영수증-주문-ID-M3 RELEASE 양쪽 분개와 RESERVED 잔고를 COMMIT 제약으로 검증해야 함. 기존 서명된 취소 API 호환 및 롤백 검증 필수.
 - **C3-C (후속)**: 다중 OPEN 예약 / 부분 체결 / 남은 예약 책임. 기존 SQL 017의 FLAT·전량·최종 영수증 제약을 유지하고, 정책적 의미가 합의되기 전 별도 실행 활성화 금지.
 - **C3-D (후속)**: 포지션 감소와 실현 손익 계산-회계 연결, fee/funding은 승인된 정책 수치가 정해지기 전 정산 금지. 계산만 필요한 경우 기존 M4 numerator 기반 표시는 지원.
 
@@ -20,3 +20,12 @@
 ## 제약
 
 SIMULATION_ONLY, 로컬 /shared/PerpDEX 한정. SQL 015~017, 기존 체결·입출금 경로 변경하지 않음. 운영 DB/실체인/실자금/push/배포 금지.
+
+## C3-B 취소 커밋 무결성 구현 범위
+
+- 신규 SQL 018 `perp_signed_cancel_receipts`: domain/account/nonce/orderId/market/collateral/release ID/IM 금액/취소 만료·서명 digest·signature(검증된 입력으로부터 저장) 불변 기록. FK와 행 불변식, 지연 COMMIT 트리거를 설치한다.
+- SQL 018은 CANCELED 상태와 nonce CANCELED, 원래 서명 주문 identity·IM, M3 RELEASE operation과 RESERVED→AVAILABLE 분개 2개, RESERVED 장부의 기록 합계를 교차 검증한다. 원장/잔고, nonce, 주문, 새 receipt 각각의 독립 SQL 변경도 감사한다.
+- 서비스 `cancelSimPerpOrder`는 EIP-712 인증을 완료한 뒤 기존 nonce·상태·M3 RELEASE와 같은 TX에 영수증을 INSERT한다. SQL 017이 존재하지만 018이 없으면 새 취소는 fail-closed. 기존 017이 없는 레거시 테스트 스키마는 기존 취소 동작을 유지하되 018 보호 수준을 주장하지 않는다.
+- **운영 마이그레이션 제한:** 영수증 없는 기존 CANCELED 기록을 무단으로 가짜 서명/영수증으로 채우지 않는다. SQL 018 DO 블록이 차단하며 검증된 과거 영수증 재구축 또는 운영자 승인된 별도 마이그레이션이 필요하다.
+- 서명 복구 검증은 viem 내부 서비스에서 수행한다. SQL 트리거 단독으로 ECDSA 서명을 인증하는 것은 불가능하고 DB owner/DDL 또는 receipt·ledger 전체 조작 권한에 대한 보장은 없다. M5-T4 DB role 최소 권한으로 분리해야 한다.
+- 실제 실자금·실거래·출금·메인넷 기능은 추가하지 않는다.

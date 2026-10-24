@@ -43,7 +43,8 @@ async function open(dir?:string){const db=new PGlite(dir);await db.waitReady;
     '010_perp_position_ledger','011_perp_pair_clearing','012_perp_reduce_reservations',
     '013_perp_guarded_position_commit','014_perp_reduce_ledger_integrity',
     '015_perp_signed_opening_fence','016_perp_signed_pair_preparations',
-    '017_perp_signed_pair_executions']){
+    '017_perp_signed_pair_executions',
+    '018_perp_signed_cancel_integrity']){
     await db.exec(await readFile(fileURLToPath(new URL(`../sql/${file}.sql`,import.meta.url)),'utf8'));
   }
   await db.query(`INSERT INTO perp_market_open_interest(chain_id,verifying_contract,market,
@@ -200,17 +201,18 @@ test('C3-A committed signed RESERVED tampering is blocked by SQL 015 and audit s
  assert.equal(report.openReservationLiabilityAtomic,report.balances.reserved);
 }));
 
-test('C3-A rejects forged signed cancellation without append-only RELEASE receipt',()=>run(async db=>{
+test('C3-A and SQL 018 reject forged signed cancellation without RELEASE receipt at COMMIT',()=>run(async db=>{
  await create(db);
- await db.transaction(async tx=>{
+ await assert.rejects(db.transaction(async tx=>{
    await tx.query("UPDATE order_nonces SET status='CANCELED' WHERE account=$1",
      [alice.address.toLowerCase()]);
    await tx.query("UPDATE perp_sim_orders SET status='CANCELED' WHERE account=$1",
      [alice.address.toLowerCase()]);
- });
- await assert.rejects(reconcileSignedSimAccount(alice.address,context(),manager(db)),
-   /cancellation missing matching M3 RELEASE/i);
- const bad=(await db.query('SELECT balance FROM perp_margin_balances WHERE account=$1 AND bucket=$2',
-   [alice.address.toLowerCase(),'RESERVED'])).rows[0] as {balance:string};
- assert.ok(BigInt(bad.balance)>0n);
+ }),/signed cancellation requires matching immutable receipt/);
+ const pending=(await db.query('SELECT status FROM perp_sim_orders WHERE account=$1',
+   [alice.address.toLowerCase()])).rows[0] as {status:string};
+ assert.equal(pending.status,'OPEN');
+ const good=await reconcileSignedSimAccount(alice.address,context(),manager(db));
+ assert.equal(good.openOrderCount,1);
+ assert.equal(good.canceledOrderCount,0);
 }));

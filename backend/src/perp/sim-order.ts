@@ -178,7 +178,18 @@ export async function cancelSimPerpOrder(
     throw new SimPerpOrderError('invalid simulation cancel signature');
   }
   const trusted=validateOrderSigningDomain(domain);
+  const cancelDigest=hashTypedData(buildSimPerpCancelTypedData(input,domain,nowSeconds)).toLowerCase();
   return transactions.withTransaction(async db=>{
+    // Compatibility with pre-C2 schemas is limited to isolated legacy tests.
+    // Once terminal execution SQL 017 is present, cancellation requires
+    // the fail-closed durable receipt/commit fencing migration 018.
+    const schema=await db.query(`SELECT
+      to_regclass('perp_signed_pair_executions') AS paired_exec,
+      to_regclass('perp_signed_cancel_receipts') AS cancel_receipts`);
+    const installed=schema.rows[0] as {paired_exec:string|null;cancel_receipts:string|null}|undefined;
+    if(installed?.paired_exec && !installed.cancel_receipts){
+      throw new SimPerpOrderError('signed cancellation requires commit-fenced SQL 018');
+    }
     const matched=await db.query(
       `SELECT market,collateral_token,initial_margin,status,order_id
          FROM perp_sim_orders WHERE chain_id=$1 AND verifying_contract=$2 AND account=$3 AND nonce=$4 FOR UPDATE`,
@@ -197,9 +208,23 @@ export async function cancelSimPerpOrder(
        RETURNING order_id`,[trusted.chainId,trusted.verifyingContract.toLowerCase(),input.account,input.nonce],
     );
     if(changed.rows.length!==1)throw new SimPerpOrderError('shadow order lost cancellation race');
+    const releaseId=cancelId(order.order_id);
     const released=await transferIsolatedMargin(withRunner(db),domain,
       {market:order.market,collateralToken:order.collateral_token,account:input.account,
-       operationId:cancelId(order.order_id),action:'RELEASE',amount:order.initial_margin});
+       operationId:releaseId,action:'RELEASE',amount:order.initial_margin});
+    if(released.replayed){
+      throw new SimPerpOrderError('cancellation requires fresh M3 RELEASE');
+    }
+    if(installed?.cancel_receipts){
+      const receipt=await db.query(`INSERT INTO perp_signed_cancel_receipts
+        (chain_id,verifying_contract,account,nonce,order_id,market,collateral_token,
+          release_id,amount,cancel_deadline,cancel_digest,cancel_signature)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING order_id`,
+        [trusted.chainId,trusted.verifyingContract.toLowerCase(),input.account,input.nonce,
+          order.order_id,order.market,order.collateral_token,releaseId,order.initial_margin,
+          input.deadline,cancelDigest,signature.toLowerCase()]);
+      if(receipt.rows.length!==1)throw new SimPerpOrderError('signed cancel receipt not recorded');
+    }
     return {orderId:order.order_id,status:'CANCELED',balances:released.balances};
   });
 }

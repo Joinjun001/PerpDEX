@@ -42,7 +42,8 @@ async function open(dir?:string){const db=new PGlite(dir);await db.waitReady;
     '010_perp_position_ledger','011_perp_pair_clearing','012_perp_reduce_reservations',
     '013_perp_guarded_position_commit','014_perp_reduce_ledger_integrity',
     '015_perp_signed_opening_fence','016_perp_signed_pair_preparations',
-    '017_perp_signed_pair_executions']){
+    '017_perp_signed_pair_executions',
+    '018_perp_signed_cancel_integrity']){
     await db.exec(await readFile(fileURLToPath(new URL(`../sql/${file}.sql`,import.meta.url)),'utf8'));
   }
   await db.query(`INSERT INTO perp_market_open_interest(chain_id,verifying_contract,market,

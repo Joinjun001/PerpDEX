@@ -27,6 +27,7 @@ const migrations = [
   "../sql/015_perp_signed_opening_fence.sql",
   "../sql/016_perp_signed_pair_preparations.sql",
   "../sql/017_perp_signed_pair_executions.sql",
+  "../sql/018_perp_signed_cancel_integrity.sql",
 ];
 
 try {
