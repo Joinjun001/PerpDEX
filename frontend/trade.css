@@ -139,6 +139,15 @@
   overflow-x:auto;max-width:100%;scrollbar-color:#304754 transparent;
 }
 .trade-shell .account-table{width:100%;min-width:740px;border-collapse:collapse;table-layout:auto}
+.trade-shell .account-table-hint{
+  padding:9px 16px;margin:0;
+  background:#182c36;border-top:1px solid #355164;
+  color:#bfd5e3;font-size:11px;line-height:1.6;
+}
+.trade-shell .account-table-hint[hidden]{display:none!important}
+.trade-shell .account-table-scroll:focus-visible{
+  outline:2px solid var(--blue);outline-offset:-2px;
+}
 .trade-shell .account-table th{
   padding:14px 20px;border-bottom:1px solid #253440;
   color:#7890a2;background:#131f2a;text-align:left;

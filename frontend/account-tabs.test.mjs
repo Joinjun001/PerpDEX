@@ -29,6 +29,16 @@ function fixture(){
     }
     selectors.set('#account-panel-'+id+' tbody',new FakeElement());
     selectors.set('#account-panel-'+id+' table',new FakeElement());
+    const wrapper=new FakeElement();
+    wrapper.clientWidth=300;
+    wrapper.scrollWidth=700;
+    wrapper.tabIndex=-1;
+    wrapper.removeAttribute=()=>{};
+    selectors.set('#account-panel-'+id+' .account-table-scroll',wrapper);
+    const hint=new FakeElement();
+    hint.id='account-table-hint-'+id;
+    hint.hidden=true;
+    byId.set(hint.id,hint);
   }
   const scroller=new FakeElement();
   scroller.clientWidth=400;scroller.scrollWidth=400;scroller.scrollLeft=0;

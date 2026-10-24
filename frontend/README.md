@@ -20,6 +20,8 @@ UX-HL-02-B2-A: order-interactions.test.mjs는 실제 main.js를 테스트용 DOM
 
 UX-HL-03-A1: 모바일에서 Positions/Open Orders/Order History/Trade History/Funding History 탭을 클릭하거나 방향키/Home/End로 선택하면 가로 스크롤 영역을 조정해 해당 탭이 보이도록 합니다. 데스크톱에 가로 오버플로가 없으면 움직이지 않습니다. 실 브라우저/스크린리더 QA 미완료. 문서 docs/tasks/UX-HL-03-account-tab-navigation/.
 
+UX-HL-03-B1: account-table-scroll-hint.mjs는 모바일에서 계정 테이블이 실제 표시되어 가로로 넘칠 때에만 탐색 안내와 키보드 가로 스크롤 진입점을 제공합니다. 현재 지갑/계정 API 미연결 화면에는 안내가 나오지 않으며, 실제 브라우저·스크린리더 인수는 수행하지 않았습니다.
+
 ## 페이지 구조
 
 - index.html (서비스 소개): 프로젝트 비전, 기술 구조, 개발 로드맵, 거래 화면 진입 버튼. 거래 입력/차트를 포함하지 않습니다.

@@ -43,6 +43,12 @@ function createFixture(width=210){
     }
     selectors.set('#account-panel-'+id+' tbody',new FakeElement());
     selectors.set('#account-panel-'+id+' table',new FakeElement());
+    const wrapper=new FakeElement();
+    wrapper.clientWidth=width;wrapper.scrollWidth=740;wrapper.tabIndex=-1;
+    wrapper.removeAttribute=()=>{};
+    selectors.set('#account-panel-'+id+' .account-table-scroll',wrapper);
+    const hint=new FakeElement();hint.id='account-table-hint-'+id;hint.hidden=true;
+    nodes.set(hint.id,hint);
   }
   const root={
     getElementById:id=>nodes.get(id),

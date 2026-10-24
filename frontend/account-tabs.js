@@ -1,5 +1,6 @@
 import {ACCOUNT_TABS,accountTabIndexForKey} from './account-tabs-model.mjs';
 import {renderAccountTabSnapshot} from './account-tabs-renderer.mjs';
+import {initAccountTableScrollHints} from './account-table-scroll-hint.mjs';
 
 /**
  * Native-button ARIA tabs. The static preview has neither a wallet connection
@@ -18,6 +19,7 @@ export function initAccountTabs(root=document){
   }
   const tabScroller=root.querySelector('.account-tab-scroll');
   if(!tabScroller)throw new Error('Account tab scroll container missing');
+  const tableHints=initAccountTableScrollHints(root);
   let selected=0;
   function revealSelectedTab(tab){
     // Only adjust horizontal overflow; avoid scrollIntoView, which can shift
@@ -46,6 +48,7 @@ export function initAccountTabs(root=document){
     });
     if(focus)entries[index].tab.focus({preventScroll:true});
     revealSelectedTab(entries[index].tab);
+    tableHints.update();
   }
   entries.forEach((entry,i)=>{
     // Static site: always fail closed to disconnected. No backend adapter wired.
