@@ -180,3 +180,13 @@
 - BTC/ETH/SOL 각각 표시된 최우선 Ask(매도 목록 마지막 행)와 Bid(매수 목록 첫 행) 숫자의 차액을 검사하는 실제 main.js 테스트, 정적 비실거래 출처·초기 — 검사 2건 PASS. 대상 order-interactions 36/36, node --test frontend/*.test.mjs 전체 156/156 PASS (기존 154+신규 2).
 - 전체 frontend JS node --check, npm --prefix backend run build (tsc --noEmit), Python HTMLParser index.html/trade.html 구조·고유 ID 및 CSP connect-src none·계정 tbody 5개 빈 상태, git diff --check PASS.
 - 실제 브라우저/스크린리더 인수는 미수행. 실거래·지갑/서명·Sepolia 트랜잭션·운영 DB·원격 Push·배포/권한 변경 없음.
+
+## 2026-10-25 UX-HL-01-P1 — 합성 차트 추세별 색상 검증
+
+- 시작 main HEAD 5cee607, Git clean, origin/main 대비 33커밋 앞섬. PROJECT_STATE/ROADMAP/Hyperliquid UX reference, UX-HL-01 SPEC/TODO/QA/RESULT 및 실제 frontend/main.js/trade.html/테스트를 확인.
+- 기존 프로젝트 내부 Playwright/Chromium 설치 약 643MB. 비특권 사용자 unshare -Ur 명령은 Operation not permitted로 차단. 실제 브라우저 O2/P2 인수는 미완료 유지, no-sandbox·보안 권한 우회 없음.
+- SOL은 고정 MOCK 시계열 기준 하락으로 표시되는데 차트 SVG line/point/gradient는 상승 녹색 고정. 신규 order-interactions.test.mjs의 실제 main.js 이벤트/정적 HTML 회귀 2건 수정 전 FAIL.
+- 수정: trade.html gradient 두 stop ID 추가. main.js renderChart의 이미 계산한 summary.changePercent 부호로 기존 디자인 녹색(#43e1b4) 또는 빨강(#ff6c7b)을 선/끝점/면적 양끝에 할당. 샘플 값·축·가격·주문/계정 기능 불변.
+- 수정 후 대상 order-interactions.test.mjs 38/38 PASS, 전체 node --test frontend/*.test.mjs 158/158 PASS (기존 156+2). 모든 frontend JavaScript node --check 및 npm --prefix backend run build (tsc --noEmit) PASS.
+- Python HTMLParser index.html/trade.html의 태그/중복 ID, CSP connect-src none·빈 계정 테이블 tbody 5개, git diff --check PASS.
+- 실제 브라우저/스크린리더/모바일 인수 미수행. 원격 Push·배포·운영 DB·지갑·실거래·Sepolia 트랜잭션 미실행.

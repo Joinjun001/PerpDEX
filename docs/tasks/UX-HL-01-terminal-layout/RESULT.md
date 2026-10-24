@@ -143,3 +143,11 @@
 - frontend/order-interactions.test.mjs: 실제 BTC/ETH/SOL 최우선가/스프레드 정합성 및 초기 MOCK 표기 회귀 2건. 수정 전 실패 확인.
 - 전체 프런트 156/156 PASS, JS syntax/TypeScript build/HTML/CSP/Git diff PASS.
 - 실제 호가·주문 체결·유동성·비용·위험 데이터는 미연결이며 백엔드 M5~M9, 지갑·온체인, 운영 DB 및 원격 Push·배포 제한 불변. O2 실브라우저 인수 별도 미완료.
+
+## 2026-10-25 UX-HL-01-P1 — 로컬 완료
+
+- frontend/trade.html: chartFill 두 gradient stop ID 추가, JS 없는 초기 BTC 차트/모의 출처 불변.
+- frontend/main.js: 현재 합성 샘플 변화 부호에 맞춰 SVG 선·끝점·면적 그라데이션의 초록/빨강을 동기화.
+- frontend/order-interactions.test.mjs: BTC/ETH/SOL/BTC 전환과 초기 BTC SVG 색/ID 회귀 2건 신규, 수정 전 실패 확인.
+- 프런트 158/158 PASS, JS/TS/HTML/CSP/git diff PASS. 실제 Chromium·보조공학 P2/O2 인수 보류.
+- 데이터 모델/호가·주문 미리보기/계정/지갑/체인/DB·원격 Push·배포 변경 없음.

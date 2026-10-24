@@ -607,6 +607,26 @@ test('UX-HL-01-L1 recent trade container has non-live accessible list fallback',
   assert.match(html,/id="recent-trades"[^>]*role="list"[^>]*aria-label="BTC 합성 최근 체결 예시 목록/);
   assert.match(html,/실제 체결 시각·블록체인 기록 아님/);
 });
+test('UX-HL-01-P1 synthetic chart stroke, point and area gradient reflect calculated sample trend',async()=>{
+  const app=await boot(),id=app.id;
+  const {sampleChart,describeSampleChart}=await import('./preview-model.mjs');
+  for(const market of ['BTC','ETH','SOL','BTC']){
+    app.market(market).dispatch('click');
+    const change=describeSampleChart(market,sampleChart(market,64)).changePercent;
+    const expected=change>=0?'#43e1b4':'#ff6c7b';
+    assert.equal(id('chart-line').getAttribute('stroke'),expected,market+' trend line');
+    assert.equal(id('chart-point').getAttribute('fill'),expected,market+' terminal point');
+    assert.equal(id('chart-gradient-start').getAttribute('stop-color'),expected,market+' gradient');
+    assert.equal(id('chart-gradient-end').getAttribute('stop-color'),expected,market+' gradient end');
+    assert.ok(id('chart-change').className.includes(change>=0?'positive':'negative'));
+  }
+});
+test('UX-HL-01-P1 no-script BTC chart has identifiable editable stops and bullish defaults',()=>{
+  assert.match(html,/id="chart-gradient-start"[^>]*stop-color="#43e1b4"/);
+  assert.match(html,/id="chart-gradient-end"[^>]*stop-color="#43e1b4"/);
+  assert.match(html,/id="chart-line"[^>]*stroke="#43e1b4"/);
+  assert.match(html,/id="chart-point"[^>]*fill="#43e1b4"/);
+});
 test('UX-HL-01-O1 visible mock spread matches best displayed ask minus best displayed bid',async()=>{
   const app=await boot(),id=app.id;
   const {FORMAT_USD}=await import('./preview-model.mjs');

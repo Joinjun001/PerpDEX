@@ -65,6 +65,13 @@ function renderChart(){
   byId('chart-sample-low').textContent=FORMAT_USD.format(summary.low);
   byId('chart-sample-high').textContent=FORMAT_USD.format(summary.high);
   byId('chart-sample-description').textContent=summary.accessibilityText;
+  // The chart belongs to the same MOCK series as the signed sample-change
+  // statistic. Avoid an upward-green visual for a falling synthetic market.
+  const trendColor=summary.changePercent>=0?'#43e1b4':'#ff6c7b';
+  byId('chart-line').setAttribute('stroke',trendColor);
+  byId('chart-point').setAttribute('fill',trendColor);
+  byId('chart-gradient-start').setAttribute('stop-color',trendColor);
+  byId('chart-gradient-end').setAttribute('stop-color',trendColor);
   byId('chart-value-label').textContent=FORMAT_USD.format(MARKETS[view.market].price);
   byId('chart-value-label').style.top=Math.max(4,Math.min(84,last[1]/284*100-4))+'%';
 }

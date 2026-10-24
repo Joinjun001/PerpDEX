@@ -85,3 +85,9 @@
 - [x] O1 원래 기준가/호가·누적 수량/깊이·9개 최근 체결·모의 주문·네트워크 게이트 불변
 - [x] O1 프런트 전체 156/156, JS syntax·TypeScript build·HTML 구조/고유 ID/CSP/git diff 검사
 - [ ] O2 실제 브라우저 모바일·키보드·스크린리더에서 스프레드 값/출처 표시를 인수 검증 (안전한 Chromium 샌드박스 환경 필요)
+
+- [x] P1 SOL 하락 샘플에도 SVG 선·점·그라데이션이 녹색으로 고정된 결함을 실제 main.js 및 초기 HTML 검사 2건 수정 전 FAIL로 재현
+- [x] P1 SVG gradient의 두 stop ID 추가 및 실제 샘플 변화율 부호에 따라 기존 초록/빨강 색상을 동기화
+- [x] P1 BTC→ETH→SOL→BTC 시장 변경의 SVG 선/끝점/gradient 색상 및 Sample change 일치 회귀
+- [x] P1 전체 프런트 158/158, 모든 JS 문법·TypeScript 빌드·HTML/CSP/git diff 검사
+- [ ] P2 실제 모바일·키보드·스크린리더·픽셀 렌더링 인수 (안전한 Chromium 샌드박스 환경 필요)
