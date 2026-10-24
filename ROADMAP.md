@@ -23,3 +23,21 @@
 | M2-T3 | Order REST API와 주문 저장/조회/취소 흐름 | Completed (로컬 HTTP/PGlite; 운영 DB QA 이관) |
 | M2-T4 | 가격-시간 우선 Matching Engine 및 부분 체결 | Completed (A~D 로컬 구현 및 통합 QA; 운영 PostgreSQL/온체인 정산 미검증 별도) |
 | M2-T5 | 매칭 결과 settlement 연동, 통합 테스트 및 M2 릴리스 정리 | Local QA Completed (A~E 및 실제 PostgreSQL 15 복수 연결·Foundry 35/35 통과, 실운영 PostgreSQL·시장/위험 정책·실체인 정산은 별도 승인 필요) |
+
+
+## M3~M8 — 무기한 선물 DEX 개발 (2026-10-24 확정된 제품 방향)
+
+제품: **Perpetual Futures DEX**. 최초 개발 프로파일은 단일 모의 BTC-USD-PERP 시장, USDC 격리 마진, one-way 포지션. 위험 숫자/실시장·배포는 승인 전 설정하지 않는다. 세부 설계: `docs/architecture/PERPETUAL-MVP-DESIGN.md`.
+
+| 마일스톤 | 목적 | 상태 |
+| --- | --- | --- |
+| **M3** | 고정소수점/신뢰 시장·오라클 입력, 이중 분개 격리 담보·주문 증거금 예약 | **Active — M3-T1부터 구현** |
+| **M4** | 순롱·순숏 포지션, 부분 체결·평균 진입가·realized/unrealized PnL, OI 영속 | Planned (M3 선행) |
+| **M5** | 레버리지·초기/유지증거금 위험 엔진, signed order v2·reduce-only·원자적 체결 게이트 | Planned (M4 선행) |
+| **M6** | funding index/rate 및 주기적 롱·숏 펀딩 분개·재시작 복구 | Planned (M5 선행) |
+| **M7** | 유지증거금 기반 부분/전체 청산, 보험기금·bad debt 및 위험 상태 머신 | Planned (M6 선행) |
+| **M8** | 전용 MarginVault/ClearingHouse, 포지션·PnL·출금 안전성, Foundry·실 PG 로컬 인수 | Planned (실체인/운영은 별도 승인) |
+
+주의: M1 Vault의 현재 `withdraw()`는 오프체인 locked margin을 강제하지 않으며, M2 `BUYER_TO_SELLER` direct settlement는 선물 포지션 회계가 아니다. 새 로컬 위험 엔진이 마련되어도 M8 이전에 사용자 실자금·운영 활성화를 금지한다.
+
+M3 시작 TASK: `docs/tasks/M3-T1-market-risk-foundation/{SPEC,TODO,RESULT,QA}.md`.
