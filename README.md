@@ -115,3 +115,11 @@ docker compose up -d
 - `backend/src/settlement/policy.ts`는 **운영자가 관리하는 신뢰된 정책**의 도메인·vault/asset/정밀도·수수료/외부 위험모델·한도·방향/유효 기간을 검증합니다. 정산 금액은 외부 신뢰된 리스크 승인자가 해당 `tradeId`/정책 해시/참여자/가격·수량에 EIP-712 서명한 **명시적인 uint256 최소 단위 금액**만 허용합니다. 가격×수량으로 자동 산출하지 않습니다.
 - `prepareSettlementInstructionFromLedger`는 커밋된 체결원장 + `WAITING_POLICY` Outbox + 맞는 정책·승인 서명이 모두 있는 경우에만 **데이터 전용** `SettlementInstruction`을 반환합니다. 실제 컨트랙트 호출/전송·정산 완료 또는 chain balance 검증은 아닙니다. 체인 전송 및 운영 정책 선택은 아직 구현하지 않았습니다.
 - 정책 `status=APPROVED`를 클라이언트 입력으로 받으면 신뢰성을 보장할 수 없으므로, 정책/신뢰 승인자 주소는 반드시 별도의 서버 보호 설정에서 공급해야 합니다. 현재 실제 운영 정책 값/서명은 구성되어 있지 않습니다.
+
+## M2-T5-C — 로컬 정산 의도 dry-run (송신 기능 없음)
+
+`backend/sql/006_settlement_intents.sql`은 승인 검증이 끝난 정산 지시를 `fill_id`/`trade_id` 단위로 한 번만 영속 등록하고 지시 해시·실행 상태를 저장합니다. 수동 마이그레이션 목록에는 006이 추가되지만 API가 DB를 자동 변경하지 않고 **운영 DB 마이그레이션은 실행되지 않았습니다**.
+
+`backend/src/settlement/dry-run.ts`의 `recordApprovedSettlementIntent`는 신뢰된 정책·per-fill 승인 서명을 기존 체결원장과 Outbox에 대조한 뒤 `PREPARED`로 기록합니다. `executeSettlementDryRun`은 `CollateralVault.settle`의 calldata만 **로컬에서 인코딩**하고 `SIMULATED` 결과 해시를 영속화합니다. 이는 **체인 트랜잭션 hash/receipt/성공을 의미하지 않습니다**. `SIMULATING` 중단·오류 발생 시 자동 재실행을 허용하지 않으며 명시적 격리 API를 통해 `UNKNOWN` 처리합니다. 실제 지갑·RPC·가스·배포 권한 사용 기능은 제공하지 않습니다.
+
+로컬 검증: `cd backend && npm run build && npm test` 또는 `node --experimental-strip-types --test test/settlement-dry-run.test.ts`. 006 스키마의 실제 운영 DB 적용·실제 체인 송신·영수증 처리는 아직 승인 및 후속 단계가 필요합니다.

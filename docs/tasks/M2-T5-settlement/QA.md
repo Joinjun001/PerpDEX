@@ -1,6 +1,6 @@
 # M2-T5 QA
 
-상태: M2-T5-A/B 로컬 단위/통합 검증; 실제 PostgreSQL 운영 검증 및 온체인/Foundry 미실행
+상태: M2-T5-A/B/C 로컬 단위/통합 검증; 실제 PostgreSQL 운영 검증 및 온체인/Foundry 미실행
 
 ## 2026-10-24 — M2-T5-A Outbox
 
@@ -14,3 +14,8 @@
 - 신규 `test/settlement-policy.test.ts` **10개 테스트**: 신뢰 정책+서명 승인 정산 지시(동일 입력 재현), 방향 반전 시 새 서명 필요, 정책 draft/revoked/미입력/만료/도메인 오류 거부, 토큰/컨트랙트 주소/정밀도/수수료/증거금 정책/상한 경계, 누락·만료·위조 승인, 승인 서명 뒤 금액/수수료/토큰/정밀도/정책 버전 변조 거부, >2^53 정확한 BigInt 정산 금액, Outbox 상태/ID 게이트, 타 체결/시장 재사용 방지, 실제 DB 원장 조회/계약 경계.
 - `cd backend && npm run build` 타입 검사 통과. `cd backend && npm test` 전체 백엔드 **122 passed / 0 failed** (기존 112 + 신규 10).
 - 실 정책 승인/정책 공급 레지스트리, 리스크 엔진·담보잔액/시장경제 모델, 정산 트랜잭션 송신·영수증 및 운영 PostgreSQL·Foundry 검증은 범위 밖. **테스트용 메모리 계정은 실제 사용자의 비밀키가 아니다**.
+
+## 2026-10-24 — M2-T5-C 영속 dry-run QA
+
+- 신규 `settlement-dry-run.test.ts` **11개**: 인증된 체결·정책/서명에 한 번만 지시 등록, 결정론적 `CollateralVault.settle` ABI calldata/BigInt 금액, 동시 6개 요청 중 정확히 한 선점, 위조·만료 승인·타 도메인·미준비 Outbox 차단, 변경된 정책/금액 덮어쓰기 거부, 실패 SQL 삽입 전체 rollback·성공 재시도, 모의 실행 결과 저장 실패 후 `SIMULATING` 정지·`UNKNOWN` 격리·자동 재실행 차단, PGlite 디스크 재시작 후 상태/해시 지속, DB JSON 변조 탐지, 복구 경계 검사.
+- `cd backend && npm run build` 타입 검사 성공. `cd backend && npm test` 전체 **133 passed / 0 failed** (기존 122 + 신규 11). 실제 PostgreSQL 멀티프로세스 검증, 운영 006 마이그레이션, 실제 트랜잭션 서명·RPC·체인 receipt/Foundry는 실행하지 않았다.

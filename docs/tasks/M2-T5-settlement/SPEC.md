@@ -8,7 +8,7 @@ M2-T4의 커밋된 `order_fills`로부터 검증 가능한 정산 후보를 만�
 
 1. **M2-T5-A — 영속 Settlement Outbox (이전 회차)**: SQL 005 + 내부 등록/선점/lease-fencing/재시도 상태 머신, 트랜잭션·동시성·재시작 로컬 테스트. 정산 승인/체인 전송 없음.
 2. **M2-T5-B — 명시적 정산 정책 검증**: 시장별 담보 자산, 정밀도·가격 단위, 거래 증거와 사용자별 자금 흐름/위험 정책이 주어진 경우에만 검증된 정산 지시를 구성한다. 정책이 미승인인 경우 차단; 먼저 정책 스키마와 순수 검증·경계 테스트 구현.
-3. **M2-T5-C — 정산 실행·영수증 어댑터**: 실제 서명/키·RPC 사용 없이 dry-run/모의 provider에서 실행 의도를 직렬화하고 `tradeId` 단위 중복 전송 차단 및 영속 Tx 기록. 실체인 실행은 승인 분리.
+3. **M2-T5-C — 영속 정산 의도·로컬 dry-run 어댑터**: 실제 서명/키·RPC 사용 없이 dry-run/모의 provider에서 실행 의도를 직렬화하고 `tradeId` 단위 중복 전송 차단 및 영속 Tx 기록. 실체인 실행은 승인 분리.
 4. **M2-T5-D — 영수증 확인·장애 재시도/복구**: 정산 여부·실패/체인 재구성/미확정·확정 결과를 분리해 저장하고 재조정. 불명확한 브로드캐스트를 무조건 재전송하지 않음.
 5. **M2-T5-E — M2 통합 QA/릴리스**: 종단간 불변식, 마이그레이션·운영 문서, 비밀키 없는 로컬/모의 검증과 사람 승인이 필요한 실제 PostgreSQL/Foundry/운영 실행의 구분.
 
@@ -38,3 +38,13 @@ M2-T4의 커밋된 `order_fills`로부터 검증 가능한 정산 후보를 만�
 - 미승인·철회·만료·불완전 정책, 누락·잘못된 승인 서명, 서명 후 입력 변경, 중복 체결 식별자 교체, 승인 만료/정책 유효 기간 외, MAX 정산 금액 초과, 타 체인/시장/컨트랙트, 자가정산을 거부한다. 금액은 JS Number가 아닌 BigInt로 비교·검사한다.
 - 생성하는 `SettlementInstruction`은 `tradeId`, `fillId`, `market`, `chainId`, `vault`, `token`, `from`, `to`, `amount`, `tokenDecimals`, `policyHash`, `approvalDeadline`만 포함한다. 이는 **드라이런/결정론적 실행 후보**이지 실제 정산 완료·전송 권한·중복 전송 방지 기록이 아니다. M2-T5-C/D에서 실행 기록·체인 `settledTrades` 확인·영수증 상태 조정과 강한 멱등성 경계를 별도로 구현한다.
 - 승인자 주소와 정책 원본은 운영자의 신뢰된 설정·레지스트리로만 공급해야 한다. 코드상 `status=APPROVED` 문자열만으로 신뢰 근거가 생성되지 않는다. 실제 운영의 승인 책임 및 정책 선택은 별도 사람 확인 필요.
+
+## M2-T5-C — 영속 정산 의도 및 로컬 dry-run (이번 회차)
+
+- `006_settlement_intents.sql`은 검증 완료된 Outbox 행을 FK로 참조한다. `fill_id` PK와 `trade_id` UNIQUE를 갖고, 승인된 지시의 완전한 정규화 JSON·결정적 `instruction_hash`를 함께 영속한다. 정책·서명 검증을 우회하는 공개 삽입 API는 없다.
+- `recordApprovedSettlementIntent(transactions, trustedDomain, fillId, policy, approval, nowSeconds)`는 **M2-T5-B의** `prepareSettlementInstructionFromLedger`를 통과한 지시만 허용한다. DB 등록은 Outbox의 `WAITING_POLICY`를 다시 검사하는 `INSERT ... SELECT ... ON CONFLICT DO NOTHING` 트랜잭션이다. 기존 같은 `fill_id`의 요청이라도 token/amount/대상/policyHash를 수정하려 하면 오류로 거부하며, 저장된 상태나 모의 실행 기록은 리셋하지 않는다. 중복 요청도 최신 정책·승인 검증을 통과해야 하며 오래된 서명은 새 전송 권한이 되지 않는다.
+- `executeSettlementDryRun`은 **내장된 로컬 calldata 인코더**로 M1 `CollateralVault.settle(token,from,to,amount,tradeId)`의 ABI 호출 데이터를 구성한다. 임의 RPC/provider callback, 지갑 서명, 토큰 이전, `eth_sendRawTransaction`은 존재하지 않는다. calldata와 `keccak256(calldata)` 검증 결과를 반환하되 실제 tx hash/receipt/confirmation으로 표기하지 않는다.
+- 영속 상태는 `PREPARED → SIMULATING → SIMULATED`, 실패 또는 충돌 시 `SIMULATING → UNKNOWN` (별도 수동 격리) 뿐이다. 시작 시 DB 조건부 UPDATE로 토큰을 선점하고 트랜잭션을 커밋한 뒤 모의 실행, 성공 시 해당 토큰으로만 SIMULATED 기록을 커밋한다. 동시 작업의 동일 체결은 한 건만 선점. `SIMULATING` 상태에서 프로세스 종료·최종 커밋 오류·결과 불확실 시 **자동 재시도 금지**. `quarantineInterruptedSimulation`은 충분히 오래된 작업을 `UNKNOWN`으로 격리하는 명시적 복구 API이며 UNKNOWN에서 자동 재시도 경로를 제공하지 않는다.
+- 저장 지시의 변경·파손은 `instruction_hash` 재계산 및 tradeId/fillId 정합성 검사에서 거부한다. 동일 정책·승인으로 재등록하더라도 SIMULATED/UNKNOWN 상태를 PREPARED로 되돌리지 않는다.
+- 정책 검증과 DB 등록 사이의 시간차를 대비하여 쓰기 트랜잭션에서 Outbox 상태를 재확인한다. 이 작업은 **실제 자산/마진 안전성 보증이 아님**. 정책 레지스트리의 신뢰·정책 철회 전파, 다중 체결 합계·자금 잔액 확보, 체인 중복 정산 판정은 후속 별도 승인 및 구현 책임이다.
+- `backend/scripts/migrate.ts`에 수동 적용 목록 006만 추가한다. 운영 DB 적용·실제 브로드캐스트, 네트워크·인증 정보 사용은 금지된다. M2-T5-D에서 정산 영수증/체인 상태 확인 및 모호한 브로드캐스트의 영속 reconciliation을 분리 구현해야 한다. 현재 SIMULATED는 **로컬 ABI 인코딩 성공만**을 의미한다.
