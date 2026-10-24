@@ -58,3 +58,15 @@
 - `git diff --check`: PASS.
 - 전체 `npm test` 단일 실행 및 독립 연결의 실제 PostgreSQL 15/16 복수 트랜잭션 경쟁 검증은 미실행. PGlite Promise.allSettled 및 동일 WASM DB의 경쟁 시험을 PG 세션 교착/직렬성 증명으로 과장하지 않는다.
 - 초기 AVAILABLE 잔고는 fixture seed이며 custody/입금/실자금 존재 증빙이 아니다. SQL DB owner·DDL 권한으로 트리거를 비활성화할 수 있는 공격자 방어는 M5-T4 최소 권한/실 PG QA 이관.
+
+## 2026-10-24 C3-C2-B1 — 독립 PostgreSQL QA 하네스 검증과 실제 실행 보류
+
+- Git 기준: 4113b1a, 작업 트리 clean 확인 후 시작.
+- 서버/소켓 환경 확인: pg_config는 15/bin 경로를 표시하지만 서버 postgres/initdb/pg_ctl 실행 파일이 실제 없고, 기존 전용 /tmp/perpdex-pg-*/socket/.s.PGSQL.5432 소켓도 없음. 실 PostgreSQL 연결은 생성하지 않음.
+- 신규 qa/postgres-signed-margin-guard.ts와 test/postgres-signed-margin-guard.test.ts: **4/4 PASS**. 지정 Unix socket·신규 QA schema·명시적 seed 단계 검증, 임의 TCP/운영/기존 schema/미존재 socket 입력 거부.
+- 신규 qa/postgres-signed-margin-concurrency.test.ts: 별도 전용 PG에서만 동작하도록 하네스 작성. 서버 identity/current_user/TCP listener 및 독립 backend PID 검증 후에만 신규 QA schema를 생성하고 SQL 001/008~020 적용. 실제 독립 세션에서 signed 여러 nonce 동시 admission, 동일 nonce 중복, cancel+admit 경합, full+cancel 경합, 직접 SQL 변조 및 M3 보존을 검증하도록 구성.
+- 비설치 상태에서 하네스를 단독 실행했을 때 **예상된 fail-closed 종료 확인**: 서버 없는 환경을 실제 PG 테스트 PASS라고 보고하지 않음.
+- TypeScript npm run build **PASS**; 기존 M3·취소·전량 체결 + guard 관련 4개 테스트 파일 **41/41 PASS**.
+- 추가 C3-A 계정 감사·C3-C1 영속 수량 프로젝션 **18/18 PASS**. 이번 회차 실제 실행한 관련 테스트 총 **59/59 PASS** (4개+2개 테스트 파일).
+- 실제 PostgreSQL의 트랜잭션 경합과 제한된 별도 role에서 DDL/임의 journal/receipt 쓰기 차단은 **미실행·미검증**. 운영·스테이징 DB/실자금/원격 push 접근 없음.
+- 후속 B2에 필요한 전제: 실제 실행 중인 전용 테스트 PG 15+ private socket, SQL migration 수행 가능한 QA role, 고유 신규 schema. 자동 설치/승인 우회/비밀번호 조회 금지.

@@ -48,3 +48,11 @@
 - 이전 SQL 015~019, EIP-712·nonce·FILLED terminal 영수증·취소 영수증 및 현재 FULL-only 실행 경로에는 기능 변경 없음. 비서명 예약의 남은 금액은 사용·인출 허가로 볼 수 없다.
 - 신규 focused **14/14 PASS**, 관련 회귀 **129/129 PASS**, TypeScript build PASS, SQL 001~020 빈 로컬 PGlite 적용 PASS, Git diff check PASS.
 - **잔여 작업:** C3-C2-B 실제 로컬 개발 PostgreSQL 독립 세션의 동시 admission·cancel·FULL race, lock ordering 및 role 최소 권한 검증. C3-C3 분할 증거금 할당/부분 체결은 안전 정책·영속 receipt 완성 전 비활성.
+
+## 2026-10-24 C3-C2-B1 — PostgreSQL 별도 세션 QA 하네스 구현
+
+- 안전한 로컬 PostgreSQL 서버가 존재하지 않아 실 PG 경쟁 검증은 진행할 수 없었다. 권한·승인을 우회하지 않고 실행 전 guard와 독립 연결 환경 확인에 필요한 QA 하네스를 작성했다.
+- 변경: qa/postgres-signed-margin-guard.ts (경로/스키마/실 socket fail-closed), qa/postgres-signed-margin-concurrency.test.ts (전용 test user/db, TCP off, 독립 pg_backend_pid, 새 schema 생성과 SQL 001/008~020 적용 후 다중 세션 signed M3/M4/nonce 경합 검사), test/postgres-signed-margin-guard.test.ts (오프라인 guard 4개).
+- npm test의 일반 테스트와 구분되는 **수동 opt-in 실제 PostgreSQL QA**. 하네스의 테스트 케이스가 코드로 존재한다는 사실은 실 DB에서 통과했다는 의미가 아니다.
+- TypeScript build PASS, 오프라인 guard 4/4 PASS, 기존 signed margin/cancel/full regression 37/37 PASS, QA 실행 시 잘못된 환경 fail-closed 종료 확인. 추가 C3-A/C3-C1 감사 관련 테스트 18/18 PASS. 이번 회차 실제 실행 총 59/59 PASS.
+- 다음 C3-C2-B2: 실제 전용 로컬 PG가 사용 가능해졌을 때만 이 하네스를 실행하고, 실패 시 정당한 코드/lock 변경을 검증하며 별도 DB 최소권한 역할·DDL/receipt 임의 변조 차단 결과를 기록.

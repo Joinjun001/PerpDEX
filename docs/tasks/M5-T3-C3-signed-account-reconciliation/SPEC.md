@@ -6,7 +6,8 @@
 - **C3-B (로컬 구현 완료)**: 직접 SQL이 주문과 nonce를 함께 CANCELED로 바꾸고 RELEASE 기록을 누락해도 현 SQL 015~017에서 커밋되는 취소 무결성 결함을 해결. 취소 요청의 EIP-712 인증은 서비스에서 수행하며 DB에서는 불변 취소 영수증-주문-ID-M3 RELEASE 양쪽 분개와 RESERVED 잔고를 COMMIT 제약으로 검증해야 함. 기존 서명된 취소 API 호환 및 롤백 검증 필수.
 - **C3-C1 (이번 회차)**: SQL 019로 영속 주문 전량과 기존 terminal 영수증에서 계산한 누적 체결/미체결/실행 가능 수량을 읽기 전용으로 투영하고, OPEN/CANCELED/FILLED의 현재 FULL-only 불변식을 COMMIT 검증한다. PREPARED는 체결량 0. 새 partial 체결·증거금 이동 기능을 열지 않는다.
 - **C3-C2-A (이번 회차 로컬 완료)**: 신규 SQL 020의 COMMIT 제약으로 서명 주문 계정별 OPEN 예약/기존 FILLED 할당 의무, RESERVED/POSITION 실제 잔고와 모든 M3 append-only 누적분개 합계를 대조. 계정에 붙은 M3 연산의 정확한 두 분개/경로/소유자를 검증하고 signed RESERVE, cancel RELEASE, terminal ALLOCATE의 기여를 비서명 M3 잔여금과 분리. 신규 자금이동 경로는 생성하지 않음.
-- **C3-C2-B (다음)**: 실제 로컬 개발 PostgreSQL 별도 세션에서 동시 서명 admission·취소·FULL 체결 경합 및 DDL/role 최소권한 검증을 설계·진행. PGlite 단일 프로세스 병렬 Promise는 실제 PostgreSQL 동시 연결 검증을 대체하지 못함.
+- **C3-C2-B1 (QA 하네스 구현 완료, 실 PG 미실행)**: 별도 테스트 전용 PostgreSQL의 Unix socket + 고정 테스트 사용자/DB + 신규 QA schema만 허용하는 다중 세션 경합 QA 하네스. 독립 backend PID를 확인하고 001/008~020 스키마를 신규 테스트 schema에만 적용. signed admission, 중복 nonce, cancel+admission, full+cancel, 직접 SQL 변조 검증을 정의.
+- **C3-C2-B2 (다음, 환경 의존)**: 전용 PG가 실제 존재할 때만 하네스를 실행하고 서버 role 최소권한·DDL 분리를 검증. 실 PG 가용성 부족 시 설치/우회 금지.
 - **C3-C3 (후속)**: 새로운 부분 체결·잔여 예약금 모델과 영속 증거금 배분 이벤트를 별도 승인된 정책에 따라 설계. 취소 시 이미 체결된 누적량과 잔량을 구분하되, SQL 015~019를 약화시키지 말 것.
 - **C3-D (후속)**: 포지션 감소와 실현 손익 계산-회계 연결, fee/funding은 승인된 정책 수치가 정해지기 전 정산 금지. 계산만 필요한 경우 기존 M4 numerator 기반 표시는 지원.
 
@@ -50,3 +51,10 @@ SIMULATION_ONLY, 로컬 /shared/PerpDEX 한정. SQL 015~017, 기존 체결·입�
 - signed 각 주문의 RESERVE, SQL 018 CANCELED RELEASE, SQL 017 FILLED ALLOCATE로 설명되지 않는 RESERVED/POSITION의 잔여 합계는 음수일 수 없다. 정확히 signed OPEN/FILLED 부담분 + 비서명 M3 잔여분이 각 버킷 장부와 일치해야 한다.
 - SQL 020 지연 제약은 signed order, M3 bucket, M3 operation, M3 entry 변경을 각각 감시하며, 관리자 마이그레이션 시 기존 signed 계정별 사전 검증이 실패하면 적용을 중단한다.
 - **한계:** 예약 자금은 계정별로 합산되므로 특정 코인의 실보관/실입금 또는 비서명 버킷 자금의 물리적 식별을 증명하지 않는다. 실제 PostgreSQL 복수 연결/서버 권한별 DML 보호는 C3-C2-B/M5-T4에서 검증해야 한다. 기존 FULL-only 실행 경계와 C3-C1 partial 비활성 상태를 유지한다.
+
+## C3-C2-B1 실행 경계
+
+- 명시적 opt-in: PERPDEX_TEST_PG_SOCKET=/tmp/perpdex-pg-<token>/socket, PERPDEX_TEST_PG_SCHEMA=perpdex_signed_qa_<12hex>, PERPDEX_TEST_PG_PHASE=seed. 경로에 실제 PostgreSQL Unix socket 필수. 기존 schema 재사용 금지.
+- 고정 test user=nobody, db=perpdex_autopilot_test, inet_server_addr() NULL, listen_addresses 비활성, pg_backend_pid() 2개 상이함을 확인한 후에만 신규 schema를 만든다.
+- QA 파일: backend/qa/postgres-signed-margin-concurrency.test.ts. npm test 기본 실행에 포함하지 않는다. DB 설치/계정 인증 정보 검색/운영 DB 접속/기존 스키마 삭제를 하지 않는다.
+- 이번 회차에는 해당 PG server 소켓/바이너리가 없어 실제 QA는 실행 불가능했다. 하네스 작성과 소켓 미존재시 fail-closed 검증은 실제 PG 인수와 다르다. DB owner/DDL 및 제한된 별도 role의 권한 분리는 B2에서만 검증 가능.
