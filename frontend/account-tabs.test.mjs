@@ -47,7 +47,7 @@ test('UX-HL-01-B: 5 unique ARIA tabs and associated panel headings exist',()=>{
   assert.equal((markup.match(/role="tab"/g)||[]).length,5);
   assert.equal((markup.match(/role="tabpanel"/g)||[]).length,5);
   assert.equal((markup.match(/aria-selected="true"/g)||[]).length,1);
-  assert.equal((markup.match(/tabindex="-1"/g)||[]).length,4);
+  assert.equal((markup.match(/id="account-tab-[^"]+"[^>]*tabindex="-1"/g)||[]).length,4);
   assert.equal((markup.match(/role="tabpanel"[^>]*hidden/g)||[]).length,4);
 });
 test('UX-HL-01-B: tab content contains real column definitions, never fabricated rows',()=>{

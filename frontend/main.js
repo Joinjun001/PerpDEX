@@ -1,4 +1,5 @@
-import {MARKETS,FORMAT_USD,FORMAT_QTY,previewOrderEstimate,validPreviewLimitPrice,sampleChart} from './preview-model.mjs';
+import {MARKETS,FORMAT_USD,FORMAT_QTY,previewOrderEstimate,validPreviewQuantity,validPreviewLimitPrice,sampleChart} from './preview-model.mjs';
+import {createDemoOrderReview,renderDemoOrderReview} from './order-review.mjs';
 
 const byId=(id)=>document.getElementById(id);
 const view={market:'BTC',side:'BUY',orderType:'MARKET'};
@@ -99,6 +100,9 @@ function renderTicket(){
   const badLimit=isLimit&&!validPreviewLimitPrice(byId('limit-price').value);
   byId('limit-price-error').hidden=!badLimit;
   byId('limit-price').setAttribute('aria-invalid',String(badLimit));
+  const badQuantity=!validPreviewQuantity(byId('quantity').value);
+  byId('quantity').setAttribute('aria-invalid',String(badQuantity));
+  byId('quantity-error').hidden=!badQuantity;
   byId('preview-price-label').textContent=isLimit?'Limit Price (user input)':'Reference price (MOCK)';
 
   const button=byId('preview-order');
@@ -125,29 +129,34 @@ function renderTicket(){
   }
   document.querySelectorAll('[data-qty]').forEach(b=>b.classList.toggle('active',b.dataset.qty===quantity));
 }
+function dismissDemoReview(){
+  byId('order-result').hidden=true;
+  byId('preview-order').focus();
+}
 function displayOrderPreview(event){
   event.preventDefault();
   const panel=byId('order-result');
   try{
-    const value=previewOrderEstimate({
-      market:view.market,orderType:view.orderType,
+    const review=createDemoOrderReview({
+      market:view.market,side:view.side,orderType:view.orderType,
       quantity:byId('quantity').value,leverage:byId('leverage').value,
       limitPrice:byId('limit-price').value,
     });
     panel.classList.remove('error');
-    panel.replaceChildren(
-      node('strong','','◈ 데모 주문 미리보기만 생성되었습니다'),
-      node('div','',(view.side==='BUY'?'Long':'Short')+' · '+value.orderType+' · '+value.market+'-PERP · '+value.quantity+' '+value.market+' · '+value.leverage+'×'),
-      node('div','',(value.orderType==='LIMIT'?'사용자 지정 Limit Price':'MOCK Reference Price')+' '+FORMAT_USD.format(value.price)+' · 가상 주문금액 '+FORMAT_USD.format(value.notional)),
-      node('div','','참고 증거금 '+FORMAT_USD.format(value.indicativeMargin)+' · 수수료/체결/청산/펀딩 미계산'),
-      node('div','','서버 전송 0건 · 지갑 서명 0건 · 실제 체결 0건')
-    );
+    renderDemoOrderReview(panel,document,review,{onClose:dismissDemoReview});
   }catch(err){
     panel.classList.add('error');
-    panel.textContent=err.message;
+    panel.textContent='미리보기를 생성할 수 없습니다. 가격·수량·레버리지 입력을 확인하세요.';
+    panel.hidden=false;
+    panel.focus({preventScroll:true});
   }
-  panel.hidden=false;
 }
+byId('order-result').addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&!byId('order-result').hidden){
+    event.preventDefault();
+    dismissDemoReview();
+  }
+});
 document.querySelectorAll('[data-market]').forEach(b=>b.addEventListener('click',()=>{
   view.market=b.dataset.market;
   updateMarket();

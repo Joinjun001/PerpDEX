@@ -101,6 +101,6 @@ test('UX-HL-02-A landing/account tabs and preview-only submission remain separat
  assert.match(html,/id="order-form"/);
  assert.match(html,/SIMULATION PREVIEW/);
  assert.match(js,/event\.preventDefault\(\)/);
- assert.match(js,/서버 전송 0건/);
+ assert.match(read('order-review.mjs'),/서버 전송 0건/);
  assert.doesNotMatch(read('index.html'),/id="order-form"/);
 });

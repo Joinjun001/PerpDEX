@@ -57,7 +57,8 @@ PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성�
 ### Hyperliquid 주문 티켓 UX 진행
 
 - **UX-HL-02-A (Local Completed)**: Market/Limit DEMO 입력 전환, Limit Price 범위·형식 검사, 선택 시장 MOCK 가격과 유형별 명목가치·참고 증거금/미리보기. 64/64 프런트 검증 PASS. 문서: docs/tasks/UX-HL-02-order-ticket/.
-- **UX-HL-02-B1 (Next)**: 입력·모의 주문 확인 UX/오류·키보드 전환·실제 브라우저 검증(가능할 때) 강화. 서명·주문 전송 활성화 금지.
+- **UX-HL-02-B1 (Local Completed)**: 9개 읽기 전용 리뷰 항목/미계산 위험 고지, 닫기/Escape/포커스 복귀·quantity/Limit 오류 ARIA. 프런트 72/72 PASS, 브라우저 인수 미실행.
+- **UX-HL-02-B2 (Next)**: 실제 브라우저/모바일·키보드/보조공학 QA 또는 독립 가능한 UI 접근성 통합 시험.
 - 계정별 실제 read API/wallet 인증이 준비되지 않아 UX-HL-01-B2-B2-B2는 게이트 보류.
 
 ## M9 — Sepolia 테스트넷 무기한 선물 거래 MVP (신규 최종 목표)

@@ -195,3 +195,22 @@
 @media(max-width:380px){
   .trade-shell .order-type-tab{min-width:52px;padding-inline:6px}
 }
+
+/* UX-HL-02-B1 — accessible, readable demo order review. */
+.trade-shell .order-result{scroll-margin-top:18px;outline:0}
+.trade-shell .order-result:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.trade-shell .preview-review-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}
+.trade-shell .preview-review-heading strong{font-size:13px;line-height:1.45;color:#c0f2dd}
+.trade-shell .preview-review-close{color:#c9e1da;border:1px solid #456256;background:#173c32;border-radius:7px;font-weight:750;padding:7px 10px;white-space:nowrap;font-size:11px}
+.trade-shell .preview-review-close:hover{background:#235849}
+.trade-shell .preview-review-close:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+.trade-shell .preview-review-details{margin:0;display:flex;flex-direction:column;gap:0}
+.trade-shell .preview-review-row{display:flex;gap:10px;justify-content:space-between;align-items:start;border-bottom:1px solid #365047;padding:8px 0;font-size:11px;line-height:1.45}
+.trade-shell .preview-review-row dt{color:#91b6a9;flex-shrink:0}
+.trade-shell .preview-review-row dd{margin:0;min-width:0;overflow-wrap:anywhere;text-align:right;color:#d5f4e7;font-variant-numeric:tabular-nums;font-weight:700}
+.trade-shell .preview-review-notice{font-weight:750;color:#a2f0ce;font-size:10px;line-height:1.55;margin:14px 0 7px}
+.trade-shell .preview-review-unsupported{color:#99bbaf;font-size:10px;line-height:1.6;margin:0}
+.trade-shell .price-error[hidden]{display:none!important}
+.trade-shell .order-panel input[aria-invalid="true"]{color:#ff9ea9}
+.trade-shell .order-panel .input-shell:has(input[aria-invalid="true"]){border-color:#c25c6b}
+@media(max-width:650px){.trade-shell .preview-review-heading{align-items:flex-start}.trade-shell .preview-review-row{padding:9px 0}.trade-shell .preview-review-row dd{max-width:60%}}

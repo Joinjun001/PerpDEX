@@ -12,6 +12,8 @@ Hyperliquid의 거래 정보 구조·사용자 흐름을 주요 UX 레퍼런스�
 
 UX-HL-02-A: Market/Limit 주문 모드와 Limit Price를 입력해 MOCK 명목가치·참고 증거금을 계산하는 **순수 미리보기**를 제공합니다. 시장 변경 시 Limit Price는 해당 시장의 고정 샘플 가격으로 초기화되며 미지원 정책·실제 주문/체결/수수료/청산을 계산하지 않습니다. 세부 TASK: docs/tasks/UX-HL-02-order-ticket/.
 
+UX-HL-02-B1: order-review.mjs의 구조화된 9항목 읽기 전용 주문 검토와 닫기/Escape/초점 복귀, 수량/Limit 오류 접근성 개선을 추가했습니다. 서버·지갑·체결 0건 및 수수료·펀딩·청산 미계산을 명시합니다. 실제 주문 실행/API 연결은 없습니다. TASK docs/tasks/UX-HL-02-order-ticket/.
+
 ## 페이지 구조
 
 - index.html (서비스 소개): 프로젝트 비전, 기술 구조, 개발 로드맵, 거래 화면 진입 버튼. 거래 입력/차트를 포함하지 않습니다.

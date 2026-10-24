@@ -9,3 +9,12 @@
 - frontend/order-ticket.test.mjs: 신규 9건. 프런트 전체 64/64 PASS, JS 문법·backend TS 빌드·HTML 구조/CSP/파일 Git 검사 PASS.
 - 로그인/서버·wallet·실자금·Sepolia 트랜잭션·실시간 시장 데이터·체결/청산·push/배포는 실행하지 않음. 브라우저 화면 수동 인수는 미실행.
 - 다음 UX-HL-02-B1: preview 확인 패널/오류 UX와 키보드·사용자 동작 시나리오 강화. UX-HL-01-B2-B2-B2는 서버 계정 인증 API가 실제 준비되기 전까지 보류.
+
+## 2026-10-25 UX-HL-02-B1 — 로컬 완료
+
+- frontend/order-review.mjs: previewOrderEstimate 기반 9개 고정 항목의 읽기 전용 createDemoOrderReview와 안전한 DOM renderDemoOrderReview. 서버·지갑·체결/서명 0건 및 미계산 정책 안내.
+- frontend/main.js: 이벤트 preventDefault 후 리뷰 렌더링/초점 이동, 닫기 또는 Escape로 결과 숨김+preview 버튼 복귀. 입력·마켓·유형·방향 변경 시 오래된 리뷰 숨김. invalid quantity ARIA 검증.
+- frontend/trade.html 및 frontend/trade.css: 결과 status/aria-label/tabindex, 모바일 항목별 읽기/포커스 스타일, quantity role alert와 Limit 설명/오류 연계.
+- frontend/order-review.test.mjs 신규 8건, 기존 정적 회귀 2곳 검사 위치 조정. 프런트 전체 72/72 PASS, JS 문법·백엔드 TS build·HTML 구조·CSP 및 격리 검사 PASS.
+- 브라우저 시각·실보조공학 인수는 미실행. 실제 계정 API/지갑/거래/온체인 및 push·배포 없음.
+- 다음 UX-HL-02-B2: 실제 브라우저/모바일/키보드 상호작용 QA 또는 가능한 독립적 접근성/통합 QA.

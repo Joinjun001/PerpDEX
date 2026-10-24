@@ -73,19 +73,20 @@
           <form id="order-form" novalidate>
             <div id="limit-price-field" class="limit-price-field" hidden>
               <label for="limit-price">Limit Price <span>USD · DEMO</span></label>
-              <div class="input-shell"><input id="limit-price" name="limitPrice" type="text" inputmode="decimal" value="65240.50" autocomplete="off" spellcheck="false" aria-describedby="limit-price-help" maxlength="13" disabled><span>USD</span></div>
+              <div class="input-shell"><input id="limit-price" name="limitPrice" type="text" inputmode="decimal" value="65240.50" autocomplete="off" spellcheck="false" aria-describedby="limit-price-help limit-price-error" maxlength="13" disabled><span>USD</span></div>
               <p id="limit-price-help" class="price-help">주문 체결에 사용되지 않는 입력 가격입니다. 소수점 2자리까지 입력할 수 있습니다.</p>
               <p id="limit-price-error" class="price-error" role="alert" hidden>0.01~1,000,000,000 USD 사이의 올바른 Limit Price를 입력하세요.</p>
             </div>
             <label for="quantity">Quantity <span id="quantity-unit">BTC</span></label>
-            <div class="input-shell"><input id="quantity" name="quantity" type="number" min="0.0001" max="100" step="any" value="0.05" inputmode="decimal" required><span id="input-unit">BTC</span></div>
+            <div class="input-shell"><input id="quantity" name="quantity" type="number" min="0.0001" max="100" step="any" value="0.05" inputmode="decimal" aria-describedby="quantity-error" required><span id="input-unit">BTC</span></div>
+            <p id="quantity-error" class="price-error" role="alert" hidden>수량은 0.0001~100 범위의 유효한 숫자로 입력하세요.</p>
             <div class="quick-amounts" role="group" aria-label="빠른 수량 선택"><button type="button" data-qty="0.01">0.01</button><button type="button" data-qty="0.05" class="active">0.05</button><button type="button" data-qty="0.1">0.1</button><button type="button" data-qty="0.25">0.25</button></div>
             <div class="leverage-label"><label for="leverage">Leverage</label><output id="leverage-output">3×</output></div><input class="leverage-input" id="leverage" type="range" min="1" max="10" step="1" value="3" aria-label="모의 레버리지"><div class="leverage-ticks"><span>1×</span><span>3×</span><span>5×</span><span>10×</span></div>
             <div class="summary-box"><div><span id="preview-price-label">Reference price (MOCK)</span><strong id="reference-price">$65,240.50</strong></div><div><span>Notional (demo)</span><strong id="notional">$3,262.03</strong></div><div><span>Indicative margin</span><strong id="margin">$1,087.34</strong></div><div><span>Fee / Funding</span><strong class="text-muted">Not configured</strong></div></div>
             <button id="preview-order" class="submit-order buy-submit" type="submit">Preview Long Order <span>↗</span></button>
             <p class="order-warning">이 버튼은 주문을 전송하지 않습니다. 입력값으로 미리보기만 생성하며 수수료·청산·실제 위험을 계산하지 않습니다.</p>
           </form>
-          <div id="order-result" class="order-result" hidden role="status" aria-live="polite"></div>
+          <div id="order-result" class="order-result" hidden role="status" aria-live="polite" aria-label="모의 주문 검토 결과" tabindex="-1"></div>
           <div class="ticket-foot"><span> <i class="offline-dot"></i> Trading engine offline</span><span>Demo v0.1</span></div>
         </aside>
       </div>
