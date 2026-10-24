@@ -14,6 +14,7 @@ const migrations = [
   "../sql/002_orders.sql",
   "../sql/003_order_cancel_receipts.sql",
   "../sql/004_order_book.sql",
+  "../sql/005_settlement_outbox.sql",
 ];
 
 try {
@@ -25,7 +26,7 @@ try {
       await client.query(await readFile(filepath, "utf8"));
     }
     await client.query("COMMIT");
-    process.stdout.write("order nonce, order, and cancellation receipt schema migrations applied\n");
+    process.stdout.write("order nonce, orders, matching, and settlement outbox schema migrations applied\n");
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;
