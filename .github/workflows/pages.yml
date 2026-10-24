@@ -1,0 +1,41 @@
+name: Publish PerpDEX Simulation Preview
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: perp-dex-pages
+  cancel-in-progress: true
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check simulation preview safety
+        run: |
+          test -f frontend/index.html
+          test -f frontend/main.js
+          grep -q 'SIMULATION PREVIEW' frontend/index.html
+          if grep -R -E 'DEPLOYER_PRIVATE_KEY|SEPOLIA_RPC_URL|wallet\.request|eth_sendTransaction' frontend/ --include='*.js' --include='*.html'; then
+            echo 'Unsafe integration was added to public static demo'; exit 1
+          fi
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Upload static preview
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
