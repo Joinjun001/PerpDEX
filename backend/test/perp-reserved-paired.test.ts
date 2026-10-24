@@ -35,7 +35,7 @@ function mgr(db:PGlite):OrderTransactionManager{return {withTransaction:fn=>db.t
   async query(sql,args=[]){const q=await tx.query(sql,[...args]);return {rows:q.rows,rowCount:q.affectedRows??null};},
 }))};}
 async function open(path?:string){const db=new PGlite(path);await db.waitReady;
-  for(const name of ['008_perp_margin_ledger','010_perp_position_ledger','011_perp_pair_clearing','012_perp_reduce_reservations','013_perp_guarded_position_commit']){
+  for(const name of ['008_perp_margin_ledger','010_perp_position_ledger','011_perp_pair_clearing','012_perp_reduce_reservations','013_perp_guarded_position_commit','014_perp_reduce_ledger_integrity']){
     await db.exec(await readFile(fileURLToPath(new URL(`../sql/${name}.sql`,import.meta.url)),'utf8'));
   }return db;
 }
@@ -113,10 +113,11 @@ test('replay and 9 simultaneous identical reserved pairs commit exactly once',()
 
 test('only ONE side reservation cannot execute both accounts',()=>run(async db=>{
   await prepare(db);const o=await reserve(db);
-  await db.query('DELETE FROM perp_reduce_orders WHERE account=$1',[ALICE.toLowerCase()]);
+  await cancelSimReduceReservation(mgr(db),{executionMode:'SIMULATION_ONLY',account:ALICE,
+    orderId:o.sell.orderId,eventId:id()},context());
   const t=trade(o);
   await assert.rejects(applySimReservedPairedFill(mgr(db),t,context()));
-  assert.deepEqual(await counts(db),{perp_sim_paired_fills:1,perp_position_applications:2,perp_reduce_events:0});
+  assert.deepEqual(await counts(db),{perp_sim_paired_fills:1,perp_position_applications:2,perp_reduce_events:1});
 }));
 
 test('stale oracle source sequence or changed margin version fail whole transaction',()=>run(async db=>{
@@ -337,12 +338,12 @@ test('B2 cancel versus partial fill is serializable and never exceeds resulting 
   assert.equal((await counts(db)).perp_sim_paired_fills,oi==='80000000'?2:1);
 }));
 
-test('B2 changed OTHER open order oracle fingerprint rejects partial without consuming selected',()=>run(async db=>{
+test('B2 OTHER open order oracle fingerprint is immutable: direct tamper is rejected',()=>run(async db=>{
   await prepare(db);const first=await reserve(db,'60000000');const other=await more(db,first);
-  await db.query('UPDATE perp_reduce_orders SET snapshot_hash=$1 WHERE order_id=$2',[
-    '0x'+'a'.repeat(64),other.buy.orderId]);
-  await assert.rejects(applySimPartialReservedPair(mgr(db),trade(first,'20000000'),context()));
+  await assert.rejects(db.query('UPDATE perp_reduce_orders SET snapshot_hash=$1 WHERE order_id=$2',[
+    '0x'+'a'.repeat(64),other.buy.orderId]),/immutable/i);
   assert.deepEqual(await counts(db),{perp_sim_paired_fills:1,perp_position_applications:2,perp_reduce_events:0});
+  assert.equal((await applySimPartialReservedPair(mgr(db),trade(first,'20000000'),context())).openInterest.openInterestAtomic,'80000000');
 }));
 
 test('B3 raw SQL snapshot change under reduce-only guard must fail at COMMIT',()=>run(async db=>{
@@ -434,4 +435,79 @@ test('B3 SQL-only mutation without journal on guarded DELETE is rejected',()=>ru
     await tx.query('DELETE FROM perp_position_snapshots WHERE account=$1',[ALICE.toLowerCase()]);
   }));
   assert.equal((await counts(db)).perp_position_applications,2);
+}));
+
+// B3-B: reproduce independent table-write bypasses BEFORE 014 is installed.
+test('B3B direct guard quota tamper must not commit',()=>run(async db=>{
+  await prepare(db);await reserve(db);
+  await assert.rejects(mgr(db).withTransaction(async tx=>{
+    await tx.query("UPDATE perp_reduce_guards SET consumed_qty_atomic='100' WHERE account=$1",[ALICE.toLowerCase()]);
+  }),/guard|quota|reduce|ledger/i);
+}));
+
+test('B3B direct pending order price/policy hash mutation must not commit',()=>run(async db=>{
+  await prepare(db);const o=await reserve(db);
+  await assert.rejects(mgr(db).withTransaction(async tx=>{
+    await tx.query("UPDATE perp_reduce_orders SET price_atomic='6500005' WHERE order_id=$1",[o.sell.orderId]);
+  }),/immutable|reduce|order|policy/i);
+  await assert.rejects(mgr(db).withTransaction(async tx=>{
+    await tx.query('UPDATE perp_reduce_orders SET config_hash=$1 WHERE order_id=$2',
+      ['0x'+'b'.repeat(64),o.buy.orderId]);
+  }),/immutable|reduce|order|policy/i);
+}));
+
+test('B3B fake consume history event without corresponding booked quantities must not commit',()=>run(async db=>{
+  await prepare(db);const o=await reserve(db);
+  await assert.rejects(mgr(db).withTransaction(async tx=>{
+    await tx.query(`INSERT INTO perp_reduce_events
+      (chain_id,verifying_contract,account,event_id,order_id,market,collateral_token,
+       action,quantity_atomic,remaining_after)
+      VALUES($1,$2,$3,$4,$5,$6,$7,'CONSUME','100','39999900')`,
+    [11155111,CONTRACT,ALICE.toLowerCase(),id(),o.sell.orderId,'BTC-USD-PERP',TOKEN]);
+  }),/event|reduce|consum|ledger|quota/i);
+}));
+
+test('B3B direct delete of an active reserved order must not commit',()=>run(async db=>{
+  await prepare(db);const o=await reserve(db);
+  await assert.rejects(mgr(db).withTransaction(async tx=>{
+    await tx.query('DELETE FROM perp_reduce_orders WHERE order_id=$1',[o.sell.orderId]);
+  }),/immutable|reduce|order|ledger/i);
+}));
+
+test('B3B direct guard position version alteration cannot commit even without position UPDATE',()=>run(async db=>{
+  await prepare(db);await reserve(db);
+  await assert.rejects(mgr(db).withTransaction(async tx=>{
+    await tx.query('UPDATE perp_reduce_guards SET position_version=position_version+1 WHERE account=$1',
+      [ALICE.toLowerCase()]);
+  }),/guard|position|reduce|ledger/i);
+}));
+
+test('B3B inserted over-capacity order, despite valid local checks, cannot commit',()=>run(async db=>{
+  await prepare(db);const o=await reserve(db,'60000000');
+  const r=await db.query('SELECT * FROM perp_reduce_orders WHERE order_id=$1',[o.sell.orderId]);
+  const original=r.rows[0] as Record<string,unknown>;
+  await assert.rejects(mgr(db).withTransaction(async tx=>{
+    await tx.query(`INSERT INTO perp_reduce_orders (chain_id,verifying_contract,market,
+      collateral_token,account,order_id,side,price_atomic,requested_qty_atomic,
+      remaining_qty_atomic,position_version,config_revision,config_hash,snapshot_hash,margin_fingerprint)
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,[
+      original.chain_id,original.verifying_contract,original.market,original.collateral_token,
+      original.account,id(),original.side,original.price_atomic,'60000000','60000000',
+      original.position_version,original.config_revision,original.config_hash,
+      original.snapshot_hash,original.margin_fingerprint]);
+  }),/quota|remaining|exceeds|reduce/i);
+  assert.equal((await db.query('SELECT COUNT(*)::INTEGER AS n FROM perp_reduce_orders')).rows.length,1);
+}));
+
+test('B3B new paired writer requires all 014 integrity triggers enabled',()=>run(async db=>{
+  await prepare(db);const o=await reserve(db),t=trade(o);
+  // Local isolated test DB only. The actual service never disables triggers.
+  await db.exec('ALTER TABLE perp_reduce_events DISABLE TRIGGER perp_reduce_event_commit');
+  try{
+    await assert.rejects(applySimReservedPairedFill(mgr(db),t,context()),/constraint 014/i);
+    assert.equal((await counts(db)).perp_position_applications,2);
+  }finally{
+    await db.exec('ALTER TABLE perp_reduce_events ENABLE TRIGGER perp_reduce_event_commit');
+  }
+  assert.equal((await applySimReservedPairedFill(mgr(db),t,context())).openInterest.openInterestAtomic,'60000000');
 }));

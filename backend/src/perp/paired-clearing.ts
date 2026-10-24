@@ -133,6 +133,22 @@ export async function applySimPairedFillWithinTransaction(db:SqlRunner,trade:Sim
       if(Number((enforced.rows[0] as {count:number}|undefined)?.count)!==1){
         throw new PairedClearingError('guarded paired write requires DB commit constraint 013');
       }
+      const anchored=await db.query(`SELECT COUNT(*)::INTEGER AS count FROM pg_trigger
+        WHERE tgenabled<>'D' AND
+          ((tgname='perp_reduce_guard_commit' AND tgrelid=to_regclass('perp_reduce_guards')) OR
+           (tgname='perp_reduce_order_commit' AND tgrelid=to_regclass('perp_reduce_orders')) OR
+           (tgname='perp_reduce_event_commit' AND tgrelid=to_regclass('perp_reduce_events')))`);
+      if(Number((anchored.rows[0] as {count:number}|undefined)?.count)!==3){
+        throw new PairedClearingError('guarded paired write requires DB reduce-ledger constraint 014');
+      }
+      const immutable=await db.query(`SELECT COUNT(*)::INTEGER AS count FROM pg_trigger
+        WHERE tgenabled<>'D' AND
+          ((tgname='perp_reduce_order_immutable_identity' AND tgrelid=to_regclass('perp_reduce_orders')) OR
+           (tgname='perp_reduce_guard_immutable_identity' AND tgrelid=to_regclass('perp_reduce_guards')) OR
+           (tgname='perp_reduce_events_immutable' AND tgrelid=to_regclass('perp_reduce_events')))`);
+      if(Number((immutable.rows[0] as {count:number}|undefined)?.count)!==3){
+        throw new PairedClearingError('guarded paired write requires immutable reduce ledger triggers');
+      }
       // Both account guards are already held by the B1/B2 outer writer,
       // ordered by account; re-evaluate exact order/quote/margin inside TX.
       const legs=[{account:buyer,id:reservationProof.buyerOrderId,side:'BUY' as const,

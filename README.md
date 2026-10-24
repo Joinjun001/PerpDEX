@@ -200,3 +200,7 @@ forge build && forge test -vv
 ## M5-T3-B3-A — 모의 영속 포지션의 DB 커밋 무결성 방어
 
 `backend/sql/013_perp_guarded_position_commit.sql`은 Reduce-only guard 계정의 M4 포지션/시장 OI 변경에 대해 COMMIT 시점에 M5 주문 소진 영수증·양측 체결 ID/수량·포지션 버전을 검증하는 지연 제약 트리거입니다. `backend/src/perp/paired-clearing.ts`의 임의 `guarded=true` 옵션을 제거하고 양측 예약 ID를 실제 검증하도록 바꿨습니다. **SQL 013 설치/활성이 필요하며, 실 거래·실 자금·체인 실행을 승인하는 기능이 아닙니다.** DB 고권한 역할/트리거 비활성화 및 guard/events 원장 자체 위변조를 막을 권한 설계, 기존 DB 일치성 검사, 실제 PostgreSQL 다중 연결/부하 QA는 미완료입니다. 상세 내용: `docs/tasks/M5-T3-B3-guarded-position-commit/SPEC.md`.
+
+## M5-T3-B3-B — Reduce-only 원장 직접 조작 방어 (모의 전용)
+
+`backend/sql/014_perp_reduce_ledger_integrity.sql`은 예약 guard·주문·이벤트에 대한 독립 SQL 변조를 커밋 단계에서 차단하도록 신원 불변성·영속 수량 보존·정책/포지션 버전·paired/shadow 소진 합계를 검사합니다. 내부 양측 Reduce-only 모의 체결은 이제 SQL 013과 014의 필수 제약 활성 여부를 모두 확인합니다. **DB 역할별 접근 통제·동시 고권한 조작·실 자금 안전을 보장하지는 않습니다.** 실제 PostgreSQL 비소유자 계정·기존 데이터 감사·마이그레이션 및 트리거 성능은 별도 승인/검증 대상입니다. `docs/tasks/M5-T3-B3-B-reduce-ledger-integrity/`에 범위·QA·역할 계획을 기록했습니다.
