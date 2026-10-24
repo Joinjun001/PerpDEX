@@ -5,6 +5,7 @@
  */
 import {getAddress} from 'viem';
 import type {OrderTransactionManager} from '../orders/order-transactions.ts';
+import type {SqlRunner} from '../orders/nonce-registry.ts';
 import type {PerpPositionContext} from './position-engine.ts';
 import type {SimPerpOrderInput} from './sim-order.ts';
 import {uint256} from './fixed-point.ts';
@@ -50,6 +51,14 @@ export async function assessPersistedSignedSimPerpPair(
   candidate:SignedSimPairCandidate,ctx:PerpPositionContext,
   transactions:OrderTransactionManager,
 ):Promise<Readonly<SignedSimPairAssessment>>{
+  return transactions.withTransaction(db=>
+    assessPersistedSignedSimPerpPairWithinTransaction(candidate,ctx,db));
+}
+
+/** Caller-owned transaction primitive: always revalidates every signed leg. */
+export async function assessPersistedSignedSimPerpPairWithinTransaction(
+  candidate:SignedSimPairCandidate,ctx:PerpPositionContext,db:SqlRunner,
+):Promise<Readonly<SignedSimPairAssessment>>{
   if(!candidate||candidate.executionMode!=='SIMULATION_ONLY'||
      typeof candidate.fillId!=='string'||!FILL_ID.test(candidate.fillId)||
      !candidate.buyer?.input||!candidate.seller?.input){
@@ -73,7 +82,7 @@ export async function assessPersistedSignedSimPerpPair(
      quantity>uint256(candidate.seller.input.quantity,'seller quantity',true)){
     throw new SignedSimPairGateError('pair quantity exceeds signed order');
   }
-  return transactions.withTransaction(async db=>{
+  {
     // Serialize with M4 paired writes BEFORE checking the fill ID. Otherwise
     // an already executed ID fails later as an unrelated position replay.
     const key=[ctx.config.chainId,ctx.config.verifyingContract.toLowerCase(),
@@ -117,5 +126,53 @@ export async function assessPersistedSignedSimPerpPair(
       marketOiVersion:buyer.marketOiVersion,buyer,seller,
       executionAuthorized:false as const,
     });
+  }
+}
+
+/**
+ * C2-B2-A: persist immutable evidence of a fully signed *candidate* pair.
+ * This is a PREPARATION ONLY and cannot be used as approval for M3/M4 mutations.
+ * Subsequent C2-B2 steps MUST fully revalidate both signatures, current orders,
+ * the M3 ledger and market/position risk under a fresh transaction lock.
+ */
+export async function preparePersistedSignedSimPerpPair(
+  candidate:SignedSimPairCandidate,ctx:PerpPositionContext,
+  transactions:OrderTransactionManager,
+):Promise<Readonly<{executionMode:'SIMULATION_ONLY';status:'PREPARED';fillId:string;
+  buyerOrderId:string;sellerOrderId:string;executionAuthorized:false}>>{
+  return transactions.withTransaction(async db=>{
+    const proof=await assessPersistedSignedSimPerpPairWithinTransaction(candidate,ctx,db);
+    // The current schema cannot safely account for partial fills, reversals or
+    // realized PnL. Only two fresh FLAT accounts and exact FULL signed quantity.
+    if(candidate.quantityAtomic!==candidate.buyer.input.quantity||
+       candidate.quantityAtomic!==candidate.seller.input.quantity||
+       proof.buyer.positionVersion!==0||proof.seller.positionVersion!==0||
+       proof.buyer.preTrade.before.status!=='FLAT'||
+       proof.seller.preTrade.before.status!=='FLAT'||
+       proof.buyer.preTrade.candidate?.realizedDeltaAtomic!=='0'||
+       proof.seller.preTrade.candidate?.realizedDeltaAtomic!=='0'){
+      throw new SignedSimPairGateError('preparation requires full quantity and flat opening accounts');
+    }
+    const market=ctx.config;
+    const stored=await db.query(`INSERT INTO perp_signed_pair_preparations
+      (chain_id,verifying_contract,market,collateral_token,fill_id,
+       buyer_order_id,seller_order_id,buyer_account,seller_account,
+       quantity_atomic,price_atomic,config_revision,config_hash,
+       oracle_sequence,market_oi_version,buyer_position_version,seller_position_version,
+       buyer_reserved_margin,seller_reserved_margin)
+      VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
+      RETURNING fill_id`,
+      [market.chainId,market.verifyingContract.toLowerCase(),market.market,
+       market.collateralToken.toLowerCase(),proof.fillId,
+       proof.buyer.orderId,proof.seller.orderId,account(candidate.buyer.input),
+       account(candidate.seller.input),proof.quantityAtomic,proof.priceAtomic,
+       market.revision,candidate.buyer.input.marketConfigHash,
+       proof.buyer.oracleSequence,proof.marketOiVersion,
+       proof.buyer.positionVersion,proof.seller.positionVersion,
+       proof.buyer.reservedInitialMarginAtomic,proof.seller.reservedInitialMarginAtomic]);
+    if(stored.rows.length!==1)throw new SignedSimPairGateError('candidate preparation not recorded');
+    return Object.freeze({executionMode:'SIMULATION_ONLY',status:'PREPARED',
+      fillId:proof.fillId,buyerOrderId:proof.buyer.orderId,
+      sellerOrderId:proof.seller.orderId,executionAuthorized:false});
   });
 }

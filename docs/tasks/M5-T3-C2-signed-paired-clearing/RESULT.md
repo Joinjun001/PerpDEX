@@ -18,3 +18,13 @@
 - 신규 PGlite 10/10, 관련 회귀 54/54, TypeScript build PASS, 임시 DB SQL 001~015 일괄 적용 PASS, diff check PASS
 - 병렬 파일 테스트에서 리소스 SIGKILL이 발생하여 `--test-concurrency=1`로 성공 재실행. 전체 테스트 358건 단일 실행은 이번 회차 미실행.
 - **남은 C2-B2**: 서명 검증과 원자적 양측 opening 체결, M3 RESERVED→POSITION, 양측 M4/OI 및 주문 상태와 영수증 간 DB FK/지연 검사 완성. B1 차단 제약을 해제하거나 우회하지 말고, 정확한 인증된 terminal receipt에 한해서만 SQL 커밋을 허용해야 한다.
+
+## 2026-10-24 C2-B2-A — 서명 양측 전량 후보 PREPARED 영속화
+
+**상태: B2-A 로컬 구현·검증 완료, B2-B 최종 체결·원장 이중분개/영수증 미구현.**
+
+- `backend/sql/016_perp_signed_pair_preparations.sql`: 신규 append-only 테이블(도메인·fillId PK, 양측 기존 signed order FK, 준비 시점 market OI·버전·정책·오라클·전량/양측 IM·계정). DB 지연 트리거가 주문 상태/시장/담보/수량/호가 범위와 기록의 일치를 COMMIT에서 확인. 이후 취소되면 기록은 과거 후보 증거에 불과하다.
+- `backend/src/perp/signed-sim-pair-gate.ts`: 기존 C2-A 검증을 동일 TX 내에서 재사용 가능하게 분리. `preparePersistedSignedSimPerpPair`는 양쪽 EIP-712/OPEN/nonce, M3 RESERVE 이중분개, M4 FLAT position/market OI 및 공통 실행가격 M5 평가를 검증한 뒤 PREPARED 레코드만 추가한다.
+- 원본 SQL 015 차단 트리거는 변경 없음. 포지션·OI, 증거금, signed order 소비, 실거래·실자금·온체인 이동은 **전혀 실행하지 않음**. 반환 `executionAuthorized:false`.
+- 내부 관리 마이그레이션 목록에 016 등록 (운영 DB 적용 안 함). 새로운 테스트 8/8, 관련 회귀 62/62, TypeScript build, SQL 001~016 빈 DB 설치 검증 PASS.
+- **다음 B2-B:** 지금의 PREPARED 레코드는 승인 근거가 될 수 없음. signed 전량 OPEN 주문 2개를 새로운 거래에서 재인증·락 → 양측 M4 paired journal/OI, M3 RESERVED→POSITION, 영속 주문 소진·nonce/영수증의 정확한 SQL 불변식을 동시에 보장하는 최종 체결 경로를 추가할 것. 위험/정산 불변식이 누락되면 계속 fail-closed.

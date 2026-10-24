@@ -31,3 +31,12 @@
 - 독립 임시 PGlite에 SQL 001~015를 순서대로 적용: PASS, 신규 trigger 7종 등록 확인
 - `git diff --check`: PASS
 - 실제 운영/스테이징 DB, 권한 정책, 동시 PostgreSQL 세션, 체인/실거래 검증은 수행하지 않음. Trigger를 disable할 수 있는 DB 관리자 권한에 대한 방어 보장이 아니며, 서명된 취소의 암호학적 인증은 TypeScript 내부 서비스가 담당함.
+
+## 2026-10-24 C2-B2-A 검증 — PREPARED 후보 기록
+
+- 신규 `backend/test/perp-signed-pair-preparation.test.ts` **8/8 PASS**: 정상 EIP-712 BUY/SELL 전량 FLAT 준비, 중복 fillId 동시 등록 시 1개만 성공, 부분 수량/위조 서명/가격 거절, 서명 취소 후 과거 후보 무효, SQL 015의 M4 무연계 실행 차단 유지, 직접 SQL 후보 변조/삭제·유효 한계가 밖 후보 거절, INSERT 장애시 롤백, 016 마이그레이션 재적용.
+- 관련 회귀 **62/62 PASS**, 실행: `node --experimental-strip-types --test --test-concurrency=1 test/perp-signed-pair-preparation.test.ts test/perp-signed-fence.test.ts test/perp-signed-pair-gate.test.ts test/perp-signed-risk-gate.test.ts test/perp-sim-order.test.ts test/perp-paired-clearing.test.ts`
+- `npm run build`: PASS
+- 별도 빈 PGlite에 SQL 001~016 순서대로 설치: **16/16 PASS**, 016 PREPARED immutable/commit trigger 2종 설치 확인.
+- 단일 전체 `npm test`는 이번 회차 미실행. 실제 PostgreSQL 멀티 연결·권한/복구 검증, 실자산/온체인 검증도 미실행.
+- PREPARED 기록은 미래 체결에 사용할 권한 토큰이 아니다. 시장·원장·오라클·서명·주문 취소 상태는 앞으로 새 트랜잭션에서 다시 검증해야 한다.
