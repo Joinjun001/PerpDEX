@@ -2,6 +2,7 @@
  * execution rights or money movement. SIMULATION_ONLY signed M3 opening orders.
  */
 import type {OrderTransactionManager} from '../orders/order-transactions.ts';
+import type {SqlRunner} from '../orders/nonce-registry.ts';
 import type {PerpPositionContext} from './position-engine.ts';
 import {readSimPerpPosition} from './position-ledger.ts';
 import {getIsolatedMarginBalances} from './margin-ledger.ts';
@@ -33,6 +34,19 @@ export async function assessPersistedSignedSimPerpOrder(
   transactions:OrderTransactionManager,simulatedFillQuantityAtomic:string=input.quantity,
   expectedPositionVersion:number=0,
 ):Promise<Readonly<SignedSimRiskGateResult>>{
+  return transactions.withTransaction(db=>assessPersistedSignedSimPerpOrderWithinTransaction(
+    db,input,signature,ctx,simulatedFillQuantityAtomic,expectedPositionVersion));
+}
+
+/** C2-A composition primitive. The caller owns the DB transaction and canonical
+ * account lock order. Candidate fillId/price must never be treated as authority
+ * to execute or as a committed receipt.
+ */
+export async function assessPersistedSignedSimPerpOrderWithinTransaction(
+  db:SqlRunner,input:SimPerpOrderInput,signature:string,ctx:PerpPositionContext,
+  simulatedFillQuantityAtomic:string=input.quantity,expectedPositionVersion:number=0,
+  candidateFillId?:string,candidateExecutionPriceAtomic?:string,
+):Promise<Readonly<SignedSimRiskGateResult>>{
   const {order,config,snapshot,orderId,initialMargin}=await authenticateSimPerpOrderIntent(
     input,signature,ctx.domain,ctx.config,ctx.trustedSourceId,ctx.snapshot,ctx.nowSeconds);
   const fill=uint256(simulatedFillQuantityAtomic,'simulatedFillQuantityAtomic',true);
@@ -40,9 +54,22 @@ export async function assessPersistedSignedSimPerpOrder(
   if(!Number.isSafeInteger(expectedPositionVersion)||expectedPositionVersion<0){
     throw new SignedSimRiskGateError('unsafe expected position version');
   }
+  const price=candidateExecutionPriceAtomic??order.price;
+  const executionPrice=uint256(price,'candidate execution price',true);
+  if(executionPrice%BigInt(config.tickSize)!==0n){
+    throw new SignedSimRiskGateError('candidate execution price violates tick size');
+  }
+  const mark=BigInt(snapshot.markPrice);
+  const deviation=executionPrice>mark?executionPrice-mark:mark-executionPrice;
+  if(deviation*10000n>mark*BigInt(config.maxPriceDeviationBps)){
+    throw new SignedSimRiskGateError('candidate execution price outside trusted oracle band');
+  }
+  if(candidateFillId!==undefined&&!/^0x[0-9a-f]{64}$/.test(candidateFillId)){
+    throw new SignedSimRiskGateError('invalid candidate fill ID');
+  }
   const key=[config.chainId,config.verifyingContract,config.market,config.collateralToken] as const;
   const account=order.account.toLowerCase();
-  return transactions.withTransaction(async db=>{
+  {
     const market=await db.query(`SELECT mode,config_revision,open_interest_atomic,version
       FROM perp_market_open_interest WHERE chain_id=$1 AND verifying_contract=$2
       AND market=$3 AND collateral_token=$4 FOR UPDATE`,key);
@@ -140,15 +167,15 @@ export async function assessPersistedSignedSimPerpOrder(
       verifyingContract:config.verifyingContract,market:config.market,
       collateralToken:config.collateralToken,account,balances:margin,
       realizedPnlBookedAtomic:'0'},
-      {executionMode:'SIMULATION_ONLY',fillId:orderId,account,
+      {executionMode:'SIMULATION_ONLY',fillId:candidateFillId??orderId,account,
         chainId:config.chainId,verifyingContract:config.verifyingContract,
         market:config.market,collateralToken:config.collateralToken,
         configRevision:config.revision,expectedVersion:position.version,
-        side:order.side,priceAtomic:order.price,orderQuantityAtomic:order.quantity,
+        side:order.side,priceAtomic:executionPrice.toString(),orderQuantityAtomic:order.quantity,
         simulatedFillQuantityAtomic:fill.toString(),reduceOnly:false},ctx);
     return Object.freeze({executionMode:'SIMULATION_ONLY',orderId,nonce:order.nonce,
       positionVersion:position.version,marketOiVersion:num(marker.version,'OI version'),
       oracleSequence:snapshot.sourceSequence,reservedInitialMarginAtomic:initialMargin,
       preTrade,executionAuthorized:false});
-  });
+  }
 }

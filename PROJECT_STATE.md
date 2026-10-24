@@ -6,11 +6,18 @@
 - 브랜치: `main`
 - 기준: 실제 소스 코드와 Git 상태를 최우선으로 판단
 - 현재 마일스톤: **M5 — Perpetual Futures 초기·유지증거금/레버리지 위험 엔진 (로컬 모의 구현)**
-- 현재 TASK: **M5-T3-C2 — 서명된 양측 모의 주문/증거금·M4 포지션/OI의 실행 시점 원자 검증·결속 (Next)**
+- 현재 TASK: **M5-T3-C2-B — 양측 signed opening 주문의 M3 예약→포지션·M4/OI 영속 원자적 체결 결속 (Next; C2-A 완료)**
 - 상태: M2-T4 로컬 완료 (A 코어/B 영속 매칭/C API 자동 체결/D 검증된 정산 원장 후보 어댑터); M2-T5-A~E 로컬 검증 완료 (E HTTP→체결→Outbox→정산 후보→모의 영수증 종단간 인수). 실제 PostgreSQL 15 임시 개발 서버의 복수 연결 검증과 Foundry 로컬 회귀 완료; 경제/위험 정책·실체인 정산·운영/스테이징 DB는 미승인/미완료
 - 최근 완료: M1 전체 및 M2-T1/T2/T3/T4 로컬 완료. M2-T5-A policy-gated 영속 Settlement Outbox, 동시 claim·lease fencing·retry·DB 재시작 복구 구현. M2-T5-C 영속 dry-run/ABI 인코딩·중복 의도 차단/UNKNOWN 격리 구현, M2-T5-E 신규 HTTP~정산 전 단계 E2E 통합 테스트 3개 포함 백엔드 전체 149/149 통과 및 TypeScript 검사 성공 (2026-10-24). 임시 실제 PostgreSQL 15 다중 연결 4/4×3 및 Foundry 35/35 검증 추가 완료; 스테이징/운영 PostgreSQL QA 별도 이관
 - 다음 작업은 사람 확인/승인 필요: 실제 스테이징/운영 PostgreSQL의 정책·백업·멀티프로세스/001~007 인수 (임시 개발용 DB 서버는 검증 후 정지), 정책/리스크·승인자/자산/금액 결정, 실제 체인 정산 실행과 read-only 영수증/settledTrades·최종성 통합, 운영 배포·push. 로컬 PostgreSQL 복수 연결 및 Foundry 테스트는 현재 완료. 검증 가이드 `docs/releases/M2-LOCAL-ACCEPTANCE.md`. 미확정 신규 기능을 임의로 생성하지 않음. M2-T5-A는 policy-gated Outbox/임대·재시도 기반으로 로컬 완료. 운영 PostgreSQL 멀티프로세스 및 003/004/005/006/007 마이그레이션은 환경/승인 준비 시 별도 수행
 - 사람 확인 필요: 개발용 PostgreSQL 15.19는 별도 임시 Unix socket 클러스터에서 다중 연결을 검증했지만, 운영/스테이징 DB의 멀티프로세스/권한/백업 및 마이그레이션은 여전히 미실행. 신규 `005_settlement_outbox.sql`/`006_settlement_intents.sql`/`007_settlement_reconciliations.sql` 운영 마이그레이션도 미실행. 실제 시장별 토큰·정밀도/마진·위험·수수료 정책과 신뢰된 정책 승인자/금액은 운영자 확인이 필요하며 자동 생성·승인하지 않음. M2-T5-B는 정책 입력과 체결별 EIP-712 서명 검증만 구현. Foundry 1.8.5 로컬 테스트 35/35 통과, Solidity invariant 128,000 calls 통과. 실제 배포/체인 RPC/영수증 검증은 미실행. 명시적으로 승인된 임시 PostgreSQL/Foundry 로컬 QA는 완료했으며, 실제 릴리스/온체인 연결은 추가 사람 승인 및 외부 환경 준비 대기. 운영/스테이징 DB 실제 마이그레이션·API 배포·Sepolia broadcast는 승인 없이 수행하지 않음. 원격 push는 AutoPilot 작업에서 제외한다.
+
+## 2026-10-24 M5-T3-C2-A — 서명 양측 후보 체결의 공통 가격·원장·리스크 검증
+
+- 신규 backend/src/perp/signed-sim-pair-gate.ts: 서로 다른 BUY/SELL EIP-712 v2 서명 주문을 공통 후보 fillId/가격/수량으로 검증하고 M4 PAIRED OI row를 선점 잠금. 양측 M3 영속 예약·nonce·분개, M4 position/version/OI, M5 후보 가격 기준 risk를 한 트랜잭션에서 계정 주소순으로 재평가하는 **읽기 전용** 서비스. 기존 fillId 재사용, self-match, 가격·수량·서명·취소·원장 변조를 거부.
+- 기존 C1 evaluator는 내부 트랜잭션 내 재사용 가능하도록 분리하며 C1 외부 API 호환성을 유지. 신규 PGlite 양측 검증 6/6 통과, TypeScript build PASS. 전체 348개 테스트는 단일 npm test 240초 제한으로 229개까지 실행 후, 첫 부분 194개와 후반 154개로 분할하여 전 범위 PASS 확인. 실행 권한은 executionAuthorized:false 고정, 실제 M4 fill/M3 RESERVED→POSITION 이동/주문 소진 미구현.
+- 후속 **M5-T3-C2-B**에서 commit-time SQL 보호를 포함한 제한된 양측 원자 기록 구현; C3에서 부분체결·PnL/fee/funding/취소 경합, M5-T4 실 PG QA. 승인되지 않은 운영 환경/실 자금/체인/원격 push 불가.
+- TASK 문서: docs/tasks/M5-T3-C2-signed-paired-clearing/
 
 ## 2026-10-24 M5-T3-C1 — 서명 M3 주문 증거금 및 M4/M5 위험 단일 TX 인수
 
