@@ -9,6 +9,11 @@ export const MARKETS = Object.freeze({
 });
 export const FORMAT_USD = new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',minimumFractionDigits:2,maximumFractionDigits:2});
 export const FORMAT_QTY = new Intl.NumberFormat('en-US',{minimumFractionDigits:3,maximumFractionDigits:4});
+// Do not resolve Object.prototype properties or coerce arbitrary objects into
+// supported market IDs; no synthetic data may be generated for unknown symbols.
+function validMarketId(market){
+  return typeof market==='string'&&Object.hasOwn(MARKETS,market);
+}
 export function validPreviewQuantity(value){
   // Accept only native numeric input strings or finite number primitives.
   // Number() on arbitrary values silently accepts booleans, hex, arrays,
@@ -27,7 +32,7 @@ export function validPreviewLeverage(value){
     (typeof value==='string'&&/^(?:10|[1-9])$/.test(value));
 }
 export function previewEstimate(market,quantity,leverage){
-  if(!MARKETS[market])throw new RangeError('Unknown simulation market');
+  if(!validMarketId(market))throw new RangeError('Unknown simulation market');
   if(!validPreviewQuantity(quantity))throw new RangeError('Demo quantity must be between 0.0001 and 100');
   if(!validPreviewLeverage(leverage))throw new RangeError('Invalid demo leverage');
   const lev=Number(leverage);
@@ -69,7 +74,7 @@ export function previewOrderEstimate({market,orderType='MARKET',quantity,leverag
  * It never asserts real times, live OHLC, exchange range or price-feed data.
  */
 export function describeSampleChart(market,points){
-  if(!Object.hasOwn(MARKETS,market)||!Array.isArray(points)||
+  if(!validMarketId(market)||!Array.isArray(points)||
      points.length<4||points.length>1000||
      points.some(n=>typeof n!=='number'||!Number.isFinite(n)||n<=0)){
     throw new RangeError('Invalid synthetic sample summary');
@@ -86,8 +91,8 @@ export function describeSampleChart(market,points){
   });
 }
 export function sampleChart(market,count=64){
+  if(!validMarketId(market))throw new RangeError('Unknown market');
   const item=MARKETS[market];
-  if(!item)throw new RangeError('Unknown market');
   if(!Number.isInteger(count)||count<4||count>1000)throw new RangeError('Invalid sample count');
   const trend=item.change<0?-1:1;
   return Array.from({length:count},(_,i)=>{

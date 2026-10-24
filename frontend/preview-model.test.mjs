@@ -61,6 +61,18 @@ test('UX-HL-02-D1 valid slider values 1 through 10 retain existing preview math'
     }
   }
 });
+test('UX-HL-01-H1: chart rejects inherited property market IDs instead of producing NaN',()=>{
+  for(const market of ['constructor','__proto__','toString','hasOwnProperty','valueOf']){
+    assert.throws(()=>sampleChart(market,4),RangeError,'sample chart must reject '+market);
+  }
+});
+test('UX-HL-01-H1: all data model entry points reject non-string IDs, including coerced objects',()=>{
+  const forged={toString:()=> 'BTC'};
+  for(const market of [forged,['BTC'],new String('BTC'),null,5,true]){
+    assert.throws(()=>sampleChart(market,4),RangeError);
+    assert.throws(()=>previewEstimate(market,'0.05',3),RangeError);
+  }
+});
 test('샘플 차트는 요청하지 않은 외부 데이터나 음수 가격 없이 생성한다',()=>{
   for(const market of Object.keys(MARKETS)){
     const arr=sampleChart(market);

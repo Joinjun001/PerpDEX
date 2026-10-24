@@ -32,6 +32,12 @@ test('E1 accessible summary stays accurate with custom synthetic sample counts',
   assert.ok(result.high>=result.last);
   assert.match(result.accessibilityText,/샘플 8개/);
 });
+test('UX-HL-01-H1: descriptive summary rejects prototype keys and coerced objects',()=>{
+ const points=[100,101,102,103];
+ for(const market of ['constructor','__proto__','toString',{toString:()=> 'BTC'},['BTC']]){
+  assert.throws(()=>describeSampleChart(market,points),RangeError);
+ }
+});
 test('E1 reject unsupported markets, malformed data, nonfinite and negative values',()=>{
   for(const [market,points] of [
     ['DOGE',[1,2,3,4]],['BTC',null],['BTC',{}],['BTC',[1,2,3]],

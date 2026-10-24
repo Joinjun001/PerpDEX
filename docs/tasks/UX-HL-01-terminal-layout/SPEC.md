@@ -87,3 +87,11 @@
 - Bid: 최우선 매수가격(높은 값)이 위이므로 각 행의 Total은 첫 행부터 해당 행까지의 Size 합.
 - 각 표시 Total은 오직 기존 합성 Size에서 도출하며 실제 주문장·유동성·체결 정보가 아니다.
 - 실제 브라우저·터치·스크린리더 QA는 F2/C 등 기존 브라우저 의존 TASK로 별도 미완료 유지.
+
+## UX-HL-01-H1 (2026-10-25) — 시장 ID 허용 목록 검증
+
+- 기존 sampleChart가 MARKETS[market]의 truthy 여부만 확인하여 constructor, __proto__, toString 등 Object.prototype의 상속 속성을 실제 시장으로 간주하고 NaN 샘플을 반환하는 결함 확인.
+- previewEstimate도 상속 속성을 정상 시장으로 간주하여 늦은 금액 오류를 반환하고, describeSampleChart의 Object.hasOwn은 사용자 객체를 문자열로 강제 변환할 수 있어 임의 toString 객체를 BTC로 수락.
+- BTC/ETH/SOL primitive 문자열 중 MARKETS own key에 해당하는 것만 유효한 시장 ID로 허용. sampleChart, previewEstimate, describeSampleChart에서 동일 검증 함수를 사용.
+- 기존 합성 가격·수량·차트·주문 미리보기·계정 미연결·CSP/모바일 UX는 변경하지 않는다. 실계정/실거래 정보는 생성하지 않는다.
+- 수정 전 실패 테스트로 prototype key/객체 시장의 NaN 생성과 데이터 출처 검증 결함 재현 후 JS/TypeScript/HTML/CSP/Git 검증.

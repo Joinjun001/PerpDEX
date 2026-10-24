@@ -32,3 +32,9 @@
 - [x] G1 BTC/ETH/SOL 각 7개 Ask/Bid 행의 가격 순서와 가시 수량·Total 일치 회귀 테스트 통과
 - [x] G1 프런트엔드 전체 122/122, JS 문법/TypeScript 빌드/HTML ID·태그/CSP/git diff 검사 통과
 - [ ] G2 실 브라우저에서 표 가독성/모바일·스크린리더 인수 (현재 도구 미가용)
+
+- [x] H1 sampleChart에 Object.prototype 상속 key를 주면 NaN 배열을 반환하는 오류를 수정 전 실패 테스트로 재현
+- [x] H1 previewEstimate/describeSampleChart도 primitive 문자열+own key 시장 ID로 정렬
+- [x] H1 차트·주문 모델·접근성 요약에서 상속 시장/문자열 강제 변환 객체를 거부하는 신규 3건 회귀
+- [x] H1 프런트 전체 125/125, JS syntax/TypeScript build/HTML 구조·CSP/git diff 검사
+- [ ] H2 실제 브라우저·스크린리더에서 시장 전환 화면 인수 (환경 미가용)

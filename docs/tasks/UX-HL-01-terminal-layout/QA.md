@@ -95,3 +95,15 @@
 - node --check frontend/main.js 및 order-interactions.test.mjs PASS; npm --prefix backend run build (tsc --noEmit) PASS.
 - HTMLParser index.html 고유 ID 4개/trade.html 68개, 태그·중복 ID 검사 PASS. 계정 5개 tbody 비어 있음, CSP connect-src none 및 SYNTHETIC LIQUIDITY 유지, git diff --check PASS.
 - 실제 브라우저 픽셀/터치/스크린리더·실거래·실 API/지갑·Sepolia/운영 DB 인수 미실행. 원격 push·배포·네트워크 요청 없음.
+
+## 2026-10-25 UX-HL-01-H1 — 지원 시장 ID 검증 QA
+
+- 시작 main HEAD 62af292, Git clean, origin/main보다 17커밋 앞섬. PROJECT_STATE, ROADMAP, Hyperliquid UX 레퍼런스와 UX-HL-01 SPEC/TODO/QA/RESULT, frontend 소스 확인.
+- chromium/google-chrome/firefox 및 Playwright/Puppeteer 실행 환경 부재, 설치·권한 우회 미실행, UX-HL-01-G2 실제 브라우저 QA 보류.
+- 문제 재현: sampleChart('constructor',4), sampleChart('toString',4), sampleChart('__proto__',4) 호출 시 기존 NaN 4개 반환. describeSampleChart에 toString 메서드가 BTC를 반환하는 객체를 넘기면 허용되는 결함도 확인. 신규 테스트 3건 수정 전 FAIL.
+- 변경: preview-model.mjs에 typeof market string 및 Object.hasOwn(MARKETS,market) 조건으로 공통 허용 시장 검증. sampleChart/previewEstimate/describeSampleChart에 적용.
+- 신규 preview-model.test.mjs 2건, chart-sample-accessibility.test.mjs 1건. prototype property와 임의 객체/배열/String wrapper/숫자 ID 거부, BTC/ETH/SOL 정상 기능 유지.
+- 대상 단위 16/16 PASS, 전체 node --test frontend/*.test.mjs 125/125 PASS (기존 122 + 신규 3).
+- node --check preview-model.mjs, preview-model.test.mjs, chart-sample-accessibility.test.mjs PASS, npm --prefix backend run build (tsc --noEmit) PASS.
+- Python HTMLParser index.html 고유 ID 4개/trade.html 68개, 태그 중첩/ID 중복 PASS. 계정 tbody 5개 빈 상태, CSP connect-src none, 모델 외부 통신·서명 API 부재, git diff --check PASS.
+- 실제 브라우저/모바일·스크린리더, 지갑/backend API, 실계정/실주문, Sepolia/운영 DB/푸시/배포 미실행.

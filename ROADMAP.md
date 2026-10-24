@@ -60,6 +60,8 @@ PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성�
 - **UX-HL-01-F2 (Pending browser)**: 실제 브라우저·스크린리더에서 샘플 체결 순서와 모바일 접기 확인 미완료.
 - **UX-HL-01-G1 (Local Completed)**: MOCK Order Book Total의 Size × 행번호 계산 오류를 최우선가 기준 누적 Size로 수정. 실제 main.js BTC/ETH/SOL 매수·매도 7행 검증, 전체 프런트 122/122 PASS.
 - **UX-HL-01-G2 (Pending browser)**: 호가 Total의 실제 모바일·키보드·스크린리더 가독성 인수 보류.
+- **UX-HL-01-H1 (Local Completed)**: prototype 상속 market 이름이 NaN 합성 차트를 반환하고 객체가 BTC로 강제 변환되는 모델 결함 수정. 시장 ID를 BTC/ETH/SOL primitive string own key로 제한. 신규 3건 포함 프런트 125/125 PASS.
+- **UX-HL-01-H2 (Pending browser)**: 실제 브라우저에서 시장 ID/모바일/스크린리더 인수 미실행.
 
 ### Hyperliquid 계정 탭 탐색 UX 진행
 

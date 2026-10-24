@@ -79,3 +79,10 @@
 - 프런트엔드 전체 122/122 PASS, JS syntax/TypeScript build/HTML ID·중첩/CSP/Git diff 검사 PASS.
 - 합성 데이터만 처리했으며 서버·지갑·실거래/실시세·DB·체인 연결 및 원격 push·배포는 수행하지 않음.
 - 다음 UX-HL-01-G2: 브라우저/보조공학 가용 시 Order Book Total의 가독성·모바일 QA. 여전히 미가용 시 재현 가능한 독립 결함이 있을 때만 TASK 시행.
+
+## 2026-10-25 UX-HL-01-H1 — 로컬 완료
+
+- frontend/preview-model.mjs: Object.prototype 시장 상속 키가 NaN 차트 샘플을 만드는 결함 수정. BTC/ETH/SOL primitive string own key만 허용. 미리보기·접근성 차트 요약도 동일 확인.
+- frontend/preview-model.test.mjs 2건, frontend/chart-sample-accessibility.test.mjs 1건 신규. 수정 전 FAIL 재현 후 전체 프런트 125/125 PASS, JS/TS 빌드·HTML 구조/CSP/diff PASS.
+- 기존 합성 마켓 가격·호가·체결·모의 주문/계정 탭/모바일 UX 보존. 실제 API/DB·지갑/거래/체인, 원격 push/배포 없음.
+- 다음 H2/G2: 브라우저/스크린리더 환경 준비 후 실제 UX 인수. 환경 미가용 시 독립 실제 결함이 재현될 때만 후속 TASK 수행.
