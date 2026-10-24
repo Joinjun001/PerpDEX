@@ -70,3 +70,12 @@
 - 추가 C3-A 계정 감사·C3-C1 영속 수량 프로젝션 **18/18 PASS**. 이번 회차 실제 실행한 관련 테스트 총 **59/59 PASS** (4개+2개 테스트 파일).
 - 실제 PostgreSQL의 트랜잭션 경합과 제한된 별도 role에서 DDL/임의 journal/receipt 쓰기 차단은 **미실행·미검증**. 운영·스테이징 DB/실자금/원격 push 접근 없음.
 - 후속 B2에 필요한 전제: 실제 실행 중인 전용 테스트 PG 15+ private socket, SQL migration 수행 가능한 QA role, 고유 신규 schema. 자동 설치/승인 우회/비밀번호 조회 금지.
+
+## 2026-10-24 C3-C2-B2-A — 제한 감사자 역할 검증 오프라인 QA
+
+- 시작 시 Git HEAD ad61fcf / clean 확인, C3-C2 SPEC/TODO/QA/RESULT·PROJECT_STATE·ROADMAP 재확인. 독립 PG 소켓/서버 바이너리 가용성 점검 결과 **없음**; 운영·스테이징/기존 네트워크 DB에 연결하지 않음.
+- 신규 backend/test/postgres-signed-role-permissions.test.ts **7/7 PASS**: 읽기 전용 12개 보호 테이블 카탈로그 정상 평가, SUPERUSER·CREATEROLE·CREATEDB·BYPASSRLS·REPLICATION·소유권·owner 멤버십·DDL/SECURITY DEFINER 실행권·INSERT/UPDATE/DELETE/TRUNCATE/REFERENCES/TRIGGER 권한 거부, 누락/NULL/중복 메타데이터 fail-closed, 파라미터 바인딩 SELECT만 수행.
+- 기존 private socket guard **4/4 PASS**, TypeScript build **PASS**.
+- 관련 signed M3 증거금 집계·취소·전량 체결·C3-A 계정감사·C3-C1 체결 잔량 회귀 포함, **7개 파일 순차 테스트 66/66 PASS**.
+- 실제 pg_catalog 쿼리는 전용 PostgreSQL 인스턴스 없어서 **미실행**. 별도 제한 역할 실제 로그인, 독립 PG backend PID, 역할별 CREATE/ALTER/DROP 및 DML 권한 거부 동작은 모두 **미검증**.
+- QA 모의 fixture의 제한 감사자 통과는 실제 PG role 보안 증명이 아니다. B2-A는 읽기 전용 감사 역할만 평가하며 서명 검증이 필요한 모의 체결 writer role의 승인 또는 영수증 인증을 대체하지 않음.

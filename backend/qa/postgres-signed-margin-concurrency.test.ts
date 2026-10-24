@@ -16,6 +16,8 @@ import {hashPerpMarketConfig,admitSimPerpOrder,cancelSimPerpOrder,
 import {preparePersistedSignedSimPerpPair,type SignedSimPairCandidate} from '../src/perp/signed-sim-pair-gate.ts';
 import {executePreparedSignedSimPair} from '../src/perp/signed-sim-pair-execution.ts';
 import {validateLocalSignedPgQaEnvironment} from './postgres-signed-margin-guard.ts';
+import {inspectSignedReadOnlyRole,assessSignedReadOnlyRole}
+  from './postgres-signed-role-permissions.ts';
 import type {PerpPositionContext} from '../src/perp/position-engine.ts';
 
 const cfg=validateLocalSignedPgQaEnvironment(process.env);
@@ -122,6 +124,14 @@ before(async()=>{
 after(async()=>{await pool.end()});
 
 test('independent real PostgreSQL backend sessions on private socket',confirmPrivateDb);
+test('owner of QA migration tables must NOT be mistaken for least-privilege reviewer',async()=>{
+ const snap=await inspectSignedReadOnlyRole(pool,cfg.schema);
+ const assessment=assessSignedReadOnlyRole(snap);
+ assert.equal(assessment.eligible,false);
+ assert.ok(assessment.reasonCodes.includes('owns_schema'));
+ // This negative attestation is not a successful restricted-role test.
+});
+
 test('unique concurrent nonces and identical-nonce rejection keep M3 conserved',async()=>{
  const inputs=[order(alice,'BUY','1001'),order(alice,'BUY','1002'),order(alice,'BUY','1003')];
  const outcomes=await Promise.allSettled(inputs.map(x=>admit(x,alice)));

@@ -56,3 +56,11 @@
 - npm test의 일반 테스트와 구분되는 **수동 opt-in 실제 PostgreSQL QA**. 하네스의 테스트 케이스가 코드로 존재한다는 사실은 실 DB에서 통과했다는 의미가 아니다.
 - TypeScript build PASS, 오프라인 guard 4/4 PASS, 기존 signed margin/cancel/full regression 37/37 PASS, QA 실행 시 잘못된 환경 fail-closed 종료 확인. 추가 C3-A/C3-C1 감사 관련 테스트 18/18 PASS. 이번 회차 실제 실행 총 59/59 PASS.
 - 다음 C3-C2-B2: 실제 전용 로컬 PG가 사용 가능해졌을 때만 이 하네스를 실행하고, 실패 시 정당한 코드/lock 변경을 검증하며 별도 DB 최소권한 역할·DDL/receipt 임의 변조 차단 결과를 기록.
+
+## 2026-10-24 C3-C2-B2-A 결과 — 역할 메타데이터 읽기 전용 검사
+
+- 신규 qa/postgres-signed-role-permissions.ts: 지정된 신규 테스트 schema의 pg_roles/pg_class/pg_namespace/pg_proc 유효 권한을 parameterized SELECT만으로 조회. 핵심 원장·영수증·주문·M4 12개 보호 테이블 누락/의심 privilege/상속 가능한 owner 및 security-definer 권한을 fail-closed. 별도 읽기 전용 감사자 후보에 한해 통과.
+- 신규 test/postgres-signed-role-permissions.test.ts: 권한 최소화 정책·파라미터 안전·오류 메타데이터 거부 단위 7개 추가.
+- 기존 opt-in qa/postgres-signed-margin-concurrency.test.ts: 신규 QA schema를 만든 소유자는 읽기 전용 제한 역할의 보안 인수를 통과하지 못한다는 음성 판정 추가. 이 시나리오는 실제 PostgreSQL이 존재할 때만 실행 가능하여 이번 회차 미실행.
+- TypeScript build 및 로컬 권한 정책 11/11 (신규 7 + 기존 guard 4), 관련 signed 회귀 포함 전체 실행 **66/66 PASS**.
+- 보류 중인 C3-C2-B2-B는 독립 PostgreSQL과 별도 제한 역할의 실제 접속·권한 거부 QA. 서버 설치·운영 DB 접속·GRANT/SET ROLE·권한 우회·push는 실행하지 않음.

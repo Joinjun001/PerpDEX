@@ -7,7 +7,8 @@
 - **C3-C1 (이번 회차)**: SQL 019로 영속 주문 전량과 기존 terminal 영수증에서 계산한 누적 체결/미체결/실행 가능 수량을 읽기 전용으로 투영하고, OPEN/CANCELED/FILLED의 현재 FULL-only 불변식을 COMMIT 검증한다. PREPARED는 체결량 0. 새 partial 체결·증거금 이동 기능을 열지 않는다.
 - **C3-C2-A (이번 회차 로컬 완료)**: 신규 SQL 020의 COMMIT 제약으로 서명 주문 계정별 OPEN 예약/기존 FILLED 할당 의무, RESERVED/POSITION 실제 잔고와 모든 M3 append-only 누적분개 합계를 대조. 계정에 붙은 M3 연산의 정확한 두 분개/경로/소유자를 검증하고 signed RESERVE, cancel RELEASE, terminal ALLOCATE의 기여를 비서명 M3 잔여금과 분리. 신규 자금이동 경로는 생성하지 않음.
 - **C3-C2-B1 (QA 하네스 구현 완료, 실 PG 미실행)**: 별도 테스트 전용 PostgreSQL의 Unix socket + 고정 테스트 사용자/DB + 신규 QA schema만 허용하는 다중 세션 경합 QA 하네스. 독립 backend PID를 확인하고 001/008~020 스키마를 신규 테스트 schema에만 적용. signed admission, 중복 nonce, cancel+admission, full+cancel, 직접 SQL 변조 검증을 정의.
-- **C3-C2-B2 (다음, 환경 의존)**: 전용 PG가 실제 존재할 때만 하네스를 실행하고 서버 role 최소권한·DDL 분리를 검증. 실 PG 가용성 부족 시 설치/우회 금지.
+- **C3-C2-B2-A (이번 회차 로컬 완료)**: pg_catalog 메타데이터에서 12개 보호 테이블의 읽기 전용 감사자 role을 보수적으로 평가하는 독립 QA. superuser/owner/owner role 회원/CREATEDB/CREATEROLE/BYPASSRLS/schema CREATE/DB CREATE/TRIGGER/REFERENCES/INSERT/UPDATE/DELETE/TRUNCATE/SECURITY DEFINER EXECUTE 권한이 하나라도 있거나 메타데이터가 부족하면 인수 거부. SELECT 가능한 제한 감사자만 통과. 전용 PostgreSQL 연결 미가용 상태에서는 평가기 오프라인 테스트만 통과.
+- **C3-C2-B2-B (다음, 환경 의존)**: 별도 전용 테스트 PostgreSQL이 실제 있으면 C3-C2-B1 다중 세션 경합 QA와 제한 감사자 별도 연결의 실역할 검증. 실제 role 만들기/GRANT/권한 우회는 자동 실행 금지, 서버 접근·승인 없으면 독립적인 QA만 진행.
 - **C3-C3 (후속)**: 새로운 부분 체결·잔여 예약금 모델과 영속 증거금 배분 이벤트를 별도 승인된 정책에 따라 설계. 취소 시 이미 체결된 누적량과 잔량을 구분하되, SQL 015~019를 약화시키지 말 것.
 - **C3-D (후속)**: 포지션 감소와 실현 손익 계산-회계 연결, fee/funding은 승인된 정책 수치가 정해지기 전 정산 금지. 계산만 필요한 경우 기존 M4 numerator 기반 표시는 지원.
 
@@ -58,3 +59,10 @@ SIMULATION_ONLY, 로컬 /shared/PerpDEX 한정. SQL 015~017, 기존 체결·입�
 - 고정 test user=nobody, db=perpdex_autopilot_test, inet_server_addr() NULL, listen_addresses 비활성, pg_backend_pid() 2개 상이함을 확인한 후에만 신규 schema를 만든다.
 - QA 파일: backend/qa/postgres-signed-margin-concurrency.test.ts. npm test 기본 실행에 포함하지 않는다. DB 설치/계정 인증 정보 검색/운영 DB 접속/기존 스키마 삭제를 하지 않는다.
 - 이번 회차에는 해당 PG server 소켓/바이너리가 없어 실제 QA는 실행 불가능했다. 하네스 작성과 소켓 미존재시 fail-closed 검증은 실제 PG 인수와 다르다. DB owner/DDL 및 제한된 별도 role의 권한 분리는 B2에서만 검증 가능.
+
+## C3-C2-B2-A 역할 검증 경계
+
+- backend/qa/postgres-signed-role-permissions.ts: 지정 테스트 schema에 대해 파라미터 바인딩된 읽기 전용 pg_catalog SELECT 두 건으로 연결된 현재 role과 보호 테이블 12개의 실효 권한을 수집하는 함수, 별도 순수 판정 함수. ALTER/GRANT/REVOKE/SET ROLE/CREATE를 절대로 실행하지 않는다.
+- 대상은 DML이 없는 제한 READ-ONLY 감사자이며, 서명 체결 서비스의 쓰기 role 권한 인수와는 전혀 다르다. 일반 실행 role에서 INSERT/UPDATE를 허용하면서 암호학적 요청 인증이 보장된다고 주장하지 않는다.
+- 평가 조건: 보호 테이블 전체 SELECT 필요. superuser/CREATEROLE/CREATEDB/BYPASSRLS/replication/테이블 또는 schema 소유권·소유자 역할 멤버십, DB/schema CREATE, 보안 정의자 함수 실행권, INSERT/UPDATE/DELETE/TRUNCATE/REFERENCES/TRIGGER 중 하나라도 있으면 실패. 누락·NULL·중복 카탈로그는 fail-closed.
+- 기존 PG 경합 QA 하네스에는 새 schema를 소유한 테스트 관리자 계정이 제한 감사자 자격을 갖지 않는다는 음성(negative) 판정만 추가하였다. 제한 감사자 역할의 실제 PostgreSQL 로그인/권한 인수는 B2-B에서 수행해야 한다.
