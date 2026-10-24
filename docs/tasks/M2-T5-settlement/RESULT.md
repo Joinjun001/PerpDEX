@@ -1,6 +1,6 @@
 # M2-T5 RESULT
 
-상태: In Progress — M2-T5-A/B/C/D 로컬 구현 완료, E 미완료
+상태: M2-T5-A~E 로컬 개발/검증 완료 (실운영 온체인 정산·승인·운영 QA는 미완료)
 
 ## 2026-10-24 — M2-T5-A 정책 미승인 Settlement Outbox
 
@@ -36,3 +36,12 @@
 - `backend/scripts/migrate.ts`: 관리자가 별도 실행할 수동 SQL 목록에 007 추가. 운영 DB 실제 마이그레이션 없음.
 - `backend/test/settlement-reconcile.test.ts`: 실제 PGlite 서명·체결·Outbox·정산 의도 기반 mock 영수증 13개 신규 테스트. 미확정, 확인 임계값, 모의 성공·실패, 도메인/이벤트 변조 거부, 모순·역행 격리, 병렬 확인, DB 오류 원자성, 디스크 DB 재시작 및 UNKNOWN 의도 검증. `npm run build` 성공, 전체 `npm test` **146/146 통과**.
 - **중요:** 성공/실패는 `MOCK_*` 상태일 뿐 *실제 온체인 성공/실패가 아님*. 브로드캐스트가 한 번도 수행되지 않은 전용 로컬 증거이며, 실제 체인 정산 판정은 사용자/운영 검증 없이는 수행하거나 주장할 수 없다. 다음 TASK는 M2-T5-E 로컬 전체 QA/릴리스 절차 정리.
+
+## 2026-10-24 — M2-T5-E 로컬 종단간 통합 인수/릴리스 게이트
+
+- 시작 상태: `main` clean, HEAD `6440218`, `origin/main`보다 6커밋 앞섬. M2-T5-E 첫 미완료 작업. PROJECT_STATE/ROADMAP/SPEC/TODO/QA/RESULT 및 HTTP·체결·정산 코드 재검토.
+- `backend/test/m2-end-to-end.test.ts` 신규: 테스트용 메모리 EIP-712 서명 실제 HTTP 주문 → 가격·시간 우선 잔량 두 체결 → 원장 → Outbox → 정책/서명 검증 → data-only 영속 지시 → dry-run ABI → 읽기 전용 모의 영수증 두 경로(확정/상충 UNKNOWN) → DB 재시작 후 원장·의도·증거 지속/중복 차단. 대형 BigInt 수량(2^120)·금액(2^200/2^199) 정확성 검증.
+- 부정 경로: 승인·Outbox 상태가 부정확하면 기존 매칭 주문이 있어도 정산 의도 불생성. 동일 주문 다시 POST해도 신규 체결 생성 없음. 마이그레이션 001~007 순서·반복 적용/선행 없는 007 거부 확인.
+- `docs/releases/M2-LOCAL-ACCEPTANCE.md` 신규: 로컬 복원/검증 명령, 사람 승인 전 운영/Foundry/금융·리스크 정책·실 DB/체인 검증 대기 게이트 명확화. README의 실제 `npm run start` 스크립트 및 마이그레이션 안내 정정.
+- `cd backend && npm run build` 성공 및 전체 `npm test` **149/149 통과** (기존 146 + 신규 3).
+- 이 단계는 실제 온체인 트랜잭션 경로를 **추가하지 않았다**. `MOCK_VERIFIED`를 실 자금 이전 또는 M2 운영 릴리스로 주장하지 않는다. 로컬 QA를 마쳤더라도 실운영 승인 대기가 남아 있다.

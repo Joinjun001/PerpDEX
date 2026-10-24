@@ -81,7 +81,7 @@ forge script script/DeployCollateralVault.s.sol:DeployCollateralVault \
 
 ```bash
 cd backend
-npm run start:dev
+npm run start
 ```
 
 ### Frontend
@@ -101,7 +101,7 @@ docker compose up -d
 
 `POST /api/orders`는 서버 설정 도메인으로 EIP-712 서명을 검증하고 **하나의 트랜잭션**에서 Nonce 예약·주문 저장·시장별 순서 등록·가격/시간 우선 매칭·체결 원장을 반영합니다. 생성 응답 201은 주문의 현재 `status`, `filledQuantity`, `remainingQuantity`, `arrivalSequence`, `fills`를 추가로 반환합니다. 동일 서명 재전송은 중복 체결하지 않고 저장된 현재 상태의 멱등 응답을 반환합니다. 이는 오프체인 체결 기록이며 온체인 잔액 정산을 의미하지 않습니다.
 
-**서버 실행 전 반드시 순서대로 `backend/sql/001_order_nonces.sql`부터 `004_order_book.sql`까지 적용되어 있어야 합니다.** 운영 DB 변경은 수동 승인 작업이며 API는 마이그레이션을 자동 실행하지 않습니다. 로컬 PGlite/HTTP 테스트는 `cd backend && npm run build && npm test`로 확인합니다. 프로덕션 PostgreSQL 다중 연결·다중 프로세스 검증과 정산 연동은 아직 미완료입니다.
+**서버 실행 전 주문 API에는 001~004가 필수이고, 로컬 모의 정산까지 사용하려면 005~007도 차례대로 필요합니다.** 운영 DB 변경은 수동 승인 작업이며 API는 마이그레이션을 자동 실행하지 않습니다. 로컬 PGlite/HTTP 테스트는 `cd backend && npm run build && npm test`로 확인합니다. 프로덕션 PostgreSQL 다중 연결·다중 프로세스 검증과 정산 연동은 아직 미완료입니다.
 
 ## M2-T5-A — 정산 후보 영속 Outbox (로컬 검증)
 
@@ -129,3 +129,9 @@ docker compose up -d
 `backend/sql/007_settlement_reconciliations.sql`은 출처가 `MOCK_READONLY`인 관측 결과만 영속 기록합니다. `backend/src/settlement/reconcile.ts`의 `InMemoryMockReceiptProvider`는 오로지 메모리 fixture를 읽고, `reconcileMockSettlement`은 실제 M1 Vault의 `Settled(tradeId, token, from, to, amount)` 이벤트 필드/상태/확인 횟수 및 정산 의도·도메인과의 일치를 검증합니다. **MOCK_VERIFIED와 MOCK_FAILED는 실제 체인 정산 결과가 아닙니다.** 모의 영수증 누락·네트워크 부재·블록 충돌은 재확인/UNKNOWN으로 기록하고 자동 전송하거나 다시 실행하지 않습니다. 운영 환경의 영수증 검증·최종성·체인 재구성, Foundry 및 실제 RPC/settledTrades 검증은 별도 승인·실행이 필요합니다.
 
 로컬 테스트: `cd backend && npm run build && npm test` (신규 `test/settlement-reconcile.test.ts`). 스키마 007은 운영 DB에 적용하지 않았습니다.
+
+## M2 로컬 종단간 인수 (M2-T5-E)
+
+- `cd backend && node --experimental-strip-types --test test/m2-end-to-end.test.ts`는 **실제 HTTP 서명 주문 → 체결 → 영속 정산 대기 → 승인 서명 검증 → 로컬 ABI 모의 실행 → 모의 영수증 결과/불확실 상태 → DB 재시작 및 DDL 재적용**을 검증합니다.
+- 전체 절차·운영 승인 게이트는 [`docs/releases/M2-LOCAL-ACCEPTANCE.md`](docs/releases/M2-LOCAL-ACCEPTANCE.md)에 작성했습니다.
+- 현재 M2는 **로컬 테스트/모의 정산까지만 통과**했으며 실제 온체인 자금 이동이나 운영 릴리스는 구현·검증·승인되지 않았습니다.

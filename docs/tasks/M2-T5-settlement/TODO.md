@@ -7,4 +7,4 @@
 - [x] M2-T5-B: 신뢰 정책 입력·자산/정밀도/수량 상한·방향/정책 유효 기간 검사, 체결별 EIP-712 승인 검증, 영속 원장/WAITING_POLICY와 결합한 read-only 정산 지시 생성 (실제 정책 승인/자산 이동은 별도)
 - [x] M2-T5-C: 검증된 승인 지시 영속 의도/고유 tradeId, 로컬 settle calldata dry-run, DB 조건부 선점·변조 차단·중복/재시작/불확실 작업 격리 테스트 (실제 전송/receipt 미구현)
 - [x] M2-T5-D: 모의 영수증/Settled 이벤트·모의 settledTrades read-only 검증, 영속 재조정 5상태, 모순/역행/재시작/트랜잭션 롤백 로컬 QA (실제 체인 receipt·재전송은 명시적 승인 필요)
-- [ ] M2-T5-E: 통합 QA·M2 릴리스; 운영 DB/체인 실제 실행은 승인 후 별도
+- [x] M2-T5-E (로컬 범위): 공개 REST 주문 → FIFO/부분체결 → Outbox → 서명정책 → dry-run → 모의 영수증의 종단간 통합 QA, 001~007 마이그레이션/재시작/멱등성 검증, M2 운영 릴리스 게이트 정리. 실 PostgreSQL/Foundry/온체인 통합 인수는 사람 승인 필요

@@ -1,6 +1,6 @@
 # M2-T5 QA
 
-상태: M2-T5-A/B/C/D 로컬 단위/통합 검증; 실제 PostgreSQL 운영 검증 및 온체인/Foundry 미실행
+상태: M2-T5-A~E 로컬 단위/종단간 통합 검증; 실제 PostgreSQL 운영 검증 및 온체인/Foundry 미실행
 
 ## 2026-10-24 — M2-T5-A Outbox
 
@@ -26,3 +26,9 @@
 - 초기 마이그레이션 실행에서 기존 006 테이블에 `(chain_id, verifying_contract, fill_id)` 복합 고유 인덱스가 없어 FK 42830 오류를 발견했고 007에 `CREATE UNIQUE INDEX IF NOT EXISTS`를 추가하여 재검증 통과.
 - `cd backend && npm run build` 통과. `cd backend && npm test` 전체 **146 passed / 0 failed** (기존 133개 + 신규 13개).
 - 실제 PostgreSQL 다중 연결·운영 데이터 적용, 실제 영수증/체인 최종성·재조직, 실제 `settledTrades` RPC, Foundry·실자산 전송·원격 push는 검증하지 않음. mock VERIFIED는 실제 정산 완료가 아님.
+
+## 2026-10-24 — M2-T5-E 로컬 종단간 검증
+
+- `node --experimental-strip-types --test test/m2-end-to-end.test.ts`에서 신규 **3/3 통과**: ① 실제 HTTP 주문 3건/서명·FIFO 잔량/체결 2건/Outbox·정책·승인·dry-run·모의 영수증/모순 UNKNOWN·DB 재시작 ② 정책 실패/위조 승인/HTTP 중복 주문 회귀 ③ 로컬 migration 001~007 반복 적용 및 순서 오류 거부.
+- 장기 운영 및 외부 체인 QA는 미검증. `cd backend && npm run build` TypeScript 검사 **통과**. 전체 `cd backend && npm test` **149/149 passed, 0 failed** (기존 146 + 신규 3).
+- 실 PostgreSQL 멀티프로세스, 운영 환경별 DDL/권한/백업·복구, Foundry/Solidity 자동회귀, 실제 정책 신뢰 경계, 송금·settledTrades RPC·chain finality/reorg, API 배포, 원격 push 등은 테스트/실행하지 않았다. 사람의 명시적 승인 및 환경 제공 없이는 실운영 인수를 완료할 수 없다.
