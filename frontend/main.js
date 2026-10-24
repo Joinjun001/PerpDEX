@@ -201,10 +201,18 @@ document.querySelectorAll('[data-market]').forEach(b=>b.addEventListener('click'
   view.market=b.dataset.market;
   updateMarket();
 }));
-byId('buy-tab').addEventListener('click',()=>{view.side='BUY';renderTicket();byId('order-result').hidden=true});
-byId('sell-tab').addEventListener('click',()=>{view.side='SELL';renderTicket();byId('order-result').hidden=true});
+for(const [side,id] of [['BUY','buy-tab'],['SELL','sell-tab']]){
+  byId(id).addEventListener('click',()=>{
+    // Only a changed order direction invalidates the existing demo review.
+    if(view.side===side)return;
+    view.side=side;
+    renderTicket();
+    byId('order-result').hidden=true;
+  });
+}
 for(const [type,id] of [['MARKET','market-type'],['LIMIT','limit-type']]){
   byId(id).addEventListener('click',()=>{
+    if(view.orderType===type)return;
     view.orderType=type;
     renderTicket();
     byId('order-result').hidden=true;

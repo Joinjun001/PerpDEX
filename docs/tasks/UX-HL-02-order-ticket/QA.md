@@ -74,3 +74,14 @@
 - 신규 preview-model.test.mjs 1건(소액·0/경계/비정상), order-review.test.mjs 1건(LIMIT 소액 및 SOL MARKET 소액 증거금), order-interactions.test.mjs 1건(실제 main.js 이벤트 기반 소액 입력·읽기 전용 검토 일치), 총 3건.
 - 수정 후 관련 대상 37/37 PASS, frontend 전체 node --test frontend/*.test.mjs 130/130 PASS (기존 127 + 신규 3). JS node --check/TypeScript tsc --noEmit/HTML/CSP/git diff 검사 PASS.
 - 실제 브라우저 화면·스크린리더/모바일 터치 인수, 실지갑·인증 API/실체인·운영 DB 변경/푸시/배포는 미실행.
+
+## 2026-10-25 UX-HL-02-G1 — 동일 선택 버튼의 상태 보존 검증
+
+- 시작 main HEAD 49b86a6, working tree clean, origin/main보다 21커밋 앞섬. PROJECT_STATE.md, ROADMAP.md, Hyperliquid UX 레퍼런스, UX-HL-01 SPEC/TODO/QA/RESULT와 main.js/order-interactions.test.mjs 및 UX-HL-02 관련 문서를 검토.
+- chromium/chromium-browser/google-chrome/google-chrome-stable/firefox 및 Node Playwright/Puppeteer 패키지 미가용. 설치·권한 우회 없이 UX-HL-01-I2와 UX-HL-02-F2 실 브라우저 인수 미완료 유지.
+- 실제 결함: 현재 BUY/MARKET 방향·유형 버튼을 다시 클릭해도 order-result.hidden=true가 되어 동일한 유효한 9항목 읽기 전용 검토가 사라짐. SELL/LIMIT 선택에서도 동일. 신규 실제 main.js DOM 이벤트 테스트 2건 수정 전 FAIL.
+- 수정: frontend/main.js의 방향·유형 클릭 핸들러에서 view.side 또는 view.orderType이 이미 선택한 값이면 return. 실제 선택이 바뀌면 기존 renderTicket 및 review 무효화 유지.
+- 신규 frontend/order-interactions.test.mjs 2건: BUY/MARKET 재클릭 시 기존 검토 DOM 유지, 실제 SELL/LIMIT 변경 시 닫힘; SELL/LIMIT의 비정상 Limit 초안/오류 상태 및 유효한 검토 결과 재클릭 보존, BUY/MARKET 실제 변경 시 닫힘.
+- 대상 node --test frontend/order-interactions.test.mjs 20/20 PASS. 전체 node --test frontend/*.test.mjs 134/134 PASS (기존 132 + 신규 2), node --check main.js/order-interactions.test.mjs PASS, npm --prefix backend run build (tsc --noEmit) PASS.
+- Python HTMLParser trade/index 태그·고유 ID, CSP connect-src none, 계정 tbody 5개 미연결 및 git diff --check 검사 PASS.
+- 브라우저/모바일/스크린리더 실제 렌더링, 실거래·지갑·계정 인증/DB·Sepolia 트랜잭션·원격 push/배포 미실행.

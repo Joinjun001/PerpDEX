@@ -58,3 +58,10 @@
 - frontend/order-review.mjs: 읽기 전용 9항목 검토의 동일 두 금액을 같은 표시 정책으로 변환.
 - frontend/preview-model.test.mjs, order-review.test.mjs, order-interactions.test.mjs: 소액 금액과 MARKET/LIMIT/화면 일치 검증 3건, 전체 130/130 PASS. JS syntax/TS build/HTML/CSP/diff PASS.
 - 브라우저·모바일·스크린리더 검증 UX-HL-02-F2 미실행; 서버/지갑/온체인·실주문·운영 DB/푸시/배포 미연결·미실행.
+
+## 2026-10-25 UX-HL-02-G1 — 로컬 수정 완료
+
+- frontend/main.js: 주문 방향 BUY/SELL과 주문 유형 MARKET/LIMIT 버튼의 실제 상태 변경에만 화면 갱신·검토 결과 무효화를 수행. 동일 선택 재클릭은 기존 초안·검증 오류·9항목 읽기 전용 검토 결과를 보존한다.
+- frontend/order-interactions.test.mjs: 실제 main.js 클릭 이벤트 통합 회귀 2건. 수정 전 FAIL 재현 및 수정 후 프런트 전체 134/134 PASS.
+- JavaScript 문법/백엔드 TypeScript 빌드/HTML 구조·CSP/Git diff 검사 PASS. 실제 거래·wallet/API/온체인·운영 DB와 연결하지 않고 원격 push·배포 없음.
+- 다음 UX-HL-02-G2: 실제 브라우저/키보드·모바일/스크린리더에서 버튼 재선택 상태 인수. 실행 환경 부재 시 다른 명확히 재현되는 독립 결함만 검토.

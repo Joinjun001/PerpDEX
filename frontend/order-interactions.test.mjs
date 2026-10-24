@@ -295,6 +295,57 @@ test('UX-HL-02-F1 positive sub-cent simulated cost appears as less than one cent
   assert.equal(rows.at(-1).children[1].textContent,'<$0.01');
   assert.equal(id('order-result').children[2].textContent.includes('서버 전송 0건'),true);
 });
+test('UX-HL-02-G1 clicking already selected side/type retains valid review; actual change invalidates it',async()=>{
+  const app=await boot(),id=app.id;
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  const review=id('order-result').children[1];
+  id('buy-tab').dispatch('click');
+  id('market-type').dispatch('click');
+  assert.equal(id('order-result').hidden,false);
+  assert.equal(id('order-result').children[1],review);
+  assert.equal(id('buy-tab').getAttribute('aria-pressed'),'true');
+  assert.equal(id('market-type').getAttribute('aria-pressed'),'true');
+  id('sell-tab').dispatch('click');
+  assert.equal(id('order-result').hidden,true);
+  assert.equal(id('sell-tab').getAttribute('aria-pressed'),'true');
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  id('limit-type').dispatch('click');
+  assert.equal(id('order-result').hidden,true);
+  assert.equal(id('limit-type').getAttribute('aria-pressed'),'true');
+});
+
+test('UX-HL-02-G1 reselecting active Limit/Short preserves invalid price draft and valid review',async()=>{
+  const app=await boot(),id=app.id;
+  id('sell-tab').dispatch('click');
+  id('limit-type').dispatch('click');
+  id('limit-price').value='invalid';
+  id('limit-price').dispatch('input');
+  assert.equal(id('limit-price-error').hidden,false);
+  assert.equal(id('preview-order').disabled,true);
+  id('sell-tab').dispatch('click');
+  id('limit-type').dispatch('click');
+  assert.equal(id('limit-price').value,'invalid');
+  assert.equal(id('limit-price-error').hidden,false);
+  assert.equal(id('preview-order').disabled,true);
+  id('limit-price').value='60000.25';
+  id('limit-price').dispatch('input');
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  const rows=id('order-result').children[1];
+  id('sell-tab').dispatch('click');
+  id('limit-type').dispatch('click');
+  assert.equal(id('order-result').hidden,false);
+  assert.equal(id('order-result').children[1],rows);
+  assert.equal(id('limit-price').value,'60000.25');
+  id('buy-tab').dispatch('click');
+  assert.equal(id('order-result').hidden,true);
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  id('market-type').dispatch('click');
+  assert.equal(id('order-result').hidden,true);
+});
 test('B2-A changes in symbol, side, quantity, leverage, limit and type hide stale preview',async()=>{
   const app=await boot(),id=app.id;
   const show=()=>{
