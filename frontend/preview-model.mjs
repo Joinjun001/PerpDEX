@@ -20,11 +20,17 @@ export function validPreviewQuantity(value){
   const quantity=Number(value);
   return Number.isFinite(quantity)&&quantity>=0.0001&&quantity<=100;
 }
+export function validPreviewLeverage(value){
+  // Native range sliders return canonical 1..10 integer strings.
+  // Never silently accept Number(true), Number([3]) or Number('0x3').
+  return (typeof value==='number'&&Number.isInteger(value)&&value>=1&&value<=10)||
+    (typeof value==='string'&&/^(?:10|[1-9])$/.test(value));
+}
 export function previewEstimate(market,quantity,leverage){
   if(!MARKETS[market])throw new RangeError('Unknown simulation market');
   if(!validPreviewQuantity(quantity))throw new RangeError('Demo quantity must be between 0.0001 and 100');
+  if(!validPreviewLeverage(leverage))throw new RangeError('Invalid demo leverage');
   const lev=Number(leverage);
-  if(!Number.isInteger(lev)||lev<1||lev>10)throw new RangeError('Invalid demo leverage');
   const price=MARKETS[market].price;
   const notional=Number(quantity)*price;
   const indicativeMargin=notional/lev;

@@ -19,3 +19,9 @@
 - [x] C1 공통 모델 검증 2건, Market/Limit 계약 1건, 실제 main.js 이벤트 통합 1건 추가
 - [x] C1 프런트 전체 116/116, JS syntax·backend TypeScript build·HTML 구조·CSP·Git diff 검사
 - [ ] C2 기존 브라우저 환경 확보 시 실제 숫자 input 동작/키보드·모바일 검증 (미실행)
+
+- [x] D1 Number(leverage)의 bool/array/0x 및 잘못된 문자열 암묵 형변환 결함을 수정 전 테스트로 재현
+- [x] D1 validPreviewLeverage 1~10 정규 정수/문자열 검증과 모델/시장형 양쪽 거부
+- [x] D1 화면에서는 원본 leverage string으로 validate, 오류 ARIA·버튼 disabled·키보드 submit 포커스 연결
+- [x] D1 새 검증 5건 포함 프런트 121/121, JS 문법·TypeScript build·HTML/ID/CSP·git diff 검사
+- [ ] D2 실제 브라우저에서 native range slider·키보드/터치/스크린리더 입력 인수 (환경 미가용)

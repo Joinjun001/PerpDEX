@@ -168,6 +168,32 @@ test('UX-HL-02-C1 malformed numeric coercion cannot enable preview or produce a 
     id('order-result').dispatch('keydown',{key:'Escape'});
   }
 });
+test('UX-HL-02-D1 corrupted leverage input cannot enable or submit either order type',async()=>{
+  const app=await boot(),id=app.id;
+  for(const mode of ['MARKET','LIMIT']){
+    if(mode==='LIMIT')id('limit-type').dispatch('click');
+    for(const raw of ['0x3','3e0',' 3 ', '03']){
+      id('leverage').value=raw;
+      id('leverage').dispatch('input');
+      assert.equal(id('leverage').getAttribute('aria-invalid'),'true',mode+' '+raw);
+      assert.equal(id('leverage-error').hidden,false);
+      assert.equal(id('leverage-output').textContent,'—');
+      assert.equal(id('preview-order').disabled,true);
+      const event=id('order-form').dispatch('submit');
+      assert.equal(event.defaultPrevented,true);
+      assert.equal(id('order-result').hidden,true);
+      assert.equal(id('leverage').didFocus,true);
+    }
+    id('leverage').value='3';
+    id('leverage').dispatch('input');
+    assert.equal(id('leverage').getAttribute('aria-invalid'),'false');
+    assert.equal(id('leverage-error').hidden,true);
+    assert.equal(id('preview-order').disabled,false);
+    id('order-form').dispatch('submit');
+    assert.equal(id('order-result').hidden,false);
+    id('order-result').dispatch('keydown',{key:'Escape'});
+  }
+});
 test('B2-A actual form submit only renders review; Escape and close return focus',async()=>{
   const app=await boot(),id=app.id;
   id('limit-type').dispatch('click');

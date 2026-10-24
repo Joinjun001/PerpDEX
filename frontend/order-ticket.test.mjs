@@ -77,6 +77,20 @@ test('UX-HL-02-C1: both Market and Limit preview reject malformed quantity coerc
   }
  }
 });
+test('UX-HL-02-D1 Market and Limit both reject coerced leverage',()=>{
+ for(const orderType of ['MARKET','LIMIT']){
+  for(const leverage of ['0x3','3e0',' 3 ',true,[3],{valueOf:()=>3}]){
+    assert.throws(()=>calc({orderType,leverage,limitPrice:'60000.00'}),RangeError);
+  }
+ }
+});
+test('UX-HL-02-D1 range input exposes validation help via ARIA',()=>{
+ assert.match(html,/id="leverage"[^>]*aria-describedby="leverage-error"/);
+ assert.match(html,/id="leverage-error"[^>]*role="alert" hidden/);
+ assert.match(js,/validPreviewLeverage\(leverageInput\)/);
+ assert.match(js,/leverage:leverageInput/);
+ assert.match(js,/byId\('leverage-error'\)\.hidden=leverageValid/);
+});
 test('UX-HL-02-A order UI offers accessible type selector and hidden-by-default Limit input',()=>{
  for(const id of ['market-type','limit-type','limit-price-field','limit-price','limit-price-help','limit-price-error','preview-price-label']){
    assert.match(html,new RegExp('id="'+id+'"'));

@@ -40,3 +40,15 @@
 - 수정 후 node --test frontend/*.test.mjs 116/116 PASS (기존 112 + 신규 4). node --check frontend/preview-model.mjs, frontend/main.js 및 3개 관련 테스트 PASS. npm --prefix backend run build (tsc --noEmit) PASS.
 - Python HTMLParser index.html 고유 ID 4개, trade.html 67개, 구조/중복 ID PASS. 정적 계정 tbody 5개 빈 상태 및 trade.html CSP connect-src none 유지. git diff --check PASS.
 - 브라우저 실제 입력·화면/접근성 트리, 실계정·wallet/backend API·Sepolia 거래/DB·실리스크 인수는 미실행. Push/배포 금지.
+
+## 2026-10-25 UX-HL-02-D1 — 레버리지 형식 변환 차단 QA
+
+- 시작 main HEAD fa764ff, clean, origin/main보다 로컬 15커밋 앞섬. PROJECT_STATE/ROADMAP/Hyperliquid UX 레퍼런스, UX-HL-02 SPEC/TODO/QA/RESULT 및 frontend 모델/UI 실제 코드 확인.
+- chromium/google-chrome/firefox/Playwright/Puppeteer 실행 환경 미가용으로 UX-HL-02-C2/B2-B 및 D2 브라우저 인수 보류, 설치·권한 우회 미수행.
+- 재현: frontend/preview-model.mjs previewEstimate은 Number(leverage)에 의해 true, [3], 0x3 등의 부정형을 범위 1~10의 정수로 받아들임. frontend/main.js renderTicket도 미리 Number(raw)를 호출하므로 모델 경계를 통과시키는 결함. 신규 회귀 테스트 실행 시 수정 전 2건 FAIL 확인.
+- 구현: validPreviewLeverage는 primitive 정수 1~10 또는 정규 decimal integer string "1"..."10"만 수락, 그 밖의 JSON/객체/배열/부울/진법 표기/선행 공백/지수 거부. 모델 검증 전에 Number 사용 금지.
+- 화면: renderTicket에서 원본 slider.value를 미리보기 모델로 전달. 이상 입력 시 leverage aria-invalid, aria-describedby/role alert, 입력값 출력 '—', 미리보기 비활성화. 강제 폼 submit도 결과 대신 leverage field focus.
+- 신규 5건: preview-model.test.mjs 2, order-ticket.test.mjs 2, order-interactions.test.mjs 1. 정상 slider 1..10 테스트, Market/Limit의 타입 일관성, 실제 main.js 이벤트 invalid·valid 복귀/화면 ARIA/submit blocked.
+- node --test frontend/*.test.mjs **121/121 PASS** (기존 116 + 신규 5), 주요 JS 파일/테스트 node --check PASS, npm --prefix backend run build (tsc --noEmit) PASS.
+- HTMLParser: index.html ID 4개, trade.html ID 68개, 태그 중첩·중복 ID 없음. Static account tbody 5개 비어 있음, CSP connect-src none, leverage 오류 안내 ARIA 존재, git diff --check PASS.
+- 실 브라우저/터치/스크린리더·실거래·실계정·지갑/백엔드 API·Sepolia/운영 DB 미실행, push/배포 미수행.

@@ -1,4 +1,4 @@
-import {MARKETS,FORMAT_USD,FORMAT_QTY,previewOrderEstimate,validPreviewQuantity,validPreviewLimitPrice,sampleChart,describeSampleChart} from './preview-model.mjs';
+import {MARKETS,FORMAT_USD,FORMAT_QTY,previewOrderEstimate,validPreviewQuantity,validPreviewLeverage,validPreviewLimitPrice,sampleChart,describeSampleChart} from './preview-model.mjs';
 import {createDemoOrderReview,renderDemoOrderReview} from './order-review.mjs';
 
 const byId=(id)=>document.getElementById(id);
@@ -112,13 +112,19 @@ function renderTicket(){
   const button=byId('preview-order');
   button.className='submit-order '+(sideBuy?'buy-submit':'sell-submit');
   button.replaceChildren(document.createTextNode(sideBuy?'Preview Long Order ':'Preview Short Order '),node('span','','↗'));
-  const lever=Number(byId('leverage').value);
-  byId('leverage-output').textContent=lever+'×';
-  byId('leverage').style.background='linear-gradient(90deg,#43e1b4 '+((lever-1)/9*100)+'%,#3b4856 '+((lever-1)/9*100)+'%)';
+  const leverageInput=byId('leverage').value;
+  const leverageValid=validPreviewLeverage(leverageInput);
+  const lever=Number(leverageInput);
+  byId('leverage').setAttribute('aria-invalid',String(!leverageValid));
+  byId('leverage-error').hidden=leverageValid;
+  byId('leverage-output').textContent=leverageValid?lever+'×':'—';
+  byId('leverage').style.background=leverageValid
+    ?'linear-gradient(90deg,#43e1b4 '+((lever-1)/9*100)+'%,#3b4856 '+((lever-1)/9*100)+'%)'
+    :'#3b4856';
   const quantity=byId('quantity').value;
   try{
     const result=previewOrderEstimate({
-      market:view.market,orderType:view.orderType,quantity,leverage:lever,
+      market:view.market,orderType:view.orderType,quantity,leverage:leverageInput,
       limitPrice:byId('limit-price').value,
     });
     byId('reference-price').textContent=FORMAT_USD.format(result.price);
@@ -158,6 +164,8 @@ function displayOrderPreview(event){
       byId('quantity').focus();
     }else if(view.orderType==='LIMIT'&&!validPreviewLimitPrice(byId('limit-price').value)){
       byId('limit-price').focus();
+    }else if(!validPreviewLeverage(byId('leverage').value)){
+      byId('leverage').focus();
     }else{
       panel.classList.add('error');
       panel.textContent='미리보기를 생성할 수 없습니다. 입력값을 다시 확인하세요.';

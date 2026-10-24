@@ -34,3 +34,12 @@
 - frontend/order-interactions.test.mjs: 실제 main.js에서 비정상 숫자 문자열은 aria-invalid=true, 오류 표시/미리보기 비활성화/submit 차단 및 오류 필드 focus, 정상 지수 수량은 미리보기 표시를 확인하는 실행형 1건.
 - 신규 4건 포함 프런트 전체 116/116 PASS, JS syntax/TypeScript build/HTML 구조·CSP/Git diff PASS. 서버/지갑/온체인·API 연결 및 원격 push/배포 없음.
 - 다음: 실제 브라우저 가용 시 UX-HL-02-C2 및 UX-HL-02-B2-B, 이외엔 다른 코드 결함을 발견할 때만 독립 후속 TASK 선정.
+
+## 2026-10-25 UX-HL-02-D1 — 로컬 수정 완료
+
+- frontend/preview-model.mjs: validPreviewLeverage 추가, 원본 leverage를 형식 검증한 뒤 Number 적용. 정상 1..10 기본 slider 문자열/숫자만 수락하고 암묵 형변환 거부.
+- frontend/main.js: 원본 leverageInput 전달, 비정상 UI 값의 aria-invalid/오류·출력/참고 요약/미리보기 차단 및 submit 입력 focus. 서버/지갑 이벤트 없음.
+- frontend/trade.html: leverage-error role alert/aria-describedby 연결. 기존 HTML 구조·주문 미리보기·MOCK 구분 유지.
+- frontend/preview-model.test.mjs, order-ticket.test.mjs, order-interactions.test.mjs: 신규 5건으로 model/Market+Limit/실제 main.js 실행형 회귀 보완.
+- frontend 전체 121/121 PASS, JS syntax·backend TypeScript build·HTML ID/중첩·CSP·git diff PASS.
+- 다음 UX-HL-02-D2: 실제 브라우저에서 range input과 오류 안내/키보드/모바일 접근성 인수. 부재 시 실제 코드에서 재현된 결함이 있을 때만 별도 작은 TASK 진행. 실제 거래·API/지갑·push/배포 없음.

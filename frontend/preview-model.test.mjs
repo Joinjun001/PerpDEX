@@ -43,6 +43,24 @@ test('UX-HL-02-C1: preserve decimal and valid native number input forms at limit
     assert.equal(p.orderExecutable,false);
   }
 });
+test('UX-HL-02-D1 leverage rejects Number coercion from arbitrary types and strings',()=>{
+  for(const invalid of [true,false,[3],{valueOf:()=>3},new Number(3),
+    '0x3','0b11','0o3',' 3','3 ','+3','03','3e0','3.0','3.5',
+    '',null,undefined,NaN,Infinity,1n,0,11]){
+    assert.throws(()=>previewEstimate('BTC','0.05',invalid),RangeError,
+      'bad leverage '+String(invalid));
+  }
+});
+test('UX-HL-02-D1 valid slider values 1 through 10 retain existing preview math',()=>{
+  for(let lev=1;lev<=10;lev++){
+    for(const input of [lev,String(lev)]){
+      const p=previewEstimate('BTC','0.05',input);
+      assert.equal(p.leverage,lev);
+      assert.ok(Math.abs(p.indicativeMargin-p.notional/lev)<1e-10);
+      assert.equal(p.orderExecutable,false);
+    }
+  }
+});
 test('샘플 차트는 요청하지 않은 외부 데이터나 음수 가격 없이 생성한다',()=>{
   for(const market of Object.keys(MARKETS)){
     const arr=sampleChart(market);

@@ -43,3 +43,11 @@
 - 0.0001~100 범위의 유한 수만 허용하며, hex/binary/octal, whitespace, 임의 객체, 배열, bool, 숫자형 wrapper, Infinity/NaN 및 비정상 문법은 거부한다.
 - 정상 BTC/ETH/SOL Market/Limit preview, 기존 레버리지·가격 검증 및 static demo CSP/account read 경계는 유지한다. 이 검증은 체결 가능성·증거금 위험 엔진 정책을 의미하지 않는다.
 - 반례가 수정 전 실제 실패하는지 재현하고 순수/통합 검증, JS syntax, TS build, HTML 태그·고유 ID, git diff 검사를 통과해야 완료.
+
+## UX-HL-02-D1 (2026-10-25) — 레버리지 입력 형식 및 UI 경계 강화
+
+- 발견 결함: previewEstimate()가 Number(leverage)로 먼저 변환하여 true, [3], 0x3, 3e0 등 네이티브 range 슬라이더가 내지 않는 형식을 정상 레버리지로 수락. main.js도 Number(raw value)를 모델로 전달해 원본 입력을 재검증할 수 없었다.
+- 공통 미리보기 레버리지는 1~10의 정수 primitive 또는 기본 HTML range input과 동일한 정규 십진 문자열 1~10만 허용한다. 지수·16진·공백/선행 0·배열/불리언/임의 객체는 거부한다.
+- main.js는 원본 leverage 문자열을 모델에 전달한다. 잘못된 형식에는 aria-invalid와 role alert, 요약 placeholder/미리보기 버튼 비활성화, 강제 폼 제출 시 입력으로 포커스를 이동한다.
+- 브라우저 range slider는 통상 1~10을 반환하지만, 테스트·리팩터링·외부 상태 주입 시 모델/표시 경계를 보장한다. 이 변경은 실제 거래 레버리지 정책의 승인이나 백엔드 리스크 계산이 아니다.
+- 기존 Market/Limit·Long/Short·차트/호가/모의 기록/5개 계정 ARIA 탭/미연결 API 및 CSP를 유지한다.
