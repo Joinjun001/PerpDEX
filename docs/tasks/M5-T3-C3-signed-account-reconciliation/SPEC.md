@@ -8,7 +8,8 @@
 - **C3-C2-A (이번 회차 로컬 완료)**: 신규 SQL 020의 COMMIT 제약으로 서명 주문 계정별 OPEN 예약/기존 FILLED 할당 의무, RESERVED/POSITION 실제 잔고와 모든 M3 append-only 누적분개 합계를 대조. 계정에 붙은 M3 연산의 정확한 두 분개/경로/소유자를 검증하고 signed RESERVE, cancel RELEASE, terminal ALLOCATE의 기여를 비서명 M3 잔여금과 분리. 신규 자금이동 경로는 생성하지 않음.
 - **C3-C2-B1 (QA 하네스 구현 완료, 실 PG 미실행)**: 별도 테스트 전용 PostgreSQL의 Unix socket + 고정 테스트 사용자/DB + 신규 QA schema만 허용하는 다중 세션 경합 QA 하네스. 독립 backend PID를 확인하고 001/008~020 스키마를 신규 테스트 schema에만 적용. signed admission, 중복 nonce, cancel+admission, full+cancel, 직접 SQL 변조 검증을 정의.
 - **C3-C2-B2-A (이번 회차 로컬 완료)**: pg_catalog 메타데이터에서 12개 보호 테이블의 읽기 전용 감사자 role을 보수적으로 평가하는 독립 QA. superuser/owner/owner role 회원/CREATEDB/CREATEROLE/BYPASSRLS/schema CREATE/DB CREATE/TRIGGER/REFERENCES/INSERT/UPDATE/DELETE/TRUNCATE/SECURITY DEFINER EXECUTE 권한이 하나라도 있거나 메타데이터가 부족하면 인수 거부. SELECT 가능한 제한 감사자만 통과. 전용 PostgreSQL 연결 미가용 상태에서는 평가기 오프라인 테스트만 통과.
-- **C3-C2-B2-B (다음, 환경 의존)**: 별도 전용 테스트 PostgreSQL이 실제 있으면 C3-C2-B1 다중 세션 경합 QA와 제한 감사자 별도 연결의 실역할 검증. 실제 role 만들기/GRANT/권한 우회는 자동 실행 금지, 서버 접근·승인 없으면 독립적인 QA만 진행.
+- **C3-C2-B2-B1 (이번 회차 로컬 완료)**: SQL 015~020 트리거 31종에 대한 정적 manifest 및 읽기 전용 pg_catalog 인수. 활성 상태, 테이블·함수/스키마, ROW/BEFORE/AFTER/이벤트, 지연 제약 및 SECURITY DEFINER 여부 검증. 전용 실 PostgreSQL 부재로 로컬 PGlite 카탈로그 인수만 완료.
+- **C3-C2-B2-B2 (다음, 환경 의존)**: 전용 실제 PG가 승인된 상태로 제공되면 독립 backend PID의 admission/cancel/FULL 경합, 트리거 상태 및 제한 감사자 별도 로그인·권한 차단을 함께 실측. 설치·권한 변경·운영 DB 접속 금지.
 - **C3-C3 (후속)**: 새로운 부분 체결·잔여 예약금 모델과 영속 증거금 배분 이벤트를 별도 승인된 정책에 따라 설계. 취소 시 이미 체결된 누적량과 잔량을 구분하되, SQL 015~019를 약화시키지 말 것.
 - **C3-D (후속)**: 포지션 감소와 실현 손익 계산-회계 연결, fee/funding은 승인된 정책 수치가 정해지기 전 정산 금지. 계산만 필요한 경우 기존 M4 numerator 기반 표시는 지원.
 
@@ -66,3 +67,10 @@ SIMULATION_ONLY, 로컬 /shared/PerpDEX 한정. SQL 015~017, 기존 체결·입�
 - 대상은 DML이 없는 제한 READ-ONLY 감사자이며, 서명 체결 서비스의 쓰기 role 권한 인수와는 전혀 다르다. 일반 실행 role에서 INSERT/UPDATE를 허용하면서 암호학적 요청 인증이 보장된다고 주장하지 않는다.
 - 평가 조건: 보호 테이블 전체 SELECT 필요. superuser/CREATEROLE/CREATEDB/BYPASSRLS/replication/테이블 또는 schema 소유권·소유자 역할 멤버십, DB/schema CREATE, 보안 정의자 함수 실행권, INSERT/UPDATE/DELETE/TRUNCATE/REFERENCES/TRIGGER 중 하나라도 있으면 실패. 누락·NULL·중복 카탈로그는 fail-closed.
 - 기존 PG 경합 QA 하네스에는 새 schema를 소유한 테스트 관리자 계정이 제한 감사자 자격을 갖지 않는다는 음성(negative) 판정만 추가하였다. 제한 감사자 역할의 실제 PostgreSQL 로그인/권한 인수는 B2-B에서 수행해야 한다.
+
+## C3-C2-B2-B1 — 서명 원장 트리거 무결성 검사
+
+- qa/postgres-signed-trigger-attestation.ts에 SQL 015~020의 31개 signed 트리거 명세를 고정. 파라미터가 있는 단일 pg_catalog SELECT로 실제 메타데이터를 확인하며 어떠한 DDL/권한 변경도 수행하지 않음.
+- tgenabled=O/A, 예상 테이블과 함수명·같은 테스트 전용 스키마, tgtype의 ROW/BEFORE/AFTER/이벤트 비트, 제약 트리거 DEFERRABLE INITIALLY DEFERRED 및 일반 트리거 비지연, SECURITY DEFINER 거부를 엄격히 검사.
+- 비활성/REPLICA-only/누락/중복/이벤트 변경/지연 제약 해제/함수 연결 변조를 거부. 버전 관리 SQL 015~020의 CREATE TRIGGER 문구와 정적 명세 일치 여부 검사.
+- 실 PostgreSQL 대신 로컬 PGlite에서 사설 테스트 스키마 및 SQL 001/008~020을 실제 적용해 pg_catalog 조회 테스트. 이는 실제 PostgreSQL 복수 세션이나 role 실효 권한 인수를 증명하지 않는다. 트리거 함수 본문 암호학적 진위·DB owner/DDL 권한자로부터의 무결성도 별도 범위.

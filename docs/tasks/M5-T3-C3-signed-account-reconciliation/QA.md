@@ -79,3 +79,12 @@
 - 관련 signed M3 증거금 집계·취소·전량 체결·C3-A 계정감사·C3-C1 체결 잔량 회귀 포함, **7개 파일 순차 테스트 66/66 PASS**.
 - 실제 pg_catalog 쿼리는 전용 PostgreSQL 인스턴스 없어서 **미실행**. 별도 제한 역할 실제 로그인, 독립 PG backend PID, 역할별 CREATE/ALTER/DROP 및 DML 권한 거부 동작은 모두 **미검증**.
 - QA 모의 fixture의 제한 감사자 통과는 실제 PG role 보안 증명이 아니다. B2-A는 읽기 전용 감사 역할만 평가하며 서명 검증이 필요한 모의 체결 writer role의 승인 또는 영수증 인증을 대체하지 않음.
+
+## 2026-10-24 C3-C2-B2-B1 — signed SQL 트리거 31종 무결성 로컬 QA
+
+- 신규 test/postgres-signed-trigger-attestation.test.ts **11/11 PASS**: SQL 015~020 실 선언 대응, 31개 보안 트리거 존재/중복/함수·스키마·테이블 연결/이벤트·ROW·시점/DEFERRABLE INITIALLY DEFERRED/비활성·REPLICA only/SECURITY DEFINER/NULL 오류·쿼리 바인딩 안전성.
+- 새 PGlite에 canonical 전용 schema 생성, SQL 001/008~020 모두 적용 후 실제 pg_catalog 조회로 31개 트리거 설정 인수 PASS. 이는 PostgreSQL 서버 설치 없이 검증한 PGlite 카탈로그 결과이며 독립 PostgreSQL 멀티세션 QA가 아니다.
+- 이전 role 권한 검증 7/7 및 private socket guard 4/4와 signed M3 집계·C3-B 취소·C2 양측 전량 체결·C3-A 감사·C3-C1 영속 수량 관련 5개 테스트 파일까지 **8개 파일 총 77/77 PASS**, --test-concurrency=1.
+- TypeScript npm run build PASS, Git diff check 확인 후 로컬 커밋.
+- 전용 서버 소켓과 postgres/initdb/pg_ctl 실행 파일이 없어 **실 PostgreSQL의 트리거/동시성/role 권한 검증 미실행**. 무결성 트리거 함수 본문 서명/해시 및 DDL owner의 트리거 교체까지 검증하지 않는다.
+- 기존 015~020 SQL·실행 경로·부분 체결 차단·API·실거래·운영 DB 변경 없음.

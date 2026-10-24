@@ -64,3 +64,11 @@
 - 기존 opt-in qa/postgres-signed-margin-concurrency.test.ts: 신규 QA schema를 만든 소유자는 읽기 전용 제한 역할의 보안 인수를 통과하지 못한다는 음성 판정 추가. 이 시나리오는 실제 PostgreSQL이 존재할 때만 실행 가능하여 이번 회차 미실행.
 - TypeScript build 및 로컬 권한 정책 11/11 (신규 7 + 기존 guard 4), 관련 signed 회귀 포함 전체 실행 **66/66 PASS**.
 - 보류 중인 C3-C2-B2-B는 독립 PostgreSQL과 별도 제한 역할의 실제 접속·권한 거부 QA. 서버 설치·운영 DB 접속·GRANT/SET ROLE·권한 우회·push는 실행하지 않음.
+
+## 2026-10-24 C3-C2-B2-B1 — SQL 015~020 트리거 카탈로그 감사
+
+- 신규 backend/qa/postgres-signed-trigger-attestation.ts: versioned signed SQL 015~020에 선언된 트리거 31종을 독립 manifest로 작성하고, 단일 pg_catalog SELECT를 통한 target/function/schema, BEFORE·AFTER/ROW/event bitmask, tgenabled O/A, DEFERRABLE INITIALLY DEFERRED 여부 및 함수 SECURITY DEFINER 금지 검증. 빠진 트리거·비활성 변경·누락된 catalog metadata는 fail-closed.
+- 신규 backend/test/postgres-signed-trigger-attestation.test.ts: manifest와 SQL 선언 자동 매칭 및 31종 실제 PGlite pg_catalog 적용, tamper·누락·schema injection 차단 등 총 11건 검증.
+- 기존 수동 opt-in QA postgres-signed-margin-concurrency.test.ts에 트리거 감사 단계 추가. 실제 전용 PostgreSQL 서버가 없으므로 이 수동 하네스의 PostgreSQL 경합/role 실측은 아직 수행하지 않았다.
+- 새로운 집중 테스트 11/11 PASS, 관련 8개 파일 순차 회귀 **77/77 PASS**, TypeScript build PASS. 부분 체결/실자금/운영 DB/원격 push 조작 없음.
+- 후속 C3-C2-B2-B2: 승인된 안전 전용 실 PostgreSQL이 실제 준비될 때만 동시 session, DB role, 트리거 및 영수증 COMMIT 경계 검증. 현재 상태에서 실제 PG의 성공이라고 보고하지 않는다.

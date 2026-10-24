@@ -18,6 +18,8 @@ import {executePreparedSignedSimPair} from '../src/perp/signed-sim-pair-executio
 import {validateLocalSignedPgQaEnvironment} from './postgres-signed-margin-guard.ts';
 import {inspectSignedReadOnlyRole,assessSignedReadOnlyRole}
   from './postgres-signed-role-permissions.ts';
+import {inspectSignedTriggerCatalog,attestSignedTriggerCatalog}
+  from './postgres-signed-trigger-attestation.ts';
 import type {PerpPositionContext} from '../src/perp/position-engine.ts';
 
 const cfg=validateLocalSignedPgQaEnvironment(process.env);
@@ -124,6 +126,13 @@ before(async()=>{
 after(async()=>{await pool.end()});
 
 test('independent real PostgreSQL backend sessions on private socket',confirmPrivateDb);
+test('all SQL 015-020 signed enforcement triggers are enabled and structurally intact',async()=>{
+ const catalog=await inspectSignedTriggerCatalog(pool,cfg.schema);
+ const attestation=attestSignedTriggerCatalog(catalog,cfg.schema);
+ assert.equal(attestation.eligible,true,attestation.reasonCodes.join('; '));
+ assert.equal(attestation.requiredTriggerCount,31);
+});
+
 test('owner of QA migration tables must NOT be mistaken for least-privilege reviewer',async()=>{
  const snap=await inspectSignedReadOnlyRole(pool,cfg.schema);
  const assessment=assessSignedReadOnlyRole(snap);
