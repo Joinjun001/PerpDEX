@@ -65,3 +65,10 @@
 - frontend/order-interactions.test.mjs: 실제 main.js 클릭 이벤트 통합 회귀 2건. 수정 전 FAIL 재현 및 수정 후 프런트 전체 134/134 PASS.
 - JavaScript 문법/백엔드 TypeScript 빌드/HTML 구조·CSP/Git diff 검사 PASS. 실제 거래·wallet/API/온체인·운영 DB와 연결하지 않고 원격 push·배포 없음.
 - 다음 UX-HL-02-G2: 실제 브라우저/키보드·모바일/스크린리더에서 버튼 재선택 상태 인수. 실행 환경 부재 시 다른 명확히 재현되는 독립 결함만 검토.
+
+## 2026-10-25 UX-HL-02-H1 — 로컬 수정 완료
+
+- frontend/main.js: 빠른 수량 버튼에서 현재 값과 정확히 같은 data-qty 선택은 입력/검토 DOM을 유지하고, 실제 다른 수량 선택만 기존 renderTicket()과 검토 결과 무효화를 수행.
+- frontend/order-interactions.test.mjs: 수정 전 실패 재현 및 수정 후 검증 2건 추가. 프런트 전체 136/136 PASS, JS syntax·TypeScript build·HTML/CSP/git diff PASS.
+- Market/Limit·Long/Short 주문 DEMO, 기존 수량·레버리지/Limit 검증, MOCK 시세·차트/호가·계정 미연결 상태 유지. 실거래·지갑/API/온체인·운영 DB·원격 push/배포 없음.
+- 다음 UX-HL-02-H2: 브라우저/스크린리더가 가용해질 때 빠른 수량 재선택과 포커스 인수. 준비 전에는 독립적으로 재현한 실제 결함이 있을 때만 추가 TASK를 시작한다.

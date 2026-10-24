@@ -85,3 +85,14 @@
 - 대상 node --test frontend/order-interactions.test.mjs 20/20 PASS. 전체 node --test frontend/*.test.mjs 134/134 PASS (기존 132 + 신규 2), node --check main.js/order-interactions.test.mjs PASS, npm --prefix backend run build (tsc --noEmit) PASS.
 - Python HTMLParser trade/index 태그·고유 ID, CSP connect-src none, 계정 tbody 5개 미연결 및 git diff --check 검사 PASS.
 - 브라우저/모바일/스크린리더 실제 렌더링, 실거래·지갑·계정 인증/DB·Sepolia 트랜잭션·원격 push/배포 미실행.
+
+## 2026-10-25 UX-HL-02-H1 — 빠른 수량 재선택 시 검토 보존 QA
+
+- 시작 main HEAD 58d0195, 작업 트리 clean, origin/main 대비 22개 로컬 커밋 앞섬. PROJECT_STATE, ROADMAP, Hyperliquid UX 레퍼런스, UX-HL-02 SPEC/TODO/QA/RESULT와 frontend 실제 이벤트 코드를 확인했다.
+- chromium/chromium-browser/google-chrome/firefox 실행 파일 및 Node Playwright/Puppeteer 미가용. 설치·권한 우회 없이 G2/I2 브라우저 인수는 미완료로 유지했다.
+- 수정 전 신규 실제 main.js 이벤트 테스트 2건 FAIL: 값 0.05에서 활성 0.05 버튼 재클릭 시 결과 hidden=true, 값 0.01에서도 같은 문제. 실제 0.1/0.25 변경 때는 검토가 닫혀야 한다.
+- 수정: data-qty 클릭 이벤트에서 현재 input.value===button.dataset.qty일 때 즉시 return, 값이 다를 때만 기존 수량 반영/renderTicket/기존 결과 무효화 유지.
+- 신규 frontend/order-interactions.test.mjs 2건: 기본 0.05 동일 클릭에 따른 리뷰 DOM 보존·다른 수량 변경의 무효화, 0.01 선택 후 같은 수량 재클릭과 0.25 변경의 상태 전환 검증.
+- 지정 이벤트 테스트 22/22 PASS. 전체 node --test frontend/*.test.mjs 136/136 PASS (기존 134+신규 2), node --check frontend/main.js 및 order-interactions.test.mjs PASS, npm --prefix backend run build (tsc --noEmit) PASS.
+- Python HTMLParser index.html/trade.html 구조·고유 ID, CSP connect-src none, 미연결 계정 tbody 5개 및 network/wallet transaction API 부재, git diff --check PASS.
+- 실제 브라우저 픽셀·터치/키보드·스크린리더·실주문·API/지갑/운영 DB·Sepolia 거래·배포/원격 push는 수행하지 않았다.

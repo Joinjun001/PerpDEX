@@ -231,6 +231,8 @@ byId('quantity').addEventListener('input',()=>{
   byId('order-result').hidden=true;
 });
 document.querySelectorAll('[data-qty]').forEach(b=>b.addEventListener('click',()=>{
+  // Re-selecting an identical quick amount leaves the validated demo review current.
+  if(byId('quantity').value===b.dataset.qty)return;
   byId('quantity').value=b.dataset.qty;
   renderTicket();
   byId('order-result').hidden=true;

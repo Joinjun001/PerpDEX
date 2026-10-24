@@ -346,6 +346,37 @@ test('UX-HL-02-G1 reselecting active Limit/Short preserves invalid price draft a
   id('market-type').dispatch('click');
   assert.equal(id('order-result').hidden,true);
 });
+test('UX-HL-02-H1 clicking an unchanged quick quantity retains an existing review',async()=>{
+  const app=await boot(),id=app.id;
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  const review=id('order-result').children[1];
+  assert.equal(id('quantity').value,'0.05');
+  app.qty('0.05').dispatch('click');
+  assert.equal(id('quantity').value,'0.05');
+  assert.equal(id('order-result').hidden,false);
+  assert.equal(id('order-result').children[1],review);
+  assert.equal(id('preview-order').disabled,false);
+  app.qty('0.1').dispatch('click');
+  assert.equal(id('quantity').value,'0.1');
+  assert.equal(id('order-result').hidden,true);
+});
+
+test('UX-HL-02-H1 active preset does not replace invalid draft unless quantity changes',async()=>{
+  const app=await boot(),id=app.id;
+  id('quantity').value='0.01';
+  id('quantity').dispatch('input');
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  const review=id('order-result').children[1];
+  app.qty('0.01').dispatch('click');
+  assert.equal(id('order-result').hidden,false);
+  assert.equal(id('order-result').children[1],review);
+  // A valid click that changes the quantity still invalidates the stale review.
+  app.qty('0.25').dispatch('click');
+  assert.equal(id('quantity').value,'0.25');
+  assert.equal(id('order-result').hidden,true);
+});
 test('B2-A changes in symbol, side, quantity, leverage, limit and type hide stale preview',async()=>{
   const app=await boot(),id=app.id;
   const show=()=>{
