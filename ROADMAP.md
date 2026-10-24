@@ -32,7 +32,7 @@
 | 마일스톤 | 목적 | 상태 |
 | --- | --- | --- |
 | **M3** | 고정소수점/신뢰 시장·오라클 입력, 이중 분개 격리 담보·주문 증거금 예약 | **Local foundation QA completed — M3-T1/T2-A/T3-A/T4 완료, M3-T2-B 및 T3-B는 실거래 승인/포지션·리스크 의존성 대기** |
-| **M4** | 순롱·순숏 포지션, 부분 체결·평균 진입가·realized/unrealized PnL, OI 영속 | Planned (M3 선행) |
+| **M4** | 순롱·순숏 포지션, 부분 체결·평균 진입가·realized/unrealized PnL, OI 영속 | **In Progress — M4-T1-A 순수 포지션 엔진 로컬 완료, M4-T2 영속 체결원장 다음** |
 | **M5** | 레버리지·초기/유지증거금 위험 엔진, signed order v2·reduce-only·원자적 체결 게이트 | Planned (M4 선행) |
 | **M6** | funding index/rate 및 주기적 롱·숏 펀딩 분개·재시작 복구 | Planned (M5 선행) |
 | **M7** | 유지증거금 기반 부분/전체 청산, 보험기금·bad debt 및 위험 상태 머신 | Planned (M6 선행) |
@@ -54,5 +54,5 @@ M3 시작 TASK: `docs/tasks/M3-T1-market-risk-foundation/{SPEC,TODO,RESULT,QA}.m
 
 ### 현재 활성 개발: M4 포지션 엔진
 
-- **M4-T1 (Next):** 무기한 선물의 정수 수량·평균진입가·증감/반전·Realized/Unrealized PnL을 순수 TypeScript 상태 전이 모델로 구현하고 과도한 overflow/반올림·자산 스케일·계정/시장 격리 테스트. 실제 담보/정산·매칭/체결/청산과 연결하지 않음.
-- M4-T2~: 체결별 포지션 반영, 순롱·순숏/OI 영속, 양측 이중 분개 및 재생. M5: 주문 위험/포지션 승인과 원자적 예약. 별도 승인 전 실 주문 활성화 금지.
+- **M4-T1-A Local Completed:** `backend/src/perp/position-engine.ts`의 순수 One-way LONG/SHORT, 축소/전량 종료/반전, 정확한 cost basis 및 realized/unrealized BigInt PnL, stale policy/oracle 실패 안전 (신규 19개 테스트).
+- **M4-T2 (Next):** 모의 fillId 전역 UNIQUE 및 append-only 영속 position journal/snapshot을 동일 DB 트랜잭션으로 저장하여 비연속 체결 재전송·원장 변조·재시작·동시성 차단. M4-T3 양측 모의 체결/OI, M4-T4 PG 회귀. M5 주문 위험/포지션 승인과 원자적 예약. 별도 승인 전 실 주문 활성화 금지.
