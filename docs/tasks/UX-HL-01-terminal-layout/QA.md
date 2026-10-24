@@ -72,3 +72,14 @@
 - 전체 node --test frontend/*.test.mjs **109/109 PASS** (이전 103 + 신규 6). JS 문법 검사 frontend/main.js/preview-model.mjs/chart-sample-accessibility.test.mjs PASS, npm --prefix backend run build (tsc --noEmit) PASS.
 - HTMLParser index.html ID 4개 / trade.html ID 67개, HTML 구조 및 중복 ID PASS. CSP connect-src none, SVG 설명 결속/기존 시간 텍스트 부재, git diff --check PASS.
 - 실제 렌더링·스크린리더·모바일 간격/터치 QA는 실행하지 않았다. 실제 시세/오라클/체결 데이터 및 계정 API·지갑·DB·체인은 호출하지 않음.
+
+## 2026-10-25 UX-HL-01-F1 — 모의 체결 출처 QA
+
+- 시작: Git main HEAD 7e50f09, clean, origin/main 대비 13커밋 앞섬. PROJECT_STATE/ROADMAP/Hyperliquid UX 레퍼런스, UX-HL-01 SPEC/TODO/QA/RESULT 및 프런트 실제 코드 확인.
+- chromium/google-chrome/firefox 및 Playwright/Puppeteer 미가용; 브라우저/스크린리더 인수는 미실행. 설치·우회 없음.
+- 발견 결함: 타임스탬프 없는 합성 Recent Trades 9건에 고정 시각 18:50~18:18과 Time 헤더가 표시됨.
+- main.js에서 제3열을 #01~#09 순번으로 교체하고 trade.html 머리글/실제 체결 기록 아님 고지 변경. 가격·수량·시장 전환 기존 동작 유지.
+- order-interactions.test.mjs 실행형·정적 회귀 3개: 초기 순번과 가짜 시간 부재, BTC/ETH/SOL 전환의 데이터/순번 정합성, HTML 출처 안내. 테스트 작성 과정의 정규식 이스케이프 오류 수정 후 재검증.
+- 프런트 전체 node --test frontend/*.test.mjs 112/112 PASS (기존 109 + 신규 3). JS node --check main.js/order-interactions.test.mjs/preview-model.mjs PASS, npm --prefix backend run build TypeScript PASS.
+- HTMLParser index.html 4개/trade.html 67개 고유 ID, 태그 구조 PASS, CSP connect-src none/계정 5개 빈 tbody/샘플 번호·안내/git diff --check 검사 PASS.
+- 실제 브라우저 렌더링·보조공학/지갑·backend·Sepolia·실거래·push·배포 없음.

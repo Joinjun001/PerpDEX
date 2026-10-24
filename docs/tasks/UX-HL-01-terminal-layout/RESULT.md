@@ -63,3 +63,11 @@
 - frontend/chart-sample-accessibility.test.mjs 신규 5건, order-interactions.test.mjs 실행형 1건, 프런트 전체 109/109 PASS. JS 문법·TypeScript build·HTML/고유 ID·CSP 및 diff 검사 PASS.
 - 실 웹사이트 배포 없음, 브라우저/스크린리더 시각 인수 미완료. 주문/계정·실거래/서명·실체인/DB 연동 안 함.
 - 다음 UX-HL-01-E2(실 브라우저/스크린리더 가용 시 차트 인수)와 UX-HL-01-C, UX-HL-02-B2-B, UX-HL-03-A2/B2(기존 브라우저 게이트). 새로 가치 있는 독립 UX TASK가 없다면 중복 기능 구현 금지.
+
+## 2026-10-25 UX-HL-01-F1 — 로컬 구현 완료
+
+- frontend/main.js: 9개 합성 체결 행의 임의 시계 시간 대신 Sample #01~#09 표시.
+- frontend/trade.html: Recent Trades 3열의 Time 헤더를 Sample #로 변경, 실제 체결 시각·블록체인 기록 아님 고지. 기존 GENERATED EXAMPLES, MOCK 유지.
+- frontend/order-interactions.test.mjs: 실행형/정적 회귀 3개 신규. 전체 프런트 112/112 PASS, JS 문법·TS 빌드·HTML/CSP·diff PASS.
+- 인증 API·wallet·온체인/실자금 거래 없음; 로컬 커밋만 허용. 실제 브라우저/스크린리더 인수 UX-HL-01-F2/C/E2 미완료.
+- 다음: 브라우저 준비 시 F2 인수. 불가하다면 중복 없는 실제 결함을 찾을 때에만 후속 UX TASK 선택.

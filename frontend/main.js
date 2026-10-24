@@ -84,7 +84,7 @@ function renderTrades(){
     const qty=((i*3+5)%9+1)*.012*(view.market==='SOL'?10:1);
     const row=node('div','trade-row');
     row.append(node('span',buy?'positive':'negative',prices.format(px)),
-      node('span','',FORMAT_QTY.format(qty)),node('span','','18:'+String(50-i*4).padStart(2,'0')));
+      node('span','',FORMAT_QTY.format(qty)),node('span','','#'+String(i+1).padStart(2,'0')));
     container.append(row);
   }
 }

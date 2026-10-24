@@ -21,3 +21,8 @@
 - [x] E1 BTC/ETH/SOL 생성 sampleChart 배열로부터 min/max/last·가상 샘플 출처 대체 텍스트 생성, SVG aria-describedby 결속 및 화면 MOCK HIGH/LOW 표시
 - [x] E1 별도 5건 단위/정적 QA와 실제 main.js 시장 변경 통합 1건, 프런트 전체 109/109 PASS, JS/TS/HTML/CSP/git 검사
 - [ ] E2 실 브라우저/실스크린리더·레이아웃에서 샘플 요약 접근성 인수 (현재 환경 미가용)
+
+- [x] F1 실제 거래 시간 출처가 없는 Recent Trades의 18:50~18:18 시각 문자열 제거
+- [x] F1 Time 헤더를 Sample #로 변경, #01~#09와 실제 체결 시간·블록체인 기록 아님 안내
+- [x] F1 기존 main.js 이벤트 실행 기반 회귀 3건 추가, 전체 112/112 PASS, JS/TS/HTML/CSP/diff 검사
+- [ ] F2 브라우저/스크린리더에서 모의 체결 순번/레이아웃 실제 인수 (현재 미가용)

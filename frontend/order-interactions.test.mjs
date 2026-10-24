@@ -226,6 +226,45 @@ test('UX-HL-01-E1 market switch refreshes visible sample range and text chart de
   assert.match(id('chart-sample-description').textContent,/SOL-USD-PERP/);
   assert.match(id('chart-sample-description').textContent,/실제 시간축이나 실시간 시세/);
 });
+test('UX-HL-01-F1 generated trades use sample IDs, never fabricated clock timestamps',async()=>{
+  const app=await boot(),id=app.id;
+  const rows=id('recent-trades').children;
+  assert.equal(rows.length,9);
+  const labels=rows.map(row=>row.children.at(-1).textContent);
+  assert.deepEqual(labels,Array.from({length:9},(_,i)=>'#'+String(i+1).padStart(2,'0')));
+  assert.equal(labels.some(v=>/^\d{1,2}:\d{2}$/.test(v)),false);
+});
+test('UX-HL-01-F1 changing BTC ETH SOL regenerates trade examples but keeps sample positions',async()=>{
+  const app=await boot(),id=app.id;
+  const rowData=()=>id('recent-trades').children.map(row=>({
+    price:row.children[0].textContent,
+    qty:row.children[1].textContent,
+    sample:row.children[2].textContent,
+  }));
+  const expected=Array.from({length:9},(_,i)=>'#'+String(i+1).padStart(2,'0'));
+  const before=rowData();
+  for(const symbol of ['ETH','SOL','BTC']){
+    app.market(symbol).dispatch('click');
+    const rows=rowData();
+    assert.equal(rows.length,9);
+    assert.deepEqual(rows.map(r=>r.sample),expected);
+    assert.ok(rows.every(r=>/^\d[\d,]*\.\d{2}$/.test(r.price)));
+  }
+  assert.deepEqual(rowData(),before);
+});
+test('UX-HL-01-F1 sample sequence and caveat shown without claiming real trade time',()=>{
+  const html=readFileSync(fileURLToPath(new URL('./trade.html',import.meta.url)),'utf8');
+  const code=readFileSync(fileURLToPath(new URL('./main.js',import.meta.url)),'utf8');
+  const tradesStart=html.indexOf('id="market-depth-trades"');
+  const tradesEnd=html.indexOf('</section>',tradesStart);
+  const section=html.slice(tradesStart,tradesEnd);
+  assert.match(section,/GENERATED EXAMPLES/);
+  assert.match(section,/Sample #/);
+  assert.match(section,/실제 체결 시각·블록체인 기록 아님/);
+  assert.doesNotMatch(section,/<span>Time<\/span>/);
+  assert.doesNotMatch(code,/18:.*String\(50-i\*4\)/);
+  assert.match(code,/String\(i\+1\)\.padStart\(2,'0'\)/);
+});
 test('B2-A no network or wallet connection side effects in simulated event execution',async()=>{
   const app=await boot(),id=app.id;
   id('limit-type').dispatch('click');

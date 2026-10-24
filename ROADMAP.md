@@ -56,6 +56,8 @@ PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성�
 - **UX-HL-01-D1 (Local Completed)**: 모바일 화면용 가상 호가·최근 체결 접기/펼치기 버튼, 760px 이하 전용 CSS·ARIA/키보드 기본 button·progressive enhancement. 신규 6건, 프런트 85/85 PASS. 실제 브라우저/터치 QA 보류.
 - **UX-HL-01-E1 (Local Completed)**: 시간 정보가 없는 합성 차트의 08:00~18:00 축을 샘플 #01~#64로 교체, 시장별 실제 생성 배열에서 MOCK LOW/HIGH·접근성 설명 도출. 신규 6건 포함 프런트 109/109 PASS.
 - **UX-HL-01-E2 (Pending browser)**: 차트 대체 텍스트/모바일 반응형 실브라우저·스크린리더 QA 미완료.
+- **UX-HL-01-F1 (Local Completed)**: 실제 출처 없는 Recent Trades 임의 시간 18:50 등을 샘플 #01~#09로 교체하고 비실제 체결 기록임을 명시. 신규 3건 포함 프런트 전체 112/112 PASS.
+- **UX-HL-01-F2 (Pending browser)**: 실제 브라우저·스크린리더에서 샘플 체결 순서와 모바일 접기 확인 미완료.
 
 ### Hyperliquid 계정 탭 탐색 UX 진행
 
