@@ -316,6 +316,32 @@ test('UX-HL-01-F1 sample sequence and caveat shown without claiming real trade t
   assert.doesNotMatch(code,/18:.*String\(50-i\*4\)/);
   assert.match(code,/String\(i\+1\)\.padStart\(2,'0'\)/);
 });
+test('UX-HL-01-G1 orderbook totals accumulate from best price, not row index times size',async()=>{
+  const app=await boot(),id=app.id;
+  const num=cell=>Number(cell.textContent.replaceAll(',',''));
+  for(const market of ['BTC','ETH','SOL']){
+    if(market!=='BTC')app.market(market).dispatch('click');
+    for(const side of ['asks','bids']){
+      const rows=id(side).children;
+      assert.equal(rows.length,7);
+      const prices=rows.map(row=>num(row.children[0]));
+      const sizes=rows.map(row=>num(row.children[1]));
+      const totals=rows.map(row=>num(row.children[2]));
+      for(let i=1;i<prices.length;i++){
+        assert.ok(prices[i-1]>prices[i],market+' '+side+' descending displayed prices');
+      }
+      for(let i=0;i<rows.length;i++){
+        const expected=(side==='asks'?sizes.slice(i):sizes.slice(0,i+1))
+          .reduce((sum,value)=>sum+value,0);
+        assert.ok(Math.abs(totals[i]-expected)<0.00015,
+          market+' '+side+' level '+i+' expected '+expected+' got '+totals[i]);
+        assert.ok(totals[i]+0.00015>=sizes[i]);
+      }
+      if(side==='asks')assert.ok(Math.abs(totals.at(-1)-sizes.at(-1))<0.00015);
+      else assert.ok(Math.abs(totals[0]-sizes[0])<0.00015);
+    }
+  }
+});
 test('B2-A no network or wallet connection side effects in simulated event execution',async()=>{
   const app=await boot(),id=app.id;
   id('limit-type').dispatch('click');

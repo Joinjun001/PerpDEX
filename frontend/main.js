@@ -61,15 +61,21 @@ function renderBook(){
   const m=MARKETS[view.market];
   for(const [side,containerId,sign] of [['ask','asks',1],['bid','bids',-1]]){
     const container=byId(containerId);container.replaceChildren();
-    for(let i=0;i<7;i++){
+    const sizes=Array.from({length:7},(_,i)=>
+      (.018+(i*7+3)%9*.009)*(view.market==='SOL'?12:1));
+    for(let i=0;i<sizes.length;i++){
       const price=m.price+sign*m.depthStep*(side==='ask'?7-i:i+1);
-      const size=(.018+(i*7+3)%9*.009)*(view.market==='SOL'?12:1);
+      const size=sizes[i];
+      // Asks render farthest price first, bids render best price first.
+      // Total must accumulate from best price outward on each side.
+      const total=(side==='ask'?sizes.slice(i):sizes.slice(0,i+1))
+        .reduce((sum,value)=>sum+value,0);
       const row=node('div','book-row'+(side==='bid'?' bid':''));
       row.style.setProperty('--depth',String(12+(i*19)%76)+'%');
       row.append(
         node('span',side==='ask'?'negative':'positive',prices.format(price)),
         node('span','',FORMAT_QTY.format(size)),
-        node('span','',FORMAT_QTY.format(size*(i+1)))
+        node('span','',FORMAT_QTY.format(total))
       );container.append(row);
     }
   }

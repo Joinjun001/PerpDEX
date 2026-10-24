@@ -71,3 +71,11 @@
 - frontend/order-interactions.test.mjs: 실행형/정적 회귀 3개 신규. 전체 프런트 112/112 PASS, JS 문법·TS 빌드·HTML/CSP·diff PASS.
 - 인증 API·wallet·온체인/실자금 거래 없음; 로컬 커밋만 허용. 실제 브라우저/스크린리더 인수 UX-HL-01-F2/C/E2 미완료.
 - 다음: 브라우저 준비 시 F2 인수. 불가하다면 중복 없는 실제 결함을 찾을 때에만 후속 UX TASK 선택.
+
+## 2026-10-25 UX-HL-01-G1 — 로컬 수정 완료
+
+- frontend/main.js: 기존 합성 호가 가격·Size·렌더러를 유지한 채 Order Book Total의 잘못된 Size × 행번호 계산을 최우선 호가부터의 누적합으로 교체. Ask는 최저가(하단)에서 위로, Bid는 최고가(상단)에서 아래로 누적.
+- frontend/order-interactions.test.mjs: 실제 main.js를 사용하는 BTC/ETH/SOL Ask/Bid 7행의 Total=누적 Size 검증 1건 추가. 이전 테스트 통과 유지.
+- 프런트엔드 전체 122/122 PASS, JS syntax/TypeScript build/HTML ID·중첩/CSP/Git diff 검사 PASS.
+- 합성 데이터만 처리했으며 서버·지갑·실거래/실시세·DB·체인 연결 및 원격 push·배포는 수행하지 않음.
+- 다음 UX-HL-01-G2: 브라우저/보조공학 가용 시 Order Book Total의 가독성·모바일 QA. 여전히 미가용 시 재현 가능한 독립 결함이 있을 때만 TASK 시행.

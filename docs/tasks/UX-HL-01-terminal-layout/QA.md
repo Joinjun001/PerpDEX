@@ -83,3 +83,15 @@
 - 프런트 전체 node --test frontend/*.test.mjs 112/112 PASS (기존 109 + 신규 3). JS node --check main.js/order-interactions.test.mjs/preview-model.mjs PASS, npm --prefix backend run build TypeScript PASS.
 - HTMLParser index.html 4개/trade.html 67개 고유 ID, 태그 구조 PASS, CSP connect-src none/계정 5개 빈 tbody/샘플 번호·안내/git diff --check 검사 PASS.
 - 실제 브라우저 렌더링·보조공학/지갑·backend·Sepolia·실거래·push·배포 없음.
+
+## 2026-10-25 UX-HL-01-G1 — 합성 Order Book 누적 Total 검증
+
+- 시작 main HEAD 3f34f8a, clean, origin/main 대비 로컬 16커밋 앞섬. PROJECT_STATE/ROADMAP/Hyperliquid 레퍼런스/UX-HL-02 SPEC·TODO·QA·RESULT와 frontend 실제 코드를 확인.
+- Chromium/google-chrome/firefox 및 Playwright/Puppeteer 실행 도구가 없어 실 브라우저 UX-HL-02-D2 등 인수 미실행. 외부 설치·권한 우회 안 함.
+- 발견된 오류: frontend/main.js renderBook()에서 Size × (i+1)로 Total 표시. 현재 BTC Ask 첫 행은 Size 0.045 / Total 0.045였지만 7개 현재 화면 Ask의 최우선가 기준 실제 누적합은 0.342임을 수정 전 신규 테스트로 재현(FAIL 확인).
+- 수정: 기존 합성 7개 Size를 먼저 계산하고 Ask는 행 i부터 최우선(마지막)까지, Bid는 최우선(첫 행)부터 행 i까지 합한 값을 Total로 표시한다. 기존 가격·Size·mock depth 그라디언트 및 마켓별 호가 정렬 불변.
+- frontend/order-interactions.test.mjs 실행형 신규 1건: 실제 main.js import/DOM 이벤트 환경에서 BTC/ETH/SOL별 7 Ask/Bid 행, 가격 내림차순, 표시 Size들의 누적합(소수 표기 오차 허용), 최우선 호가 total=size를 검증.
+- 변경 직후 해당 테스트 포함 14/14 PASS. 전체 node --test frontend/*.test.mjs 122/122 PASS (기존 121+신규 1).
+- node --check frontend/main.js 및 order-interactions.test.mjs PASS; npm --prefix backend run build (tsc --noEmit) PASS.
+- HTMLParser index.html 고유 ID 4개/trade.html 68개, 태그·중복 ID 검사 PASS. 계정 5개 tbody 비어 있음, CSP connect-src none 및 SYNTHETIC LIQUIDITY 유지, git diff --check PASS.
+- 실제 브라우저 픽셀/터치/스크린리더·실거래·실 API/지갑·Sepolia/운영 DB 인수 미실행. 원격 push·배포·네트워크 요청 없음.

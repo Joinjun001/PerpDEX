@@ -26,3 +26,9 @@
 - [x] F1 Time 헤더를 Sample #로 변경, #01~#09와 실제 체결 시간·블록체인 기록 아님 안내
 - [x] F1 기존 main.js 이벤트 실행 기반 회귀 3건 추가, 전체 112/112 PASS, JS/TS/HTML/CSP/diff 검사
 - [ ] F2 브라우저/스크린리더에서 모의 체결 순번/레이아웃 실제 인수 (현재 미가용)
+
+- [x] G1 합성 Order Book Total의 Size × 행 번호 오류를 실제 main.js 실행형 테스트로 수정 전 실패 재현
+- [x] G1 최우선 Ask/Bid 가격 기준 누적 Size 계산으로 수정; 기존 샘플 가격·수량 생성 변경 없음
+- [x] G1 BTC/ETH/SOL 각 7개 Ask/Bid 행의 가격 순서와 가시 수량·Total 일치 회귀 테스트 통과
+- [x] G1 프런트엔드 전체 122/122, JS 문법/TypeScript 빌드/HTML ID·태그/CSP/git diff 검사 통과
+- [ ] G2 실 브라우저에서 표 가독성/모바일·스크린리더 인수 (현재 도구 미가용)
