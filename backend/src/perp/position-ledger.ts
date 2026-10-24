@@ -94,6 +94,18 @@ export async function applySimPerpFillToLedger(
   transactions:OrderTransactionManager,fill:PerpPositionFill,context:PerpPositionContext,
 ):Promise<Readonly<PerpPositionTransition>>{
   return transactions.withTransaction(async db=>{
+    // M5-T3-B1: even UNPAIRED standalone M4 writers must not bypass an
+    // account with an active/past reduce-only capacity guard.
+    const guardTable=await db.query("SELECT to_regclass('perp_reduce_guards') AS oid");
+    if((guardTable.rows[0] as {oid:string|null}|undefined)?.oid){
+      const {key}=positionKey(context,fill.account);
+      const guarded=await db.query(`SELECT account FROM perp_reduce_guards
+        WHERE chain_id=$1 AND verifying_contract=$2 AND market=$3
+          AND collateral_token=$4 AND account=$5`,key);
+      if(guarded.rows.length){
+        throw new PerpPositionLedgerError('reduce-only guarded position cannot use legacy standalone fill');
+      }
+    }
     // A single-account M4-T2 writer must not silently bypass paired-market OI.
     // to_regclass works even in old M4-T2 schema tests lacking migration 011.
     const present=await db.query(`SELECT to_regclass('perp_market_open_interest') AS oid`);

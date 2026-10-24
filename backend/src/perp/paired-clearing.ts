@@ -77,9 +77,11 @@ export async function computeSimMarketOpenInterest(
 }
 
 /** Both counterparties share one market lock and ONE transaction. No nested BEGIN. */
-export async function applySimPairedFill(
-  transactions:OrderTransactionManager,trade:SimPairedFill,ctx:PerpPositionContext,
-):Promise<Readonly<PairedExecutionResult>>{
+export async function applySimPairedFill(transactions:OrderTransactionManager,trade:SimPairedFill,ctx:PerpPositionContext):Promise<Readonly<PairedExecutionResult>>{
+  return transactions.withTransaction(db=>applySimPairedFillWithinTransaction(db,trade,ctx));
+}
+/** Composition primitive: guarded only after acquiring market and both account guards. */
+export async function applySimPairedFillWithinTransaction(db:SqlRunner,trade:SimPairedFill,ctx:PerpPositionContext,guarded=false):Promise<Readonly<PairedExecutionResult>>{
   if(!trade||trade.executionMode!=='SIMULATION_ONLY'||typeof trade.fillId!=='string'||!ID.test(trade.fillId)){
     throw new PairedClearingError('canonical simulation-only fill required');
   }
@@ -99,7 +101,7 @@ export async function applySimPairedFill(
     chainId:c.chainId,verifyingContract:c.verifyingContract,market:c.market,
     collateralToken:c.collateralToken,configRevision:c.revision,executionMode:'SIMULATION_ONLY',
   });
-  return transactions.withTransaction(async db=>{
+
     // Row-level serialization of all pair updates in this market, including new accounts.
     await db.query(`INSERT INTO perp_market_open_interest
       (chain_id,verifying_contract,market,collateral_token,config_revision,open_interest_atomic)
@@ -113,6 +115,15 @@ export async function applySimPairedFill(
     const already=await db.query(`SELECT fill_id FROM perp_sim_paired_fills
       WHERE chain_id=$1 AND verifying_contract=$2 AND fill_id=$3`,[c.chainId,c.verifyingContract,trade.fillId]);
     if(already.rows.length)throw new PairedClearingError('paired fill ID already processed');
+    if(!guarded){
+      const available=await db.query("SELECT to_regclass('perp_reduce_guards') AS oid");
+      if((available.rows[0] as {oid:string|null}|undefined)?.oid){
+        const found=await db.query(`SELECT account FROM perp_reduce_guards WHERE
+          chain_id=$1 AND verifying_contract=$2 AND market=$3 AND collateral_token=$4
+          AND account IN ($5,$6) LIMIT 1`,[...key,buyer,seller]);
+        if(found.rows.length)throw new PairedClearingError('reduce-only guarded market account cannot use legacy paired fill');
+      }
+    }
     const before=await computeSimMarketOpenInterest(db,ctx);
     if(before.longQuantityAtomic!==before.shortQuantityAtomic||
        before.openInterestAtomic!==old.open_interest_atomic){
@@ -145,7 +156,6 @@ export async function applySimPairedFill(
        hashPerpMarketConfig(c),s.sourceSequence,after.openInterestAtomic]);
     if(inserted.rows.length!==1)throw new PairedClearingError('paired fill journal missing');
     return Object.freeze({buyer:buyerResult,seller:sellerResult,openInterest:after});
-  });
 }
 
 /** Confirm stored tracked OI equals recomputed aggregate. Unbalanced markets fail closed. */

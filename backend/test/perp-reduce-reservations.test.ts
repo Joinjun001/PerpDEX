@@ -244,3 +244,17 @@ test('disk close/reopen preserves consumed quota and replay fences',{timeout:450
     await assert.rejects(reserveSimReduceOnly(manager(db),order('100'),ctx()));
   }finally{if(db)await db.close();await rm(dir,{recursive:true,force:true});}
 });
+
+test('legacy single-account position writer rejects an account with reduce-only guard',()=>withDb(async db=>{
+  await seeded(db);const a=order();await reserveSimReduceOnly(manager(db),a,ctx());
+  const c=ctx();
+  await assert.rejects(applySimPerpFillToLedger(manager(db),{
+    fillId:id(),account:USER,side:'SELL',priceAtomic:'6500000',quantityAtomic:'10000000',
+    chainId:c.config.chainId,verifyingContract:c.config.verifyingContract,
+    market:c.config.market,collateralToken:c.config.collateralToken,
+    configRevision:c.config.revision,expectedVersion:1,executionMode:'SIMULATION_ONLY',
+  },c),/reduce-only guarded/);
+  const snapshots=await db.query('SELECT version,size_signed_atomic FROM perp_position_snapshots WHERE account=$1',[USER.toLowerCase()]);
+  assert.equal(Number((snapshots.rows[0] as {version:number|string}).version),1);
+  assert.equal((snapshots.rows[0] as {size_signed_atomic:string}).size_signed_atomic,'100000000');
+}));

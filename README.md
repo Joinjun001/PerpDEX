@@ -188,3 +188,7 @@ forge build && forge test -vv
 ## M5-T3-A — Reduce-only 모의 예약 수량 원장
 
 `backend/src/perp/reduce-reservations.ts`와 수동 SQL `backend/sql/012_perp_reduce_reservations.sql`는 **SIMULATION_ONLY**에서 단일 계정의 `미체결 reduce-only 합계 + 가상 소진 누적 <= 해당 버전 포지션 절댓값`을 영속 계정 잠금으로 검증합니다. M3 마진 3버킷·M4 포지션 스냅샷/이력·M5-T2 위험계산을 읽기 잠금 안에서 재검증합니다. 주문 예약·가상 부분 소진·미소진 취소/이벤트 중복 처리만 제공하며 **M2 실주문, M4 실제 양측 체결/포지션 변경, M3 자금 버킷 이동, Vault/온체인 거래에 연결하지 않았습니다**. 가상 소진은 실제 체결을 뜻하지 않습니다. 잔여 위험과 검증 범위는 `docs/tasks/M5-T3-reduce-capacity-ledger/SPEC.md`에 기록했습니다.
+
+## M5-T3-B1 — 제한된 양측 Reduce-only 모의 체결의 원자적 연결
+
+`backend/src/perp/reserved-paired-clearing.ts`는 기존 `PAIRED` 시장에서 양쪽 계정의 **단일 온전한 Reduce-only 예약을 각각 전량 소진하는 모의 포지션 축소**만 지원합니다. M4 양측 포지션·시장 OI·공통 영수증과 M5-T3-A의 두 계정 예약 소진 이벤트를 하나의 DB 트랜잭션에서 원자 저장합니다. 예약 guard가 존재하는 계정은 기존 M4의 직접 paired 및 standalone 공개 writer 경로를 거부합니다. 여러 주문의 부분 체결·일반 주문과의 매칭·실 증거금/자금 이동·온체인 송신은 미구현이며, 실 PostgreSQL 다중 연결과 모든 저수준 writer 우회 차단은 후속 검증이 필요합니다. `docs/tasks/M5-T3-B-reserved-paired/SPEC.md`를 참조하세요.

@@ -259,3 +259,80 @@ async function mutateReservation(transactions:OrderTransactionManager,
     return view((await orderById(db,key,id))!,false);
   });
 }
+
+/** Acquire all capacity locks before either account position/margin read.
+ * Call for each party in canonical account order under the market OI lock.
+ */
+export async function lockReservedReduceGuardForPair(db:SqlRunner,ctx:PerpPositionContext,account:string){
+  const {key}=accountKey(ctx,account);
+  await lockGuard(db,key);
+}
+
+/** M5-T3-B1 internal-only: called after MARKET row lock, accounts in sorted order.
+ * Supports exactly one pristine OPEN reduce-only order per party (no partials).
+ */
+export async function checkReservedReduceForPair(db:SqlRunner,ctx:PerpPositionContext,
+  account:string,orderId:string,side:'BUY'|'SELL',priceAtomic:string,
+  quantityAtomic:string,expectedVersion:number):Promise<void>{
+  const {config,key}=accountKey(ctx,account);
+  const guard=await lockGuard(db,key);
+  const position=await existingPositionLocked(db,key,ctx);
+  const {balances,hash:marginHash}=await lockedMargin(db,key,ctx);
+  await ensureAnchored(db,key,position,hashPerpMarketConfig(config),guard);
+  const row=await orderById(db,key,eventId(orderId));
+  if(!row||row.status!=='OPEN'||row.side!==side||
+    row.price_atomic!==priceAtomic||row.remaining_qty_atomic!==quantityAtomic||
+    row.requested_qty_atomic!==quantityAtomic||row.consumed_qty_atomic!=='0'||
+    row.cancelled_qty_atomic!=='0'||guard.consumed_qty_atomic!=='0'||
+    asNumber(row.position_version)!==expectedVersion||position.version!==expectedVersion||
+    asNumber(row.config_revision)!==config.revision||
+    row.config_hash!==hashPerpMarketConfig(config)||
+    row.snapshot_hash!==snapshotHash(ctx)||row.margin_fingerprint!==marginHash){
+    throw new SimReduceReservationError('stale, non-pristine or mismatched pair reservation');
+  }
+  if(await totalOpen(db,key)!==BigInt(quantityAtomic)){
+    throw new SimReduceReservationError('multiple outstanding reservations require coordinated reconciliation');
+  }
+  const evalResult=evaluateSimPreTrade(position,{executionMode:'SIMULATION_ONLY',
+    chainId:config.chainId,verifyingContract:config.verifyingContract,
+    market:config.market,collateralToken:config.collateralToken,account:String(key[4]),
+    balances,realizedPnlBookedAtomic:'0'},
+    {executionMode:'SIMULATION_ONLY',fillId:eventId(orderId),account:String(key[4]),
+      chainId:config.chainId,verifyingContract:config.verifyingContract,
+      market:config.market,collateralToken:config.collateralToken,
+      configRevision:config.revision,expectedVersion,side,priceAtomic,
+      orderQuantityAtomic:quantityAtomic,simulatedFillQuantityAtomic:quantityAtomic,reduceOnly:true},ctx);
+  if(evalResult.decision!=='SIMULATION_ELIGIBLE'||
+     !['CLOSE','REDUCE'].includes(evalResult.effect??'')){
+    throw new SimReduceReservationError('post-fill reduce-only gate rejected');
+  }
+}
+
+/** Caller holds market and both account guards in one TX; M4 journals already
+ * applied before calling. Reanchor to the newly persisted size, NOT shadow quota.
+ */
+export async function finalizeReservedReduceForPair(db:SqlRunner,ctx:PerpPositionContext,
+  account:string,orderId:string,fillId:string,quantityAtomic:string,
+  nextSize:string,nextVersion:number):Promise<void>{
+  const {key,config}=accountKey(ctx,account);
+  const oid=eventId(orderId),fid=eventId(fillId);
+  const order=await db.query(`UPDATE perp_reduce_orders SET remaining_qty_atomic='0',
+    consumed_qty_atomic=$7,status='EXHAUSTED'
+    WHERE chain_id=$1 AND verifying_contract=$2 AND market=$3 AND collateral_token=$4
+      AND account=$5 AND order_id=$6 AND remaining_qty_atomic=$7
+      AND consumed_qty_atomic='0' AND cancelled_qty_atomic='0' AND status='OPEN'
+    RETURNING order_id`,[...key,oid,quantityAtomic]);
+  if(order.rows.length!==1)throw new SimReduceReservationError('reserved consumption CAS failed');
+  const evt=await db.query(`INSERT INTO perp_reduce_events
+    (chain_id,verifying_contract,account,event_id,order_id,market,collateral_token,
+      action,quantity_atomic,remaining_after)
+    VALUES($1,$2,$3,$4,$5,$6,$7,'CONSUME',$8,'0') RETURNING event_id`,
+    [key[0],key[1],key[4],fid,oid,key[2],key[3],quantityAtomic]);
+  if(evt.rows.length!==1)throw new SimReduceReservationError('missing fill-bound receipt');
+  const updated=await db.query(`UPDATE perp_reduce_guards SET position_version=$6,
+    position_size_atomic=$7,consumed_qty_atomic='0',revision=revision+1
+    WHERE chain_id=$1 AND verifying_contract=$2 AND market=$3 AND collateral_token=$4
+      AND account=$5 AND config_revision=$8 AND config_hash=$9 RETURNING revision`,
+    [...key,nextVersion,nextSize,config.revision,hashPerpMarketConfig(config)]);
+  if(updated.rows.length!==1)throw new SimReduceReservationError('post-fill capacity anchor CAS failed');
+}
