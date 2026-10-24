@@ -42,6 +42,9 @@ function updateMarket(){
   byId('limit-price').value=m.price.toFixed(2);
   byId('quantity-unit').textContent=m.symbol;
   byId('input-unit').textContent=m.symbol;
+  byId('book-size-label').textContent='Size ('+m.symbol+')';
+  byId('book-total-label').textContent='Total ('+m.symbol+')';
+  byId('trade-size-label').textContent='Size ('+m.symbol+')';
   renderChart();
   renderBook();
   renderTrades();

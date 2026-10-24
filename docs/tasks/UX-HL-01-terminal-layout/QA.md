@@ -158,3 +158,14 @@
 - 수정 후 대상 order-interactions.test.mjs 30/30 PASS, 전체 node --test frontend/*.test.mjs 150/150 PASS (기존 148+신규 2). 모든 프런트 JS node --check, npm --prefix backend run build (tsc --noEmit) PASS.
 - 첫 git diff --check에서 새 CSS 끝 불필요한 빈 줄 1건 발견, 수정 후 검사 PASS. HTMLParser index.html/trade.html 태그/고유 ID, CSP connect-src none 및 5개 계정 tbody 빈 상태 확인.
 - 실제 브라우저 픽셀·터치/스크린리더 가독성, 서버/지갑/실자금·실거래·Sepolia 트랜잭션, 운영 DB·원격 push/배포 미실행.
+
+## 2026-10-25 UX-HL-01-N1 — 시장별 가시 수량 단위 검증
+
+- 시작 HEAD 7c72243, main Git clean, origin/main 대비 30개 로컬 커밋 앞섬. PROJECT_STATE.md, ROADMAP.md, Hyperliquid UX reference, UX-HL-01 SPEC/TODO/QA/RESULT, HTML/JS/모델 및 기존 프런트 테스트 확인.
+- 브라우저: 프로젝트 내부 Playwright/Chromium 643MB 설치됨. 비특권 사용자 unshare -Ur 실행이 Operation not permitted로 실패하며 샌드박스 Chromium을 사용할 수 없어 UX-HL-01-M2/N2 실제 브라우저 인수는 미완료. 안전 제한 우회 없음.
+- 선행 검토: chart-value-label 가격은 chartSample 마지막 값과 같은 MOCK 기준가라는 사실을 모델·기존 테스트에서 확인해 결함으로 판단하지 않음.
+- 실제 결함: 호가 Size/Total과 최근 체결 Size 수치의 단위가 해당 섹션의 가시 헤더에 없음. BTC/ETH/SOL 전환 시 가시 단위 확인 불가. 신규 정적 HTML/실제 main.js 통합 테스트 2건 수정 전 FAIL.
+- 수정: frontend/trade.html에 각각 book-size-label, book-total-label, trade-size-label와 BTC 초기 단위를 추가. main.js updateMarket에서 선택된 m.symbol 단위를 헤더에 반영. 실제 수치 계산·MOCK 출처 및 ARIA 행 설명은 그대로 유지.
+- 수정 후 실제 main.js 이벤트 테스트 포함 order-interactions.test.mjs 32/32 PASS, 전체 node --test frontend/*.test.mjs 152/152 PASS (기존 150+신규 2). frontend 모든 JS node --check PASS, npm --prefix backend run build (tsc --noEmit) PASS.
+- Python HTMLParser index.html/trade.html 구조 및 고유 ID, CSP connect-src none/계정 tbody 5개 비어 있음, git diff --check PASS.
+- 실제 Chromium 렌더링/스크린리더·모바일 뷰포트 인수, API·지갑/서명·실거래/실체인·운영 DB·원격 push/배포 미실행.

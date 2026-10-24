@@ -72,3 +72,9 @@
 - [x] M1 가상 Recent Trades 전용 4열 CSS 적용, Order Book 3열/모바일 접기 및 샘플 순번 유지
 - [x] M1 프런트 전체 150/150·JS syntax·TypeScript build·HTML 구조/고유 ID/CSP·git diff 검사
 - [ ] M2 실 브라우저 모바일/스크린리더에서 4열 글자 가독성·색상 무관 방향 인수 (Chromium 샌드박스 환경 의존)
+
+- [x] N1 Order Book Size/Total 및 Recent Trades Size의 가시 열에서 자산 수량 단위가 누락된 문제를 정적 HTML/실제 main.js 회귀 2건 수정 전 FAIL로 재현
+- [x] N1 정적 BTC 수량 단위 헤더 3개와 시장 전환 시 BTC/ETH/SOL 헤더 텍스트 동기화 구현
+- [x] N1 기존 Price (USD) 헤더·모의 호가/체결 수량·깊이·ARIA 목록/행 및 주문 계산 불변
+- [x] N1 프런트 전체 152/152, JS 문법·TypeScript 빌드·HTML 구조/고유 ID/CSP/git diff 검사
+- [ ] N2 안전한 실제 브라우저에서 헤더 단위의 좁은 4열/3열 레이아웃 및 키보드·스크린리더 인수 (샌드박스 제약)

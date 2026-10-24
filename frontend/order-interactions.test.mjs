@@ -578,6 +578,27 @@ test('UX-HL-01-L1 recent trade container has non-live accessible list fallback',
   assert.match(html,/id="recent-trades"[^>]*role="list"[^>]*aria-label="BTC 합성 최근 체결 예시 목록/);
   assert.match(html,/실제 체결 시각·블록체인 기록 아님/);
 });
+test('UX-HL-01-N1 mock book and trade visible quantity headers follow selected unit',async()=>{
+  const app=await boot(),id=app.id;
+  for(const market of ['BTC','ETH','SOL']){
+    app.market(market).dispatch('click');
+    assert.equal(id('book-size-label').textContent,'Size ('+market+')');
+    assert.equal(id('book-total-label').textContent,'Total ('+market+')');
+    assert.equal(id('trade-size-label').textContent,'Size ('+market+')');
+    assert.match(id('asks').getAttribute('aria-label')??'',new RegExp(market));
+    assert.match(id('recent-trades').getAttribute('aria-label')??'',new RegExp(market));
+  }
+});
+
+test('UX-HL-01-N1 initial non-JS trade markup declares BTC units for every visible size header',()=>{
+  const book=html.match(/<section id="market-depth-book"[\s\S]*?<\/section>/)?.[0]??'';
+  const trades=html.match(/<section id="market-depth-trades"[\s\S]*?<\/section>/)?.[0]??'';
+  assert.match(book,/id="book-size-label"[^>]*>Size \(BTC\)<\/span>/);
+  assert.match(book,/id="book-total-label"[^>]*>Total \(BTC\)<\/span>/);
+  assert.match(trades,/id="trade-size-label"[^>]*>Size \(BTC\)<\/span>/);
+  assert.match(book,/>Price \(USD\)<\/span>/);
+  assert.match(trades,/>Price \(USD\)<\/span>/);
+});
 test('UX-HL-01-M1 recent-trade direction is visible in text, not inferred only from red/green',async()=>{
   const app=await boot(),id=app.id;
   for(const market of ['BTC','ETH','SOL']){

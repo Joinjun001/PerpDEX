@@ -126,3 +126,11 @@
 - frontend/order-interactions.test.mjs: BTC/ETH/SOL × 9행의 가시 방향·기존 색상/ARIA 정합성과 새 헤더/전용 CSS를 검증하는 2건 추가. F1 샘플 순번 검사 위치 정정.
 - 신규 2건 포함 전체 프런트 150/150 PASS, JS/TypeScript/HTML/CSP/Git 검사 PASS. 실제 렌더링 M2 미완료.
 - MOCK 체결 샘플/시장 생성 로직·계정 인증/주문/서명·실체인/운영 DB·원격 push/배포 미변경.
+
+## 2026-10-25 UX-HL-01-N1 — 가시 수량 단위 동기화 로컬 완료
+
+- frontend/trade.html: BTC 정적 기본 화면 Book Size/Total, Recent Trades Size 헤더에 기초 자산 BTC 수량 단위 표기.
+- frontend/main.js: 시장 변경 시 3개 헤더를 BTC/ETH/SOL 선택값으로 갱신, 기존 차트/호가/체결/주문 산술 및 MOCK 데이터 출처 유지.
+- frontend/order-interactions.test.mjs: 정적 BTC 단위와 실제 BTC·ETH·SOL 전환의 3개 헤더 및 ARIA 목록 일치 신규 회귀 2건.
+- 전체 프런트 152/152 PASS, 모든 프런트 JavaScript 문법, 백엔드 TypeScript 빌드, HTML/CSP/git diff 검사 PASS. 실제 브라우저 N2 인수는 샌드박스 실행 환경 확보 때만 진행.
+- 서버 API·실잔고·위험/정산 계산, 지갑·Sepolia 거래·운영 DB·push/배포/권한 변경 없음.
