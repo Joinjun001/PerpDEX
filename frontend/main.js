@@ -1,7 +1,7 @@
-import {MARKETS,FORMAT_USD,FORMAT_QTY,previewEstimate,sampleChart} from './preview-model.mjs';
+import {MARKETS,FORMAT_USD,FORMAT_QTY,previewOrderEstimate,validPreviewLimitPrice,sampleChart} from './preview-model.mjs';
 
 const byId=(id)=>document.getElementById(id);
-const view={market:'BTC',side:'BUY'};
+const view={market:'BTC',side:'BUY',orderType:'MARKET'};
 const tickets={BTC:'₿',ETH:'◆',SOL:'◎'};
 const prices=new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 
@@ -30,7 +30,7 @@ function updateMarket(){
   const sampleChange=byId('market-stats-change');
   sampleChange.textContent=(m.change>=0?'+':'−')+Math.abs(m.change).toFixed(2)+'%';
   sampleChange.className=m.change>=0?'positive':'negative';
-  byId('reference-price').textContent=FORMAT_USD.format(m.price);
+  byId('limit-price').value=m.price.toFixed(2);
   byId('quantity-unit').textContent=m.symbol;
   byId('input-unit').textContent=m.symbol;
   renderChart();
@@ -89,6 +89,18 @@ function renderTicket(){
   byId('sell-tab').classList.toggle('active',!sideBuy);
   byId('buy-tab').setAttribute('aria-pressed',String(sideBuy));
   byId('sell-tab').setAttribute('aria-pressed',String(!sideBuy));
+  const isLimit=view.orderType==='LIMIT';
+  byId('market-type').classList.toggle('active',!isLimit);
+  byId('limit-type').classList.toggle('active',isLimit);
+  byId('market-type').setAttribute('aria-pressed',String(!isLimit));
+  byId('limit-type').setAttribute('aria-pressed',String(isLimit));
+  byId('limit-price-field').hidden=!isLimit;
+  byId('limit-price').disabled=!isLimit;
+  const badLimit=isLimit&&!validPreviewLimitPrice(byId('limit-price').value);
+  byId('limit-price-error').hidden=!badLimit;
+  byId('limit-price').setAttribute('aria-invalid',String(badLimit));
+  byId('preview-price-label').textContent=isLimit?'Limit Price (user input)':'Reference price (MOCK)';
+
   const button=byId('preview-order');
   button.className='submit-order '+(sideBuy?'buy-submit':'sell-submit');
   button.replaceChildren(document.createTextNode(sideBuy?'Preview Long Order ':'Preview Short Order '),node('span','','↗'));
@@ -97,11 +109,16 @@ function renderTicket(){
   byId('leverage').style.background='linear-gradient(90deg,#43e1b4 '+((lever-1)/9*100)+'%,#3b4856 '+((lever-1)/9*100)+'%)';
   const quantity=byId('quantity').value;
   try{
-    const result=previewEstimate(view.market,quantity,lever);
+    const result=previewOrderEstimate({
+      market:view.market,orderType:view.orderType,quantity,leverage:lever,
+      limitPrice:byId('limit-price').value,
+    });
+    byId('reference-price').textContent=FORMAT_USD.format(result.price);
     byId('notional').textContent=FORMAT_USD.format(result.notional);
     byId('margin').textContent=FORMAT_USD.format(result.indicativeMargin);
     button.disabled=false;
   }catch{
+    byId('reference-price').textContent='—';
     byId('notional').textContent='—';
     byId('margin').textContent='—';
     button.disabled=true;
@@ -112,12 +129,17 @@ function displayOrderPreview(event){
   event.preventDefault();
   const panel=byId('order-result');
   try{
-    const value=previewEstimate(view.market,byId('quantity').value,byId('leverage').value);
+    const value=previewOrderEstimate({
+      market:view.market,orderType:view.orderType,
+      quantity:byId('quantity').value,leverage:byId('leverage').value,
+      limitPrice:byId('limit-price').value,
+    });
     panel.classList.remove('error');
     panel.replaceChildren(
       node('strong','','◈ 데모 주문 미리보기만 생성되었습니다'),
-      node('div','',`${view.side==='BUY'?'Long':'Short'} ${value.market}-PERP · ${value.quantity} ${value.market} · ${value.leverage}×`),
-      node('div','',`가상 주문금액 ${FORMAT_USD.format(value.notional)} · 참고 증거금 ${FORMAT_USD.format(value.indicativeMargin)}`),
+      node('div','',(view.side==='BUY'?'Long':'Short')+' · '+value.orderType+' · '+value.market+'-PERP · '+value.quantity+' '+value.market+' · '+value.leverage+'×'),
+      node('div','',(value.orderType==='LIMIT'?'사용자 지정 Limit Price':'MOCK Reference Price')+' '+FORMAT_USD.format(value.price)+' · 가상 주문금액 '+FORMAT_USD.format(value.notional)),
+      node('div','','참고 증거금 '+FORMAT_USD.format(value.indicativeMargin)+' · 수수료/체결/청산/펀딩 미계산'),
       node('div','','서버 전송 0건 · 지갑 서명 0건 · 실제 체결 0건')
     );
   }catch(err){
@@ -132,11 +154,29 @@ document.querySelectorAll('[data-market]').forEach(b=>b.addEventListener('click'
 }));
 byId('buy-tab').addEventListener('click',()=>{view.side='BUY';renderTicket();byId('order-result').hidden=true});
 byId('sell-tab').addEventListener('click',()=>{view.side='SELL';renderTicket();byId('order-result').hidden=true});
-byId('leverage').addEventListener('input',renderTicket);
-byId('quantity').addEventListener('input',renderTicket);
+for(const [type,id] of [['MARKET','market-type'],['LIMIT','limit-type']]){
+  byId(id).addEventListener('click',()=>{
+    view.orderType=type;
+    renderTicket();
+    byId('order-result').hidden=true;
+  });
+}
+byId('limit-price').addEventListener('input',()=>{
+  renderTicket();
+  byId('order-result').hidden=true;
+});
+byId('leverage').addEventListener('input',()=>{
+  renderTicket();
+  byId('order-result').hidden=true;
+});
+byId('quantity').addEventListener('input',()=>{
+  renderTicket();
+  byId('order-result').hidden=true;
+});
 document.querySelectorAll('[data-qty]').forEach(b=>b.addEventListener('click',()=>{
   byId('quantity').value=b.dataset.qty;
   renderTicket();
+  byId('order-result').hidden=true;
 }));
 byId('order-form').addEventListener('submit',displayOrderPreview);
 updateMarket();

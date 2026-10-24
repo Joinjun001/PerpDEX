@@ -25,6 +25,32 @@ export function previewEstimate(market,quantity,leverage){
   return Object.freeze({market,quantity:Number(quantity),leverage:lev,price,notional,indicativeMargin,
     simulated:true,orderExecutable:false,feesConfigured:false});
 }
+/**
+ * UX-HL-02-A presentation-only preview. No matching/tick/risk policy is implied.
+ */
+export function validPreviewLimitPrice(value){
+  if(typeof value!=='string'||!/^(?:0|[1-9][0-9]*)(?:[.][0-9]{1,2})?$/.test(value))
+    return false;
+  const price=Number(value);
+  return Number.isFinite(price)&&price>=0.01&&price<=1000000000;
+}
+export function previewOrderEstimate({market,orderType='MARKET',quantity,leverage,limitPrice}){
+  if(orderType!=='MARKET'&&orderType!=='LIMIT')
+    throw new RangeError('Unsupported demo order type');
+  const sample=previewEstimate(market,quantity,leverage);
+  if(orderType==='LIMIT'&&!validPreviewLimitPrice(limitPrice))
+    throw new RangeError('Enter a positive Limit Price in USD (up to 2 decimals)');
+  const price=orderType==='LIMIT'?Number(limitPrice):sample.price;
+  const notional=sample.quantity*price;
+  const indicativeMargin=notional/sample.leverage;
+  if(!Number.isFinite(notional)||!Number.isFinite(indicativeMargin))
+    throw new RangeError('Invalid simulated order estimate');
+  return Object.freeze({
+    ...sample,orderType,referencePrice:sample.price,price,
+    priceSource:orderType==='LIMIT'?'USER_LIMIT':'MOCK_REFERENCE',
+    notional,indicativeMargin,executionGuaranteed:false,
+  });
+}
 export function sampleChart(market,count=64){
   const item=MARKETS[market];
   if(!item)throw new RangeError('Unknown market');

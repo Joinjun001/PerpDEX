@@ -175,3 +175,23 @@
 /* Explicit hidden attributes beat account-empty flex and table presentation. */
 .trade-shell .account-empty[hidden],
 .trade-shell .account-table[hidden]{display:none!important}
+
+/* UX-HL-02-A — order-type switch and conditional Limit Price demo input. */
+.trade-shell .order-type-row{align-items:center;gap:8px}
+.trade-shell .order-type-row>span{flex:none;white-space:nowrap}
+.trade-shell .order-type-row>span small{font-size:9px;color:#739687}
+.trade-shell .order-type-tabs{display:inline-flex;gap:3px;padding:3px;border:1px solid #344957;border-radius:8px;background:#101b26}
+.trade-shell .order-type-tab{min-width:58px;min-height:34px;background:transparent;color:#8a9fb1;border:1px solid transparent;border-radius:6px;padding:7px 9px;font-size:11px;font-weight:750}
+.trade-shell .order-type-tab:hover{color:#e5f8f1;background:#20313b}
+.trade-shell .order-type-tab.active{background:#234a3e;color:#81efca;border-color:#3d745d}
+.trade-shell .order-type-tab:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.trade-shell .limit-price-field{margin-bottom:19px}
+.trade-shell .limit-price-field[hidden],
+.trade-shell .price-error[hidden]{display:none!important}
+.trade-shell .limit-price-field input[aria-invalid="true"]{color:#ff9ea9}
+.trade-shell .limit-price-field .input-shell:has(input[aria-invalid="true"]){border-color:#c25c6b}
+.trade-shell .price-help{color:#8295a7;font-size:10px;line-height:1.5;margin:8px 1px 0}
+.trade-shell .price-error{color:#ff929d;font-size:10px;line-height:1.5;margin:8px 1px 0}
+@media(max-width:380px){
+  .trade-shell .order-type-tab{min-width:52px;padding-inline:6px}
+}

@@ -10,6 +10,8 @@ Hyperliquid의 거래 정보 구조·사용자 흐름을 주요 UX 레퍼런스�
 
 오프라인 계정 read orchestration: account-read-flow.mjs은 외부 verifySession/query를 주입해야 하고, 요청 전후 지갑 세션 검증·Abort/stale/race 방지를 처리합니다. 프런트 코드에서 자동 호출하지 않으며 공개 주문 GET API에는 계정별 권한이 없어 개인 히스토리 API로 직접 연동하지 않습니다. 백엔드 조사: docs/tasks/UX-HL-01-terminal-layout/BACKEND_ACCOUNT_READ_GAP.md.
 
+UX-HL-02-A: Market/Limit 주문 모드와 Limit Price를 입력해 MOCK 명목가치·참고 증거금을 계산하는 **순수 미리보기**를 제공합니다. 시장 변경 시 Limit Price는 해당 시장의 고정 샘플 가격으로 초기화되며 미지원 정책·실제 주문/체결/수수료/청산을 계산하지 않습니다. 세부 TASK: docs/tasks/UX-HL-02-order-ticket/.
+
 ## 페이지 구조
 
 - index.html (서비스 소개): 프로젝트 비전, 기술 구조, 개발 로드맵, 거래 화면 진입 버튼. 거래 입력/차트를 포함하지 않습니다.

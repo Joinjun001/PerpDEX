@@ -54,6 +54,12 @@ PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성�
 - **UX-HL-01-B2-B2-B2 (Next, dependent)**: 서버 소유권 인증/계정별 read API가 준비되면 실제 브라우저/렌더러 연결. 준비 전에는 현재 static disconnected 유지하고 C1 검증으로 전환.
 - **UX-HL-01-C (Follow-up)**: 실제 브라우저 너비별 시각 확인 및 모바일·접근성 보완.
 
+### Hyperliquid 주문 티켓 UX 진행
+
+- **UX-HL-02-A (Local Completed)**: Market/Limit DEMO 입력 전환, Limit Price 범위·형식 검사, 선택 시장 MOCK 가격과 유형별 명목가치·참고 증거금/미리보기. 64/64 프런트 검증 PASS. 문서: docs/tasks/UX-HL-02-order-ticket/.
+- **UX-HL-02-B1 (Next)**: 입력·모의 주문 확인 UX/오류·키보드 전환·실제 브라우저 검증(가능할 때) 강화. 서명·주문 전송 활성화 금지.
+- 계정별 실제 read API/wallet 인증이 준비되지 않아 UX-HL-01-B2-B2-B2는 게이트 보류.
+
 ## M9 — Sepolia 테스트넷 무기한 선물 거래 MVP (신규 최종 목표)
 
 **사용자 목표:** 메인넷 실자금이 아닌 Ethereum Sepolia에서 무가치 테스트 담보로 MetaMask 연결 → 입금 → EIP-712 signed 주문 → BTC-USD-PERP Long/Short 체결 → 포지션 종료/정산 → 출금까지 검증 가능한 서비스. 상세 인수 조건: docs/releases/SEPOLIA-TESTNET-TRADING-MVP.md.
