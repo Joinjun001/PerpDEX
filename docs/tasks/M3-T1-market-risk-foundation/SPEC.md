@@ -1,6 +1,6 @@
 # M3-T1 SPEC — 무기한 선물 시장·가격·단위/정밀도 기반
 
-상태: Planned. M3 첫 실제 구현 TASK. 이번 설계 회차에서는 소스 코드·스키마를 변경하지 않는다.
+상태: Local Implementation Completed. M3 첫 구현은 기존 M2 API/SQL의 동작을 변경하지 않는 순수 검증 모듈로 구현했다.
 
 ## 구현 목적
 
@@ -22,3 +22,10 @@
 - 실제 체인 송신, 실자산 이동, 스테이징/운영 DB 변경, 원격 push 금지.
 
 참고: `docs/architecture/PERPETUAL-MVP-DESIGN.md`.
+
+## 실제 구현 계약 — 2026-10-24
+
+- `fixed-point.ts`: 정규 10진 문자열 `uint256`/`int256` (부호/선행 0/범위 거부), 0~36 소수 자릿수, explicit rounding mulDiv 및 `quantityAtomic × priceAtomic × 10^collateralDecimals / (10^baseDecimals × 10^priceDecimals)` 명목가치. 부호·결과 overflow·0으로 잘리는 명목가치 차단. `Number` 기반 금전 연산 금지.
+- `market-config.ts`: trusted `sourceId`와 서명 도메인·명시적 `status=APPROVED`, revision/유효기간, `BASE-QUOTE-PERP`, ERC-20 collateral EVM 주소·소수점, tick/lot/min/max/OI, IM/MM/leverage·price deviation·confidence·snapshot age 필드의 완전성·범위 검사. 서버가 제공하는 trustedSourceId는 요청자 입력으로 받아서는 안 된다. 위험 수치는 테스트용 픽스처 외 실제 운영 기본값으로 내장하지 않음.
+- `price-snapshot.ts`: local mock snapshot만 검증하며 chain/contract/market/policy revision/oracleSource 정확한 일치, price uint256, 미래/오래된 publish, 신뢰도·mark/index deviation, sequence/timestamp 재사용·역행 차단. 외부 oracle RPC/HTTP 연결 금지.
+- `validatePerpOrderUnits`: 순수 가격 tick·lot 배수/수량 제한 검사. 아직 M2 v1 signed order 생성/매칭 API에는 연결하지 않음. M3-T2에서 원장/격리 마진 예약에 이어서 사용하며 실제 운영 주문 활성화는 M5 위험 엔진 이후로 미룬다.

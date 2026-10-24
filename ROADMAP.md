@@ -31,7 +31,7 @@
 
 | 마일스톤 | 목적 | 상태 |
 | --- | --- | --- |
-| **M3** | 고정소수점/신뢰 시장·오라클 입력, 이중 분개 격리 담보·주문 증거금 예약 | **Active — M3-T1부터 구현** |
+| **M3** | 고정소수점/신뢰 시장·오라클 입력, 이중 분개 격리 담보·주문 증거금 예약 | **In Progress — M3-T1 로컬 구현 완료, M3-T2~ 남음** |
 | **M4** | 순롱·순숏 포지션, 부분 체결·평균 진입가·realized/unrealized PnL, OI 영속 | Planned (M3 선행) |
 | **M5** | 레버리지·초기/유지증거금 위험 엔진, signed order v2·reduce-only·원자적 체결 게이트 | Planned (M4 선행) |
 | **M6** | funding index/rate 및 주기적 롱·숏 펀딩 분개·재시작 복구 | Planned (M5 선행) |
@@ -41,3 +41,13 @@
 주의: M1 Vault의 현재 `withdraw()`는 오프체인 locked margin을 강제하지 않으며, M2 `BUYER_TO_SELLER` direct settlement는 선물 포지션 회계가 아니다. 새 로컬 위험 엔진이 마련되어도 M8 이전에 사용자 실자금·운영 활성화를 금지한다.
 
 M3 시작 TASK: `docs/tasks/M3-T1-market-risk-foundation/{SPEC,TODO,RESULT,QA}.md`.
+
+
+### M3 실제 TASK 현황
+
+| TASK | 구현 및 검증 | 상태 |
+| --- | --- | --- |
+| M3-T1 | trusted MarketConfig, BigInt fixed-point, mock PriceSnapshot, tick/lot/오라클 경계 | Local Completed (13개 신규 테스트; 운영 정책 미승인) |
+| M3-T2 | 영속 증거금 이중 분개 원장, 계정별 available/reserved/position margin와 잔액·중복 불변식 | Next |
+| M3-T3 | 서명 주문 전 증거금 예약·취소 해제의 DB 원자성/복구 | Planned |
+| M3-T4 | 격리 계정·실 PostgreSQL 다중 연결/리플레이 회귀 | Planned |
