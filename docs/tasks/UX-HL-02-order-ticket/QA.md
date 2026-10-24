@@ -140,3 +140,12 @@
 - 수정 후 node --test frontend/order-interactions.test.mjs 42/42 PASS, 전체 node --test frontend/*.test.mjs 162/162 PASS(기존 160+신규 2). 모든 프런트 JavaScript node --check, npm --prefix backend run build (tsc --noEmit) PASS.
 - Python HTMLParser 두 HTML의 태그/고유 ID, 정적 CSP connect-src none·미연결 계정 tbody 5개·실주문 차단, git diff --check PASS.
 - 실제 브라우저·스크린리더 인수 미실행. 지갑/실거래·Sepolia 트랜잭션·운영 DB·원격 push/배포·권한 우회 없음.
+
+## 2026-10-25 UX-HL-02-M1 — DEMO Long/Short 버튼 방향 아이콘 검증
+
+- 시작 main HEAD 2a1a201, Git clean, origin/main보다 로컬 36커밋 앞섬. PROJECT_STATE/ROADMAP/Hyperliquid UX 레퍼런스, UX-HL-02 SPEC/TODO/QA/RESULT, 실제 frontend/main.js 및 테스트 확인.
+- 프로젝트 내부 .local-browser-qa Playwright/Chromium 약 643MB 설치. 비특권 사용자 unshare -Ur → Operation not permitted. Chromium 샌드박스 우회 없이 UX-HL-02-L2/UX-HL-01-P2 실브라우저 인수 미완료.
+- 재현: Short 선택 시 기존 텍스트와 CSS/ARIA는 Short로 변경되지만 화살표는 상승 ↗로 남는다. 기존 DOM 이벤트 회귀 2건 신규, 수정 전 2/2 FAIL.
+- frontend/main.js에서 같은 renderTicket 처리의 아이콘 span을 sideBuy?↗:↘ 방향으로 계산한다. 기존 주문 미리보기·검증·데이터·모델은 변경하지 않는다.
+- 재검증: 신규 2건 포함 실제 DOM 이벤트 44/44 PASS, 프런트 전체 164/164 PASS (162+2), 모든 프런트 JS 문법, npm --prefix backend run build의 tsc --noEmit PASS. HTMLParser/index.html/trade.html 중첩/고유 ID·정적 CSP connect-src none·계정 tbody 5개 미연결·git diff --check PASS.
+- 화면 실렌더링/보조공학·모바일 인수 미실행. 지갑/인증·실체인 트랜잭션·실거래·운영 DB·원격 Push/배포·보안 제한 우회 미실행.

@@ -170,7 +170,7 @@ function renderTicket(){
 
   const button=byId('preview-order');
   button.className='submit-order '+(sideBuy?'buy-submit':'sell-submit');
-  button.replaceChildren(document.createTextNode(sideBuy?'Preview Long Order ':'Preview Short Order '),node('span','','↗'));
+  button.replaceChildren(document.createTextNode(sideBuy?'Preview Long Order ':'Preview Short Order '),node('span','',sideBuy?'↗':'↘'));
   const leverageInput=byId('leverage').value;
   const leverageValid=validPreviewLeverage(leverageInput);
   const lever=Number(leverageInput);

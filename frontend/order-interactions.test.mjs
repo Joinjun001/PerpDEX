@@ -377,6 +377,36 @@ test('UX-HL-02-H1 active preset does not replace invalid draft unless quantity c
   assert.equal(id('quantity').value,'0.25');
   assert.equal(id('order-result').hidden,true);
 });
+test('UX-HL-02-M1 order preview direction arrow follows the selected Long or Short side',async()=>{
+  const app=await boot(),id=app.id;
+  const previewArrow=()=>id('preview-order').children.at(-1).textContent;
+  assert.equal(previewArrow(),'↗','default Long shows rising arrow');
+  id('sell-tab').dispatch('click');
+  assert.equal(previewArrow(),'↘','Short must not show rising Long arrow');
+  assert.equal(id('preview-order').className,'submit-order sell-submit');
+  assert.equal(id('sell-tab').getAttribute('aria-pressed'),'true');
+  id('limit-type').dispatch('click');
+  assert.equal(previewArrow(),'↘','Short direction survives type change');
+  id('sell-tab').dispatch('click');
+  assert.equal(previewArrow(),'↘','reselecting Short keeps direction');
+  id('buy-tab').dispatch('click');
+  assert.equal(previewArrow(),'↗','switching to Long restores rising arrow');
+  id('market-type').dispatch('click');
+  assert.equal(previewArrow(),'↗','Long direction survives Market selection');
+});
+
+test('UX-HL-02-M1 directional arrow does not change disabled, DEMO-only or review semantics',async()=>{
+  const app=await boot(),id=app.id;
+  id('sell-tab').dispatch('click');
+  assert.equal(id('preview-order').disabled,false);
+  assert.equal(id('preview-order').children[0].textContent,'Preview Short Order ');
+  assert.equal(id('preview-order').children.at(-1).textContent,'↘');
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  assert.match(id('order-result').children[1].children[0].children[1].textContent,/Short/);
+  assert.match(html,/LOCAL PREVIEW · NO EXECUTION/);
+  assert.match(html,/connect-src 'none'/);
+});
 test('UX-HL-02-L1 valid equivalent Limit Price editing preserves reviewed terms and DOM',async()=>{
   const app=await boot(),id=app.id;
   id('limit-type').dispatch('click');

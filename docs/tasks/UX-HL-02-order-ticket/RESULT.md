@@ -101,3 +101,10 @@
 - frontend/order-interactions.test.mjs: 실제 main.js 입력 이벤트로 가격 동치의 리뷰 보존/9항목 동일성·검증 불합격/가격 변경 후 자동 복구 금지를 검증하는 신규 2건(수정 전 FAIL).
 - 전체 프런트 162/162 PASS, 모든 JS 문법/TypeScript build/HTML 구조·고유 ID/CSP/Git diff PASS.
 - 실제 브라우저 UX-HL-02-L2 인수 미완료. 주문 금액/위험 정책 변경, 서버·지갑·실거래·DB/Push/배포 없음.
+
+## 2026-10-25 UX-HL-02-M1 — 로컬 완료
+
+- frontend/main.js: Long ↗, Short ↘ DEMO 버튼 시각 방향 동기화.
+- frontend/order-interactions.test.mjs: 실제 main.js에서 BUY/SELL, Market/Limit 변경/재클릭과 aria-pressed·DEMO 미리보기 경계의 신규 2건 회귀(수정 전 FAIL).
+- 전체 프런트 164/164 PASS, JS/TypeScript/HTML/CSP/git diff 검사 PASS. 서명·지갑·백엔드·실주문·운영 DB 연결 및 Push/배포 없음.
+- UX-HL-02-M2 실브라우저/스크린리더 인수는 Chromium 샌드박스 지원 환경에서만 수행 가능.

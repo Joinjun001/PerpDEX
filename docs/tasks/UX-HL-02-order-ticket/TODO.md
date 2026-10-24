@@ -75,3 +75,9 @@
 - [x] L1 Market/Limit·수량/레버리지·MOCK 입력/리뷰 계산/실주문 차단 등 기존 기능 회귀 유지
 - [x] L1 프런트 전체 162/162, 전체 JS 문법·TypeScript build·HTML 구조·고유 ID/CSP/git diff 검사
 - [ ] L2 실제 샌드박스 Chromium의 모바일·키보드/스크린리더에서 Limit Price 동일값 편집/리뷰 유지·무효화 인수
+
+- [x] M1 Short 선택 뒤 버튼 화살표가 ↗로 남는 결함을 실제 main.js 이벤트 테스트 신규 2건 수정 전 FAIL로 확인
+- [x] M1 BUY/SELL 방향에 따라 DEMO 미리보기 버튼 화살표 ↗/↘ 갱신
+- [x] M1 Market/Limit 전환, 방향 재선택, 기존 aria-pressed·Long/Short 텍스트와 미리보기 DEMO-only 동작 유지
+- [x] M1 전체 프런트 164/164, JS syntax/TypeScript build/HTML 구조·고유 ID/CSP/git diff 검증
+- [ ] M2 안전한 실제 브라우저에서 화살표 표시·모바일·키보드/스크린리더 인수 (Chromium 샌드박스 허용 환경 의존)
