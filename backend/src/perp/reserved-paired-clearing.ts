@@ -35,7 +35,7 @@ export async function applySimReservedPairedFill(transactions:OrderTransactionMa
     for(const leg of legs){
       await checkReservedReduceForPair(db,ctx,leg.account,leg.orderId,leg.side,price,qty,leg.version);
     }
-    const result=await applySimPairedFillWithinTransaction(db,trade,ctx,true);
+    const result=await applySimPairedFillWithinTransaction(db,trade,ctx,{buyerOrderId:trade.buyerOrderId,sellerOrderId:trade.sellerOrderId});
     for(const leg of legs){
       const delta=leg.side==='BUY'?result.buyer:result.seller;
       if(delta.closedQuantityAtomic!==qty||delta.openedQuantityAtomic!=='0'){

@@ -37,7 +37,7 @@ export async function applySimPartialReservedPair(transactions:OrderTransactionM
       await checkPartialReservedReduceForPair(db,ctx,leg.account,leg.orderId,
         leg.side,price,qty,leg.version);
     }
-    const result=await applySimPairedFillWithinTransaction(db,fill,ctx,true);
+    const result=await applySimPairedFillWithinTransaction(db,fill,ctx,{buyerOrderId:fill.buyerOrderId,sellerOrderId:fill.sellerOrderId});
     for(const leg of legs){
       const applied=leg.side==='BUY'?result.buyer:result.seller;
       if(applied.closedQuantityAtomic!==qty||applied.openedQuantityAtomic!=='0'){

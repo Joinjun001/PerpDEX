@@ -8,9 +8,10 @@ import {PGlite} from '@electric-sql/pglite';
 import {generatePrivateKey,privateKeyToAccount} from 'viem/accounts';
 import type {OrderTransactionManager} from '../src/orders/order-transactions.ts';
 import type {PerpPositionContext} from '../src/perp/position-engine.ts';
-import {applySimPairedFill,verifySimMarketOpenInterest,type SimPairedFill} from '../src/perp/paired-clearing.ts';
+import {applySimPairedFill,applySimPairedFillWithinTransaction,verifySimMarketOpenInterest,type SimPairedFill} from '../src/perp/paired-clearing.ts';
 import {applySimReservedPairedFill,type SimReservedPairedFill} from '../src/perp/reserved-paired-clearing.ts';
 import {applySimPartialReservedPair} from '../src/perp/partial-reserved-paired-clearing.ts';
+import {applySimPerpFillWithinTransaction} from '../src/perp/position-ledger.ts';
 import {reserveSimReduceOnly,type SimReduceOrderRequest,consumeSimReduceReservation,cancelSimReduceReservation} from '../src/perp/reduce-reservations.ts';
 const ALICE=privateKeyToAccount(generatePrivateKey()).address;
 const BOB=privateKeyToAccount(generatePrivateKey()).address;
@@ -34,7 +35,7 @@ function mgr(db:PGlite):OrderTransactionManager{return {withTransaction:fn=>db.t
   async query(sql,args=[]){const q=await tx.query(sql,[...args]);return {rows:q.rows,rowCount:q.affectedRows??null};},
 }))};}
 async function open(path?:string){const db=new PGlite(path);await db.waitReady;
-  for(const name of ['008_perp_margin_ledger','010_perp_position_ledger','011_perp_pair_clearing','012_perp_reduce_reservations']){
+  for(const name of ['008_perp_margin_ledger','010_perp_position_ledger','011_perp_pair_clearing','012_perp_reduce_reservations','013_perp_guarded_position_commit']){
     await db.exec(await readFile(fileURLToPath(new URL(`../sql/${name}.sql`,import.meta.url)),'utf8'));
   }return db;
 }
@@ -342,4 +343,95 @@ test('B2 changed OTHER open order oracle fingerprint rejects partial without con
     '0x'+'a'.repeat(64),other.buy.orderId]);
   await assert.rejects(applySimPartialReservedPair(mgr(db),trade(first,'20000000'),context()));
   assert.deepEqual(await counts(db),{perp_sim_paired_fills:1,perp_position_applications:2,perp_reduce_events:0});
+}));
+
+test('B3 raw SQL snapshot change under reduce-only guard must fail at COMMIT',()=>run(async db=>{
+  await prepare(db);await reserve(db);
+  const before=await db.query('SELECT size_signed_atomic,version FROM perp_position_snapshots WHERE account=$1',[ALICE.toLowerCase()]);
+  await assert.rejects(mgr(db).withTransaction(async tx=>{
+    await tx.query(`UPDATE perp_position_snapshots SET size_signed_atomic='90000000',
+       open_cost_numerator='5850000000000000',version=version+1,last_fill_id=$1
+       WHERE account=$2`,[id(),ALICE.toLowerCase()]);
+  }),/guard|position|receipt|paired/i);
+  const after=await db.query('SELECT size_signed_atomic,version FROM perp_position_snapshots WHERE account=$1',[ALICE.toLowerCase()]);
+  assert.deepEqual(after.rows,before.rows);
+}));
+
+test('B3 caller-supplied guarded=true on low-level M4 pair cannot skip reservation settlement',()=>run(async db=>{
+  await prepare(db);const o=await reserve(db);const t=trade(o);
+  await assert.rejects(mgr(db).withTransaction(tx=>applySimPairedFillWithinTransaction(tx,t,context(),true as unknown as {buyerOrderId:string;sellerOrderId:string})),
+    /guard|position|receipt|paired|reduc/i);
+  assert.equal((await counts(db)).perp_sim_paired_fills,1);
+  assert.equal((await counts(db)).perp_reduce_events,0);
+  assert.equal((await verifySimMarketOpenInterest(db,context())).openInterestAtomic,'100000000');
+}));
+
+test('B3 low-level single-account writer cannot silently commit under a reduce guard',()=>run(async db=>{
+  await prepare(db);await reserve(db);
+  const c=context();
+  await assert.rejects(mgr(db).withTransaction(tx=>applySimPerpFillWithinTransaction(tx,{
+    executionMode:'SIMULATION_ONLY',fillId:id(),account:ALICE,side:'SELL',
+    priceAtomic:'6500000',quantityAtomic:'10000000',expectedVersion:1,
+    chainId:c.config.chainId,verifyingContract:c.config.verifyingContract,
+    market:c.config.market,collateralToken:c.config.collateralToken,
+    configRevision:c.config.revision,
+  },c)),/guard|position|receipt|paired/i);
+  assert.equal((await counts(db)).perp_position_applications,2);
+}));
+
+test('B3 valid reservation IDs alone cannot bypass atomic reservation CONSUME at commit',()=>run(async db=>{
+  await prepare(db);const o=await reserve(db);const t=trade(o);
+  await assert.rejects(mgr(db).withTransaction(tx=>applySimPairedFillWithinTransaction(tx,t,context(),{
+    buyerOrderId:o.buy.orderId,sellerOrderId:o.sell.orderId,
+  })),/guard|receipt|paired/i);
+  assert.deepEqual(await counts(db),{perp_sim_paired_fills:1,perp_position_applications:2,perp_reduce_events:0});
+  assert.equal((await verifySimMarketOpenInterest(db,context())).openInterestAtomic,'100000000');
+  // The identical transaction can still execute through the FULL verified path.
+  const actual=await applySimReservedPairedFill(mgr(db),t,context());
+  assert.equal(actual.openInterest.openInterestAtomic,'60000000');
+}));
+
+test('B3 missing migration 013 forbids even a matching caller proof in the guarded M4 writer',async()=>{
+  const db=new PGlite();await db.waitReady;
+  try{
+    for(const name of ['008_perp_margin_ledger','010_perp_position_ledger','011_perp_pair_clearing','012_perp_reduce_reservations']){
+      await db.exec(await readFile(fileURLToPath(new URL(`../sql/${name}.sql`,import.meta.url)),'utf8'));
+    }
+    await prepare(db);const o=await reserve(db);const t=trade(o);
+    await assert.rejects(mgr(db).withTransaction(tx=>applySimPairedFillWithinTransaction(tx,t,context(),{
+      buyerOrderId:o.buy.orderId,sellerOrderId:o.sell.orderId,
+    })),/requires DB commit constraint 013/i);
+    assert.equal((await counts(db)).perp_position_applications,2);
+  }finally{await db.close();}
+});
+
+test('B3 raw SQL corruption of a previously valid guarded position cannot commit',()=>run(async db=>{
+  await prepare(db);const o=await reserve(db);await applySimReservedPairedFill(mgr(db),trade(o),context());
+  const before=await db.query('SELECT open_cost_numerator,version FROM perp_position_snapshots WHERE account=$1',[ALICE.toLowerCase()]);
+  await assert.rejects(mgr(db).withTransaction(async tx=>{
+    await tx.query(`UPDATE perp_position_snapshots
+      SET open_cost_numerator='99999999' WHERE account=$1`,[ALICE.toLowerCase()]);
+  }),/guard|position|receipt|paired/i);
+  const after=await db.query('SELECT open_cost_numerator,version FROM perp_position_snapshots WHERE account=$1',[ALICE.toLowerCase()]);
+  assert.deepEqual(after.rows,before.rows);
+}));
+
+test('B3 guard on ALICE/BOB does not block an unrelated account pair in the same market',()=>run(async db=>{
+  await prepare(db);await reserve(db);
+  const CAROL=privateKeyToAccount(generatePrivateKey()).address;
+  const DAN=privateKeyToAccount(generatePrivateKey()).address;
+  const tradeOther:SimPairedFill={executionMode:'SIMULATION_ONLY',fillId:id(),
+    buyerAccount:CAROL,sellerAccount:DAN,priceAtomic:'6500000',quantityAtomic:'10000000',
+    buyerExpectedVersion:0,sellerExpectedVersion:0};
+  const r=await applySimPairedFill(mgr(db),tradeOther,context());
+  assert.equal(r.openInterest.openInterestAtomic,'110000000');
+  assert.equal((await counts(db)).perp_reduce_events,0);
+}));
+
+test('B3 SQL-only mutation without journal on guarded DELETE is rejected',()=>run(async db=>{
+  await prepare(db);await reserve(db);
+  await assert.rejects(mgr(db).withTransaction(async tx=>{
+    await tx.query('DELETE FROM perp_position_snapshots WHERE account=$1',[ALICE.toLowerCase()]);
+  }));
+  assert.equal((await counts(db)).perp_position_applications,2);
 }));

@@ -22,6 +22,7 @@ const migrations = [
   "../sql/010_perp_position_ledger.sql",
   "../sql/011_perp_pair_clearing.sql",
   "../sql/012_perp_reduce_reservations.sql",
+  "../sql/013_perp_guarded_position_commit.sql",
 ];
 
 try {

@@ -7,6 +7,7 @@ import {validatePerpMarketConfig} from './market-config.ts';
 import {validateMockPriceSnapshot} from './price-snapshot.ts';
 import type {PerpPositionContext,PerpPositionFill,PerpPositionTransition} from './position-engine.ts';
 import {applySimPerpFillWithinTransaction} from './position-ledger.ts';
+import {checkPartialReservedReduceForPair} from './reduce-reservations.ts';
 import {hashPerpMarketConfig} from './sim-order.ts';
 
 export class PairedClearingError extends Error {
@@ -80,8 +81,14 @@ export async function computeSimMarketOpenInterest(
 export async function applySimPairedFill(transactions:OrderTransactionManager,trade:SimPairedFill,ctx:PerpPositionContext):Promise<Readonly<PairedExecutionResult>>{
   return transactions.withTransaction(db=>applySimPairedFillWithinTransaction(db,trade,ctx));
 }
-/** Composition primitive: guarded only after acquiring market and both account guards. */
-export async function applySimPairedFillWithinTransaction(db:SqlRunner,trade:SimPairedFill,ctx:PerpPositionContext,guarded=false):Promise<Readonly<PairedExecutionResult>>{
+/**
+ * Low-level paired write. Guarded writes require actual bound reservation IDs
+ * AND enabled commit-time DB fencing (013), NEVER a caller-controlled boolean.
+ * A proof alone cannot commit without M5 events: the deferred SQL trigger
+ * rejects any mismatch at the transaction boundary.
+ */
+export interface SimPairReservationProof {buyerOrderId:string;sellerOrderId:string;}
+export async function applySimPairedFillWithinTransaction(db:SqlRunner,trade:SimPairedFill,ctx:PerpPositionContext,reservationProof?:SimPairReservationProof):Promise<Readonly<PairedExecutionResult>>{
   if(!trade||trade.executionMode!=='SIMULATION_ONLY'||typeof trade.fillId!=='string'||!ID.test(trade.fillId)){
     throw new PairedClearingError('canonical simulation-only fill required');
   }
@@ -115,7 +122,28 @@ export async function applySimPairedFillWithinTransaction(db:SqlRunner,trade:Sim
     const already=await db.query(`SELECT fill_id FROM perp_sim_paired_fills
       WHERE chain_id=$1 AND verifying_contract=$2 AND fill_id=$3`,[c.chainId,c.verifyingContract,trade.fillId]);
     if(already.rows.length)throw new PairedClearingError('paired fill ID already processed');
-    if(!guarded){
+    if(reservationProof!==undefined){
+      if(!reservationProof||typeof reservationProof.buyerOrderId!=='string'||
+         typeof reservationProof.sellerOrderId!=='string'){
+        throw new PairedClearingError('valid per-account reservation IDs required: no bypass flag');
+      }
+      const enforced=await db.query(`SELECT COUNT(*)::INTEGER AS count FROM pg_trigger
+        WHERE tgname='perp_guarded_position_commit' AND tgenabled<>'D'
+          AND tgrelid=to_regclass('perp_position_snapshots')`);
+      if(Number((enforced.rows[0] as {count:number}|undefined)?.count)!==1){
+        throw new PairedClearingError('guarded paired write requires DB commit constraint 013');
+      }
+      // Both account guards are already held by the B1/B2 outer writer,
+      // ordered by account; re-evaluate exact order/quote/margin inside TX.
+      const legs=[{account:buyer,id:reservationProof.buyerOrderId,side:'BUY' as const,
+        expected:trade.buyerExpectedVersion},{account:seller,id:reservationProof.sellerOrderId,
+        side:'SELL' as const,expected:trade.sellerExpectedVersion}]
+        .sort((a,b)=>a.account.localeCompare(b.account));
+      for(const leg of legs){
+        await checkPartialReservedReduceForPair(db,ctx,leg.account,leg.id,leg.side,
+          price.toString(),amount.toString(),leg.expected);
+      }
+    } else {
       const available=await db.query("SELECT to_regclass('perp_reduce_guards') AS oid");
       if((available.rows[0] as {oid:string|null}|undefined)?.oid){
         const found=await db.query(`SELECT account FROM perp_reduce_guards WHERE

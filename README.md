@@ -196,3 +196,7 @@ forge build && forge test -vv
 ## M5-T3-B2 — 다중 Reduce-only 예약 부분 체결·위험 화해 (모의 전용)
 
 `backend/src/perp/partial-reserved-paired-clearing.ts`는 양쪽 모두 기존 포지션을 줄이는 **SIMULATION_ONLY** 체결에서 여러 열린 Reduce-only 주문의 예약 용량을 같은 M4 양측 포지션·OI 트랜잭션 안에서 유지합니다. 일부 체결 후 남은 주문 각각을 새 포지션/증거금/오라클/정책 조건으로 재검사하여 `SUM(남은 예약) <= abs(새 포지션)`을 보장합니다. 체결 없는 shadow consume는 기존 position fill 기록으로 인정하지 않습니다. **실 주문·실 자금·M3 자금 버킷 이동·저수준 writer 전체 잠금은 아직 지원하지 않습니다.** 세부 내용: `docs/tasks/M5-T3-B2-partial-reservations/SPEC.md`.
+
+## M5-T3-B3-A — 모의 영속 포지션의 DB 커밋 무결성 방어
+
+`backend/sql/013_perp_guarded_position_commit.sql`은 Reduce-only guard 계정의 M4 포지션/시장 OI 변경에 대해 COMMIT 시점에 M5 주문 소진 영수증·양측 체결 ID/수량·포지션 버전을 검증하는 지연 제약 트리거입니다. `backend/src/perp/paired-clearing.ts`의 임의 `guarded=true` 옵션을 제거하고 양측 예약 ID를 실제 검증하도록 바꿨습니다. **SQL 013 설치/활성이 필요하며, 실 거래·실 자금·체인 실행을 승인하는 기능이 아닙니다.** DB 고권한 역할/트리거 비활성화 및 guard/events 원장 자체 위변조를 막을 권한 설계, 기존 DB 일치성 검사, 실제 PostgreSQL 다중 연결/부하 QA는 미완료입니다. 상세 내용: `docs/tasks/M5-T3-B3-guarded-position-commit/SPEC.md`.
