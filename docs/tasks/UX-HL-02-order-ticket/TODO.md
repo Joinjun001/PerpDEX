@@ -49,3 +49,9 @@
 - [x] H1 정상 검토 결과 및 다른 빠른 수량 간 변경 동작 실행형 회귀 2건 추가
 - [x] H1 프런트 전체 136/136 PASS, JS syntax·TS build·HTML 구조/ID/CSP/git diff 검증
 - [ ] H2 실 브라우저·모바일/키보드/스크린리더에서 빠른 수량 버튼 재선택 동작 인수 (환경 미가용)
+
+- [x] I1 네 빠른 수량 버튼에서 aria-pressed 미선언 및 직접 수량 변경 시 상태가 노출되지 않는 결함을 수정 전 테스트 2건 FAIL로 확인
+- [x] I1 초기 HTML의 수량 0.05만 aria-pressed=true, 다른 세 수량은 false로 명시
+- [x] I1 main.js renderTicket에서 CSS active와 aria-pressed를 동일 조건으로 갱신하고 수량 직접 입력/프리셋 클릭/일치하는 프리셋 없는 경우 검증
+- [x] I1 전체 프런트 138/138, JS syntax·TypeScript build·HTML 구조/고유 ID/CSP 및 git diff 검사
+- [ ] I2 실제 브라우저/키보드·스크린리더에서 선택 수량의 상태 읽기 및 모바일 배치 인수 (환경 미가용)

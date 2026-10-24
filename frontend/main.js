@@ -151,7 +151,11 @@ function renderTicket(){
     byId('margin').textContent='—';
     button.disabled=true;
   }
-  document.querySelectorAll('[data-qty]').forEach(b=>b.classList.toggle('active',b.dataset.qty===quantity));
+  document.querySelectorAll('[data-qty]').forEach(b=>{
+    const selected=b.dataset.qty===quantity;
+    b.classList.toggle('active',selected);
+    b.setAttribute('aria-pressed',String(selected));
+  });
 }
 function dismissDemoReview(){
   byId('order-result').hidden=true;

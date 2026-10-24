@@ -96,3 +96,14 @@
 - 지정 이벤트 테스트 22/22 PASS. 전체 node --test frontend/*.test.mjs 136/136 PASS (기존 134+신규 2), node --check frontend/main.js 및 order-interactions.test.mjs PASS, npm --prefix backend run build (tsc --noEmit) PASS.
 - Python HTMLParser index.html/trade.html 구조·고유 ID, CSP connect-src none, 미연결 계정 tbody 5개 및 network/wallet transaction API 부재, git diff --check PASS.
 - 실제 브라우저 픽셀·터치/키보드·스크린리더·실주문·API/지갑/운영 DB·Sepolia 거래·배포/원격 push는 수행하지 않았다.
+
+## 2026-10-25 UX-HL-02-I1 — 빠른 수량 버튼 aria-pressed 정합성 QA
+
+- 시작 HEAD fb0232a, Git clean, origin/main보다 로컬 23커밋 앞섬. PROJECT_STATE/ROADMAP/Hyperliquid UX 가이드 및 UX-HL-02 SPEC·TODO·QA·RESULT·main.js·trade.html 실제 파일 검토.
+- chromium/chromium-browser/google-chrome/firefox와 Node Playwright/Puppeteer 미가용. 설치·권한 우회 없음. UX-HL-02-H2/G2·UX-HL-01-I2 실제 브라우저 검증 계속 미완료.
+- 재현: 모든 data-qty 버튼은 초기/실행 중 CSS active만 토글하므로 aria-pressed 없음. 수정 전 실제 main.js DOM 이벤트 테스트 1건 및 HTML 정적 초기 상태 검사 1건 FAIL 확인.
+- 변경: frontend/trade.html 네 버튼에 초기 aria-pressed(true는 0.05만)를 추가. frontend/main.js renderTicket에서 quantity === b.dataset.qty와 동일한 판정으로 CSS active 및 aria-pressed를 동시에 설정한다.
+- 추가 frontend/order-interactions.test.mjs 1건: 초기 수량 0.05, 프리셋 0.25 클릭, 수동 0.07(모두 false), 수동 0.01과 동일 프리셋 재클릭의 선택 상태·CSS 정합성을 검증. frontend/order-ticket.test.mjs 1건: HTML 네 버튼 중 정확히 0.05만 초기 aria-pressed true.
+- 수정 후 관련 36/36 PASS, 전체 node --test frontend/*.test.mjs **138/138 PASS** (기존 136+신규 2). Node JS 문법검사 main.js/order-ticket.test.mjs/order-interactions.test.mjs PASS, npm --prefix backend run build(tsc --noEmit) PASS.
+- Python HTMLParser trade.html/index.html 태그/고유 ID, CSP connect-src none, 지갑·계정 데이터 5개 tbody 공백, git diff --check PASS.
+- 진짜 스크린리더/브라우저 접근성 트리·모바일 뷰포트/터치 인수, 실지갑/백엔드 API·Sepolia·운영 DB·실거래/푸시/배포 없음.

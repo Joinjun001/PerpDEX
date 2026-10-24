@@ -91,6 +91,15 @@ test('UX-HL-02-D1 range input exposes validation help via ARIA',()=>{
  assert.match(js,/leverage:leverageInput/);
  assert.match(js,/byId\('leverage-error'\)\.hidden=leverageValid/);
 });
+test('UX-HL-02-I1 static quick quantity buttons declare exactly one selected toggle',()=>{
+  const buttons=[...html.matchAll(/<button[^>]+data-qty="([^"]+)"[^>]*>/g)];
+  assert.equal(buttons.length,4);
+  for(const [,value] of buttons){
+    const markup=buttons.find(([,qty])=>qty===value)?.[0];
+    assert.match(markup,/aria-pressed="(?:true|false)"/);
+    assert.equal(markup.includes('aria-pressed="true"'),value==='0.05');
+  }
+});
 test('UX-HL-02-A order UI offers accessible type selector and hidden-by-default Limit input',()=>{
  for(const id of ['market-type','limit-type','limit-price-field','limit-price','limit-price-help','limit-price-error','preview-price-label']){
    assert.match(html,new RegExp('id="'+id+'"'));

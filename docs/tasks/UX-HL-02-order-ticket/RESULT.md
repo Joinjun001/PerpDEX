@@ -72,3 +72,11 @@
 - frontend/order-interactions.test.mjs: 수정 전 실패 재현 및 수정 후 검증 2건 추가. 프런트 전체 136/136 PASS, JS syntax·TypeScript build·HTML/CSP/git diff PASS.
 - Market/Limit·Long/Short 주문 DEMO, 기존 수량·레버리지/Limit 검증, MOCK 시세·차트/호가·계정 미연결 상태 유지. 실거래·지갑/API/온체인·운영 DB·원격 push/배포 없음.
 - 다음 UX-HL-02-H2: 브라우저/스크린리더가 가용해질 때 빠른 수량 재선택과 포커스 인수. 준비 전에는 독립적으로 재현한 실제 결함이 있을 때만 추가 TASK를 시작한다.
+
+## 2026-10-25 UX-HL-02-I1 — 로컬 구현 완료
+
+- frontend/trade.html: 빠른 수량 0.01/0.05/0.1/0.25의 초기 aria-pressed 속성을 명시, 선택된 0.05만 true.
+- frontend/main.js: renderTicket에서 active CSS와 aria-pressed를 동일한 현재 quantity 조건으로 동기화. 수동 입력이 어떤 프리셋과도 일치하지 않을 때 네 버튼 전부 false.
+- frontend/order-ticket.test.mjs와 frontend/order-interactions.test.mjs: 정적/실제 이벤트 회귀 2건. 수정 전 FAIL 재현 후 전체 프런트 138/138 PASS, JS/TS/HTML/CSP/Git 검사 PASS.
+- UX-HL-02-H1의 같은 빠른 수량 재클릭 검토 보존과 변경 시 검토 무효화는 기존 기능을 유지한다.
+- 실제 브라우저·스크린리더 인수 UX-HL-02-I2는 미완료. 지갑/API/실자금/온체인·운영 DB·push/배포 미실행.

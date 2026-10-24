@@ -91,6 +91,8 @@ PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성�
 - **UX-HL-02-G2 (Pending browser)**: 실제 브라우저에서 선택 버튼/키보드·모바일/스크린리더 인수 미실행.
 - **UX-HL-02-H1 (Local Completed)**: 같은 빠른 수량 버튼 재클릭에도 기존 검토 결과가 사라지는 실제 상태 전환 오류 수정. 다른 수량 변경 시만 기존 재계산·검토 무효화. 신규 2건 포함 프런트 136/136 PASS.
 - **UX-HL-02-H2 (Pending browser)**: 빠른 수량 재클릭의 모바일·키보드·스크린리더 실 브라우저 인수 미실행.
+- **UX-HL-02-I1 (Local Completed)**: 빠른 수량 버튼에 CSS active만 있고 ARIA 선택 상태가 없던 결함 수정. 네 프리셋의 aria-pressed 초기 및 동적 동기화, 신규 2건 포함 프런트 138/138 PASS.
+- **UX-HL-02-I2 (Pending browser)**: 실제 브라우저·키보드/스크린리더에서 선택 상태 전달 및 모바일 인수 미실행.
 - 계정별 실제 read API/wallet 인증이 준비되지 않아 UX-HL-01-B2-B2-B2는 게이트 보류.
 
 ## M9 — Sepolia 테스트넷 무기한 선물 거래 MVP (신규 최종 목표)

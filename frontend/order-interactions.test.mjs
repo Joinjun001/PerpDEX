@@ -377,6 +377,28 @@ test('UX-HL-02-H1 active preset does not replace invalid draft unless quantity c
   assert.equal(id('quantity').value,'0.25');
   assert.equal(id('order-result').hidden,true);
 });
+test('UX-HL-02-I1 quick quantity buttons expose selected state through aria-pressed',async()=>{
+  const app=await boot(),id=app.id;
+  const buttons=['0.01','0.05','0.1','0.25'];
+  const expectPressed=selected=>{
+    for(const amount of buttons){
+      assert.equal(app.qty(amount).getAttribute('aria-pressed'),String(amount===selected),
+        'quick qty '+amount+' when selected '+selected);
+      assert.equal(app.qty(amount).classList.contains('active'),amount===selected);
+    }
+  };
+  expectPressed('0.05');
+  app.qty('0.25').dispatch('click');
+  expectPressed('0.25');
+  id('quantity').value='0.07';
+  id('quantity').dispatch('input');
+  expectPressed(null);
+  id('quantity').value='0.01';
+  id('quantity').dispatch('input');
+  expectPressed('0.01');
+  app.qty('0.01').dispatch('click');
+  expectPressed('0.01');
+});
 test('B2-A changes in symbol, side, quantity, leverage, limit and type hide stale preview',async()=>{
   const app=await boot(),id=app.id;
   const show=()=>{
