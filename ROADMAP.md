@@ -48,6 +48,6 @@ M3 시작 TASK: `docs/tasks/M3-T1-market-risk-foundation/{SPEC,TODO,RESULT,QA}.m
 | TASK | 구현 및 검증 | 상태 |
 | --- | --- | --- |
 | M3-T1 | trusted MarketConfig, BigInt fixed-point, mock PriceSnapshot, tick/lot/오라클 경계 | Local Completed (13개 신규 테스트; 운영 정책 미승인) |
-| M3-T2 | 영속 증거금 이중 분개 원장, 계정별 available/reserved/position margin와 잔액·중복 불변식 | Next |
-| M3-T3 | 서명 주문 전 증거금 예약·취소 해제의 DB 원자성/복구 | Planned |
+| M3-T2 | 영속 증거금 이중 분개 원장, 계정별 available/reserved/position margin와 잔액·중복 불변식 | In Progress (A 내부 이동·두 분개 로컬 구현 완료, B 예치 증빙/실정산 통합은 보안 승인 대기) |
+| M3-T3 | 서명 주문 전 증거금 예약·취소 해제의 DB 원자성/복구 | Next — 공개 주문 v1 선물 활성화 금지, 내부 안전 통합 우선 |
 | M3-T4 | 격리 계정·실 PostgreSQL 다중 연결/리플레이 회귀 | Planned |

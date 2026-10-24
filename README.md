@@ -148,3 +148,11 @@ forge build && forge test -vv
 ```
 
 `test:postgres-local`은 고정 이름의 개발 DB와 임의의 고유 스키마에서만 작동하며 운영 `DATABASE_URL`을 사용하지 않습니다. 외부 RPC/배포/실토큰 이동은 하지 않습니다.
+
+## M3-T2 — 격리 증거금 내부 원장 (실제 자금 아님)
+
+`backend/sql/008_perp_margin_ledger.sql`은 계정/시장/담보/체인별 가용(AVAILABLE)·예약(RESERVED)·포지션(POSITION) 원자 단위 잔액과 2-leg 이중 분개를 기록하는 영속 스키마입니다. 관리용 마이그레이션 목록에만 등록했으며 운영 DB에는 적용하지 않았습니다.
+
+`backend/src/perp/margin-ledger.ts`는 멱등 `operationId`, 트랜잭션/행 잠금, 잔액 보존 검사를 통해 내부 계정의 `RESERVE`, `RELEASE`, `ALLOCATE`, `UNALLOCATE`만 지원합니다. **실제 자금 입금·잔액 발행/지급 API는 없고**, `backend/test/perp-margin-ledger.test.ts`의 테스트용 시작 잔액은 PGlite 테스트 코드에서만 주입하는 검증되지 않은 fixture입니다. 공개 주문·체결·청산·출금 경로에도 연결하지 않았습니다. `RELEASE`/`UNALLOCATE`가 향후 허가된 주문 취소·포지션 종료와 원자적으로 연결되기 전에는 거래소 기능으로 노출하면 안 됩니다.
+
+검증: `cd backend && npm run build && npm test` (전체 백엔드 174/174). 실제 거래소의 담보 보호는 M8 ClearingHouse 및 승인된 정책/실자산 검증 전까지 미구현입니다.
