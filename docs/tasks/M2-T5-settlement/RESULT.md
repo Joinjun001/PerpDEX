@@ -1,6 +1,6 @@
 # M2-T5 RESULT
 
-상태: In Progress — M2-T5-A/B/C 로컬 구현 완료, D~E 미완료
+상태: In Progress — M2-T5-A/B/C/D 로컬 구현 완료, E 미완료
 
 ## 2026-10-24 — M2-T5-A 정책 미승인 Settlement Outbox
 
@@ -27,3 +27,12 @@
 - `backend/scripts/migrate.ts`: 수동 마이그레이션 목록에 SQL 006 추가. 운영 DB에는 적용하지 않음.
 - `backend/test/settlement-dry-run.test.ts`: 실제 서명·체결원장/Outbox 및 PGlite 통합을 통한 11개 신규 테스트. 일관성/변조·동시 등록/선점, 모의 ABI 인코딩, 잘못된 승인 차단, SQL 삽입·결과 저장 오류, 중단 후 UNKNOWN 격리, 재시작·중복 거부를 검증. `npm run build` 성공 및 전체 `npm test` **133/133 통과**.
 - 미완료: M2-T5-D 실제 RPC가 아닌 신뢰 가능한 read-only 모의 receipt/체인 상태 재조정과 불명확한 브로드캐스트 처리; M2-T5-E 전체 릴리스 QA. 외부 승인 없이는 브로드캐스트/자격증명/운영 마이그레이션 금지.
+
+## 2026-10-24 — M2-T5-D 모의 영수증 read-only 재조정/영속 복구 (이번 회차)
+
+- 시작 Git: `main` 작업 트리 clean, 직전 로컬 커밋 `73ff70e`, `origin/main`보다 5커밋 앞섬. M2-T5-D가 현재 첫 미완료 항목임을 PROJECT_STATE/ROADMAP/SPEC/TODO/QA/RESULT로 확인.
+- `backend/sql/007_settlement_reconciliations.sql`: 서명 도메인과 체결 ID를 가진 `settlement_intents` 복합 고유 인덱스/FK, 별도 `MOCK_READONLY` 증거 원장, 고유 tradeId, 영속 mock 관측 상태·증거/블록 해시 및 카운터.
+- `backend/src/settlement/reconcile.ts`: 테스트 전용 메모리 read-only Provider, 입력 체인/Vault/거래ID/Tx·블록 정보·확인 횟수/컨트랙트 `Settled` 이벤트·`settledTrades` 일치 검증, `UNCONFIRMED/RECHECK_REQUIRED/MOCK_VERIFIED/MOCK_FAILED/UNKNOWN` 상태 및 터미널 역행 차단, 상충된 잠정 증거 UNKNOWN 격리, SQL FOR UPDATE 기반 단일 트랜잭션 동시 관측 처리. 실제 호출·비밀키·RPC·broadcast 없음.
+- `backend/scripts/migrate.ts`: 관리자가 별도 실행할 수동 SQL 목록에 007 추가. 운영 DB 실제 마이그레이션 없음.
+- `backend/test/settlement-reconcile.test.ts`: 실제 PGlite 서명·체결·Outbox·정산 의도 기반 mock 영수증 13개 신규 테스트. 미확정, 확인 임계값, 모의 성공·실패, 도메인/이벤트 변조 거부, 모순·역행 격리, 병렬 확인, DB 오류 원자성, 디스크 DB 재시작 및 UNKNOWN 의도 검증. `npm run build` 성공, 전체 `npm test` **146/146 통과**.
+- **중요:** 성공/실패는 `MOCK_*` 상태일 뿐 *실제 온체인 성공/실패가 아님*. 브로드캐스트가 한 번도 수행되지 않은 전용 로컬 증거이며, 실제 체인 정산 판정은 사용자/운영 검증 없이는 수행하거나 주장할 수 없다. 다음 TASK는 M2-T5-E 로컬 전체 QA/릴리스 절차 정리.

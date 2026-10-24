@@ -123,3 +123,9 @@ docker compose up -d
 `backend/src/settlement/dry-run.ts`의 `recordApprovedSettlementIntent`는 신뢰된 정책·per-fill 승인 서명을 기존 체결원장과 Outbox에 대조한 뒤 `PREPARED`로 기록합니다. `executeSettlementDryRun`은 `CollateralVault.settle`의 calldata만 **로컬에서 인코딩**하고 `SIMULATED` 결과 해시를 영속화합니다. 이는 **체인 트랜잭션 hash/receipt/성공을 의미하지 않습니다**. `SIMULATING` 중단·오류 발생 시 자동 재실행을 허용하지 않으며 명시적 격리 API를 통해 `UNKNOWN` 처리합니다. 실제 지갑·RPC·가스·배포 권한 사용 기능은 제공하지 않습니다.
 
 로컬 검증: `cd backend && npm run build && npm test` 또는 `node --experimental-strip-types --test test/settlement-dry-run.test.ts`. 006 스키마의 실제 운영 DB 적용·실제 체인 송신·영수증 처리는 아직 승인 및 후속 단계가 필요합니다.
+
+## M2-T5-D — 모의 영수증 조회·재조정 (실제 체인 검증 아님)
+
+`backend/sql/007_settlement_reconciliations.sql`은 출처가 `MOCK_READONLY`인 관측 결과만 영속 기록합니다. `backend/src/settlement/reconcile.ts`의 `InMemoryMockReceiptProvider`는 오로지 메모리 fixture를 읽고, `reconcileMockSettlement`은 실제 M1 Vault의 `Settled(tradeId, token, from, to, amount)` 이벤트 필드/상태/확인 횟수 및 정산 의도·도메인과의 일치를 검증합니다. **MOCK_VERIFIED와 MOCK_FAILED는 실제 체인 정산 결과가 아닙니다.** 모의 영수증 누락·네트워크 부재·블록 충돌은 재확인/UNKNOWN으로 기록하고 자동 전송하거나 다시 실행하지 않습니다. 운영 환경의 영수증 검증·최종성·체인 재구성, Foundry 및 실제 RPC/settledTrades 검증은 별도 승인·실행이 필요합니다.
+
+로컬 테스트: `cd backend && npm run build && npm test` (신규 `test/settlement-reconcile.test.ts`). 스키마 007은 운영 DB에 적용하지 않았습니다.

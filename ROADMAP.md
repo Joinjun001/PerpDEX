@@ -22,4 +22,4 @@
 | M2-T2 | EIP-712 주문 서명 검증, nonce 및 replay 방지 | Completed (로컬 검증; 실서버 QA 이관) |
 | M2-T3 | Order REST API와 주문 저장/조회/취소 흐름 | Completed (로컬 HTTP/PGlite; 운영 DB QA 이관) |
 | M2-T4 | 가격-시간 우선 Matching Engine 및 부분 체결 | Completed (A~D 로컬 구현 및 통합 QA; 운영 PostgreSQL/온체인 정산 미검증 별도) |
-| M2-T5 | 매칭 결과 settlement 연동, 통합 테스트 및 M2 릴리스 정리 | In Progress (A Outbox/B 서명 정책/C 영속 dry-run 로컬 완료, D~E 남음) |
+| M2-T5 | 매칭 결과 settlement 연동, 통합 테스트 및 M2 릴리스 정리 | In Progress (A~D 영속 Outbox/정책 서명/dry-run/모의 영수증 로컬 완료, E 최종 QA 남음) |

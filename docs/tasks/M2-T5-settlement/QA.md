@@ -1,6 +1,6 @@
 # M2-T5 QA
 
-상태: M2-T5-A/B/C 로컬 단위/통합 검증; 실제 PostgreSQL 운영 검증 및 온체인/Foundry 미실행
+상태: M2-T5-A/B/C/D 로컬 단위/통합 검증; 실제 PostgreSQL 운영 검증 및 온체인/Foundry 미실행
 
 ## 2026-10-24 — M2-T5-A Outbox
 
@@ -19,3 +19,10 @@
 
 - 신규 `settlement-dry-run.test.ts` **11개**: 인증된 체결·정책/서명에 한 번만 지시 등록, 결정론적 `CollateralVault.settle` ABI calldata/BigInt 금액, 동시 6개 요청 중 정확히 한 선점, 위조·만료 승인·타 도메인·미준비 Outbox 차단, 변경된 정책/금액 덮어쓰기 거부, 실패 SQL 삽입 전체 rollback·성공 재시도, 모의 실행 결과 저장 실패 후 `SIMULATING` 정지·`UNKNOWN` 격리·자동 재실행 차단, PGlite 디스크 재시작 후 상태/해시 지속, DB JSON 변조 탐지, 복구 경계 검사.
 - `cd backend && npm run build` 타입 검사 성공. `cd backend && npm test` 전체 **133 passed / 0 failed** (기존 122 + 신규 11). 실제 PostgreSQL 멀티프로세스 검증, 운영 006 마이그레이션, 실제 트랜잭션 서명·RPC·체인 receipt/Foundry는 실행하지 않았다.
+
+## 2026-10-24 — M2-T5-D 모의 영수증·재조정 QA
+
+- `node --experimental-strip-types --test test/settlement-reconcile.test.ts`: **13/13 신규 테스트 통과**. 미존재 영수증 UNCONFIRMED/접근 오류·pending RECHECK_REQUIRED, 확인 횟수 증가 후 MOCK_VERIFIED, 확정 mock REVERTED MOCK_FAILED, 이벤트·거래 상태/도메인/액수 위조 거부, 이전 블록 증거와 충돌 시 UNKNOWN 격리, 완료 후 상태 역행·재확정 차단, 같은 tradeId 동시 확인 고유성, SQL 제약 위반 롤백, PGlite 디스크 재시작 시 증거 지속, 재송신 없는 UNKNOWN 원장 검사.
+- 초기 마이그레이션 실행에서 기존 006 테이블에 `(chain_id, verifying_contract, fill_id)` 복합 고유 인덱스가 없어 FK 42830 오류를 발견했고 007에 `CREATE UNIQUE INDEX IF NOT EXISTS`를 추가하여 재검증 통과.
+- `cd backend && npm run build` 통과. `cd backend && npm test` 전체 **146 passed / 0 failed** (기존 133개 + 신규 13개).
+- 실제 PostgreSQL 다중 연결·운영 데이터 적용, 실제 영수증/체인 최종성·재조직, 실제 `settledTrades` RPC, Foundry·실자산 전송·원격 push는 검증하지 않음. mock VERIFIED는 실제 정산 완료가 아님.
