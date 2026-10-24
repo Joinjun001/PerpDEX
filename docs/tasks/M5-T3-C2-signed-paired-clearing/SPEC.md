@@ -5,7 +5,8 @@ M3 signed v2 비-reduce-only OPEN 주문 두 개, M4 PAIRED 포지션/OI, M5 위
 
 ## 하위 단계
 - C2-A (이번 회차): 동일 DB 트랜잭션에서 시장 OI를 선점 잠그고 두 계정의 EIP-712 서명/nonce/영속 M3 RESERVE 이중분개, M4 position/version, M5 주문 체결 직전 위험을 검증하는 읽기 전용 쌍 증명.
-- C2-B (다음): SQL 불변식과 함께 안전하게 제한된 양측 전량 opening fill, 주문 소진, M3 RESERVED→POSITION 할당, M4 두 계정/OI 영속 원자 기록을 구체적으로 설계·구현.
+- **C2-B1 (이번 회차)**: SQL 015 지연 커밋 트리거로 signed OPEN 원장과 nonce·M3 RESERVE, 예약 합계 하한, M4 포지션·양측 paired-fill 우회 및 미연계 M3 ALLOCATE를 fail-closed 처리. API는 여전히 읽기 전용이며 신규 실행 권한 없음.
+- **C2-B2 (다음)**: 승인된 DB 스키마의 정확한 양측 전량 opening fill 영수증과 상태 전이를 설계하고, 한 TX에서 M3 RESERVED→POSITION 할당·M4 양측 저널/OI·signed 주문 소진이 모두 검증되어야만 커밋되도록 구현. SQL 015의 현재 fail-closed 실행 방어를 '검증된 C2-B2 영수증' 조건으로만 좁히며 임의 우회 플래그 금지.
 - C3 (후속): 부분 체결/복수 OPEN 예약/취소 경합, realized PnL/fee/funding 등의 회계 정산.
 
 ## 불변식

@@ -5,6 +5,8 @@
 - [x] 시장·계정 canonical locking, 모든 작업 read-only
 - [x] 양측 pre/post 위험평가와 기존 fill ID 차단
 - [x] 위조, 취소, 원장 변조, OI·버전·SQL 오류 회귀
-- [ ] C2-B 양측 M4/OI·M3 할당·영속 주문 소진을 1TX 내 기록하고 SQL 제약 구현
+- [x] C2-B1 SQL 015: 무연계 M4 포지션·paired fill·M3 ALLOCATE 커밋 차단, signed 상태/nonce/원장 무결성 및 예약 증거금 하한 검사
+- [x] C2-B1 PGlite SQL/DML 우회·마이그레이션 재적용·정상 취소 및 무관 계정 회귀
+- [ ] C2-B2 양측 M4/OI·M3 할당·영속 주문 소진의 하나의 TX 영수증/commit-time SQL 제약 및 실패·경합 회귀
 - [ ] C3 미체결 예약·부분 체결 및 PnL/fee/funding/취소 경쟁 정산
 - [ ] M5-T4 실제 테스트용 PostgreSQL 동시성/역할/재시작 QA
