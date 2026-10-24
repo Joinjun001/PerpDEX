@@ -17,9 +17,9 @@
 | 참고 대상 | PerpDEX 목표 | 현재 상태 | 우선순위 |
 |---|---|---|---|
 | 시장 정보 헤더: Mark·Oracle·24h 변화·Funding·OI | BTC-USD-PERP 상단의 압축된 지표 바 | 모의 가격만 제공 | P0 |
-| 차트·호가창·주문 티켓 | 데스크톱 3열, 모바일에서 차트→주문→접이식 호가 | 데모 2열 + 하단 호가 | P0 |
-| 하단 포지션·주문 관리 탭 | Positions / Open Orders / Order History / Trade History / Funding History | Portfolio 빈 상태 | P0 |
-| Market / Limit, Long / Short, Size, Leverage | 주문 패널의 유효성·주문 확인·상태 표시 | Long/Short, 수량·레버리지 모의 미리보기 | P0 |
+| 차트·호가창·주문 티켓 | 데스크톱 3열, 모바일에서 차트→주문→접이식 호가 | 로컬 3열 + 760px 이하 호가/체결 접기·펼치기 (실 브라우저 QA 전) | P0 |
+| 하단 포지션·주문 관리 탭 | Positions / Open Orders / Order History / Trade History / Funding History | 계정 ARIA 5탭 + 미연결 빈 상태 | P0 |
+| Market / Limit, Long / Short, Size, Leverage | 주문 패널의 유효성·주문 확인·상태 표시 | Market/Limit·Long/Short 모의 주문/9항목 검토 | P0 |
 | 주문 상태와 재시도·취소 피드백 | OPEN / PARTIALLY_FILLED / FILLED / CANCELED 및 정산 상태 | 백엔드 로컬 기반, UI 미연결 | P0 |
 | Available / Reserved / Position Margin, PnL | 출처 검증된 위험·담보 데이터만 노출 | 단순 예상 증거금 미리보기 | P0/백엔드 연계 |
 | GTC / IOC / Post Only, Reduce Only | Market/Limit 이후 지원; 서버/DB 검증 선행 | 일부 로컬 엔진 기반만 존재 | P1 |

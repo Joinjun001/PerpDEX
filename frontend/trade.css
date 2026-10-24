@@ -214,3 +214,29 @@
 .trade-shell .order-panel input[aria-invalid="true"]{color:#ff9ea9}
 .trade-shell .order-panel .input-shell:has(input[aria-invalid="true"]){border-color:#c25c6b}
 @media(max-width:650px){.trade-shell .preview-review-heading{align-items:flex-start}.trade-shell .preview-review-row{padding:9px 0}.trade-shell .preview-review-row dd{max-width:60%}}
+
+/* UX-HL-01-D1: mobile-first depth disclosure, never hide sample panels on desktop. */
+.trade-shell .market-depth-toggle{display:none}
+@media(max-width:760px){
+  .trade-shell .market-depth-toggle:not([hidden]){
+    display:flex;
+    grid-column:1 / -1;
+    width:100%;min-height:44px;gap:12px;align-items:center;
+    justify-content:space-between;padding:12px 15px;
+    border:1px solid var(--border);border-radius:9px;
+    color:#d7efe5;background:var(--panel);
+    font-size:12px;font-weight:700;text-align:left;
+    cursor:pointer;
+  }
+  .trade-shell .market-depth-toggle:hover{background:#1b2d35}
+  .trade-shell .market-depth-toggle:focus-visible{
+    outline:2px solid var(--blue);outline-offset:2px;
+  }
+  .trade-shell .market-depth-toggle #market-depth-toggle-status{
+    color:var(--green);font-size:11px;white-space:nowrap;
+  }
+  .trade-shell .market-column[data-mobile-collapsed="true"]>.orderbook-panel,
+  .trade-shell .market-column[data-mobile-collapsed="true"]>.trade-log-panel{
+    display:none!important;
+  }
+}

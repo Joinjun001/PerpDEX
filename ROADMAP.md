@@ -53,6 +53,7 @@ PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성�
 - **UX-HL-01-B2-B2-B1 (Local Completed)**: 기존 공개 주문 조회는 계정 인증 API가 아님을 검증, 오프라인 계정 세션/동시 query orchestration·전후 세션 재확인·Abort/stale 차단 테스트 (frontend 55/55 PASS).
 - **UX-HL-01-B2-B2-B2 (Next, dependent)**: 서버 소유권 인증/계정별 read API가 준비되면 실제 브라우저/렌더러 연결. 준비 전에는 현재 static disconnected 유지하고 C1 검증으로 전환.
 - **UX-HL-01-C (Follow-up)**: 실제 브라우저 너비별 시각 확인 및 모바일·접근성 보완.
+- **UX-HL-01-D1 (Local Completed)**: 모바일 화면용 가상 호가·최근 체결 접기/펼치기 버튼, 760px 이하 전용 CSS·ARIA/키보드 기본 button·progressive enhancement. 신규 6건, 프런트 85/85 PASS. 실제 브라우저/터치 QA 보류.
 
 ### Hyperliquid 주문 티켓 UX 진행
 

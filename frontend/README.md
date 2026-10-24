@@ -16,6 +16,8 @@ UX-HL-02-B1: order-review.mjs의 구조화된 9항목 읽기 전용 주문 검�
 
 UX-HL-02-B2-A: order-interactions.test.mjs는 실제 main.js를 테스트용 DOM에 import하여 Market/Limit·Long/Short·시장/수량/가격/레버리지 전환과 모의 submit·Escape·오류 포커스를 검증합니다. 실제 브라우저 렌더링·스크린리더 인수를 대체하지 않습니다.
 
+모바일 호가 UI (UX-HL-01-D1): 화면 너비 760px 이하에서는 MOCK 호가/최근 체결을 필요할 때 펼칠 수 있는 버튼이 제공됩니다. 브라우저에서 JS가 실행되지 않으면 샘플 패널은 숨겨지지 않고 그대로 보입니다. 데스크톱 3열은 유지되며, 실제 모바일 렌더링/스크린리더 인수는 미실행입니다. 자세한 QA는 docs/tasks/UX-HL-01-terminal-layout/에 있습니다.
+
 ## 페이지 구조
 
 - index.html (서비스 소개): 프로젝트 비전, 기술 구조, 개발 로드맵, 거래 화면 진입 버튼. 거래 입력/차트를 포함하지 않습니다.

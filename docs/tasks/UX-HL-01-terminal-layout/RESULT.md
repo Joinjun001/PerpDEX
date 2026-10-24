@@ -44,3 +44,12 @@
 - 실제 앱 account-tabs.js, order preview, 거래 DOM 및 GitHub Pages는 계정 미연결/빈 기록 상태로 유지. 인증·지갑·fetch·DB·온체인·배포·push 없음.
 - 다음 UX-HL-01-B2-B2-B2: 서버 측 wallet 계정 소유권 검증·계정 read API 준비 후 프런트 실제 연결, 아니면 독립 가능한 UX-HL-01-C 브라우저 QA.
 - 검증: 전체 frontend 55/55 PASS, backend 주문 read HTTP 6/6 PASS, TypeScript build·JS 문법·HTML 구조·Git diff 검사 PASS.
+
+## 2026-10-25 UX-HL-01-D1 — 모바일 접이식 시장 깊이 보기 로컬 완료
+
+- frontend/trade.html: 시장 정보 중간 컬럼에 숨겨진 native button, 구분 가능한 market-depth-book/trades ID 및 aria-controls 추가. 서명/데이터/API와 무관.
+- frontend/mobile-market-depth.js: 버튼 이벤트 연결 후에만 버튼 공개, 모바일 기본 접힘 + 접기/펼치기 클릭 상태/aria-expanded/안내 문구 갱신, 마크업 불일치 시 구성 오류.
+- frontend/trade.css: <=760px에서만 토글 표시/44px 터치 타깃/포커스·호가와 체결 패널 접힘. 데스크톱 기존 컬럼은 항상 보이도록 CSS 스코프 제한.
+- frontend/mobile-market-depth.test.mjs: 신규 6건, 전체 프런트엔드 85/85 PASS. TS 빌드/JS syntax/HTML 구조 및 CSP 안전성 PASS.
+- 미수행: 실제 브라우저 픽셀 레이아웃/스와이프/스크린리더·테스트넷 계정/API 거래. UX-HL-01-C 및 UX-HL-02-B2-B 시각 검증은 독립 미완료.
+- 다음 독립 UX 후보: UX-HL-03 계정 탭의 미연결 기능 설명·모바일 표 탐색 접근성을 개선하되 실 데이터/위험 정보를 가공하지 말 것. 또는 실제 browser가 가용한 경우 보류된 C/B2-B부터 검증.

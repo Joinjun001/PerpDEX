@@ -11,3 +11,8 @@
 - [x] B2-B2-B1 백엔드 공개 주문 read 라우트/계정 권한 부재 조사, 오프라인 verifySession/query 콜백 주입 흐름·세션 버전/재인증/중복·stale 요청/취소 신호 QA
 - [ ] B2-B2-B2 계정 인증/접근 제어가 확인된 전용 서버 read endpoint 준비 시 브라우저 UI/계정 연동 E2E; 미준비 시 C1 QA 우선
 - [ ] C1 브라우저 wide/tablet/mobile 실제 렌더링·키보드 시각 인수(브라우저 가용 시)
+
+- [x] D1 모바일 MOCK Order Book / Recent Trades 묶음 접기·펼치기 UI 및 aria-expanded/aria-controls·접근성 포커스
+- [x] D1 JS 미실행 시 샘플 패널을 숨기지 않는 progressive enhancement와 데스크톱 3열 무변경
+- [x] D1 신규 토글 6개 단위/정적 회귀, 기존 전체 85/85, JavaScript·TypeScript·HTML/CSP 검사
+- [ ] D2 실제 브라우저/모바일 viewport/터치/보조공학 렌더링 인수 (현재 도구 미가용; C와 병행 보류)

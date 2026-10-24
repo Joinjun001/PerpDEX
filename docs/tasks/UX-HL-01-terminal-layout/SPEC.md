@@ -52,3 +52,13 @@
 3. 겹친 요청은 abort signal과 request token으로 폐기하고, 계정 전환/disconnect/reconnect/sessionVersion 역행·동일 version 다른 계정에서 이전 기록 제거.
 4. 요청 이후 재검증에서 계정·세션이 바뀌거나 검증 실패하면 disconnected, 데이터 형식 실패는 error, 정상 빈 결과는 empty. 다른 탭 요청의 실패는 독립 처리.
 5. 실제 네트워크·브라우저·wallet/계정 인증/백엔드 schema 변경 없이 순수 비동기 테스트만 구현, 기존 주문·ARIA/렌더링 회귀 유지.
+
+
+## UX-HL-01-D1 (2026-10-25) — 모바일 호가·최근 체결 접기
+
+- Hyperliquid UX 가이드에 있는 모바일 우선순위: 시장 헤더 → 차트 → 주문 → 접이식 호가/거래 기록 → 계정 탭.
+- 대상: frontend/trade.html, trade.css, mobile-market-depth.js. 기존 데스크톱 3열, MOCK sample 표/주문/계정 탭과 백엔드·M5~M9는 변경하지 않는다.
+- 760px 이하: 호가창/최근 체결의 단일 공개/접기 버튼, aria-expanded 및 aria-controls 두 패널 연결, 44px 이상 터치 타깃, 포커스 표시. 작은 화면에서는 처음에 둘 다 접힌다.
+- 760px 초과: 공개 여부 상태와 관계없이 호가/최근 체결은 항상 데스크톱 컬럼에 표시하고 토글 버튼은 보이지 않는다.
+- 스크립트가 실패하면 toggle hidden 및 두 샘플 패널 표시 상태를 유지해 콘텐츠가 사라지지 않는다. JavaScript 정상 실행에서만 토글 노출·모바일 접기 속성 초기화.
+- 실제 접근성/뷰포트 픽셀 QA를 수행하지 않았으므로 대응 미디어쿼리 및 이벤트 로직 검증을 시각 렌더링 완료로 인정하지 않는다.
