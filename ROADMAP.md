@@ -77,7 +77,9 @@ PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성�
 
 - **UX-HL-04-A1 (Local Completed, disabled only)**: 미인증 포지션/잔량·위험 정책으로 인해 사용할 수 없는 Reduce Only를 주문 폼에 명시적 비활성 옵션과 제한 이유로 표시. 실제 주문/API 및 데모 계산 미연결. 신규 2건 포함 프런트 140/140 PASS. 문서 docs/tasks/UX-HL-04-reduce-only-availability/.
 - **UX-HL-04-A2 (Pending browser)**: Reduce Only 비활성 컨트롤의 실제 모바일/키보드/스크린리더 인수. 샌드박스 지원 환경 필요.
-- **UX-HL-04-B1 (Next independent)**: 미인증 Available/Reserved/Position Margin이 실제 보유값으로 오인되지 않도록 미연결 UI 강화.
+- **UX-HL-04-B1 (Local Completed, unavailable only)**: 주문 티켓에서 Available/Reserved/Position Margin을 각각 — 미연결, UNAVAILABLE 출처·MOCK 참고 증거금 차이와 함께 표시. 신규 3건 포함 프런트 143/143 PASS. 문서: docs/tasks/UX-HL-04-margin-availability/.
+- **UX-HL-04-B2 (Pending browser)**: Account Margin의 실제 모바일·키보드·스크린리더 상태 인수는 Chromium 샌드박스 지원 환경 의존.
+- **UX-HL-04-C1 (Potential independent)**: 미지원 거래 편의 안내를 실제 사용자 필요와 안전 경계에 따라 검토. 승인되지 않은 포지션/위험 데이터 숫자는 만들지 않음.
 - **UX-HL-04 execution (Dependent)**: 서명, Reduce Only 위험 정책, 포지션 감소·잔량 검증 및 M5~M8 승인 뒤 별도 구현.
 
 ### Hyperliquid 주문 티켓 UX 진행

@@ -24,8 +24,10 @@ test('UX-HL-01-A: market header labels simulated values and unavailable real met
     const escaped=label.replace(/[.*+?^$()|[\]{}]/g,'\\$&');
     assert.match(html,new RegExp('>'+escaped+'<'));
   }
-  assert.equal((html.match(/class="metric-unavailable"/g)||[]).length,4);
-  assert.equal((html.match(/미연결<\/small>/g)||[]).length,4);
+  const metrics=html.match(/<section class="market-metrics"[\s\S]*?<\/section>/)?.[0];
+  assert.ok(metrics,'missing top-level market metrics');
+  assert.equal((metrics.match(/class="metric-unavailable"/g)||[]).length,4);
+  assert.equal((metrics.match(/미연결<\/small>/g)||[]).length,4);
   assert.match(html,/Reference <span>MOCK<\/span>/);
   assert.match(html,/Sample change <span>MOCK<\/span>/);
 });

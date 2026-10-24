@@ -282,3 +282,18 @@
   border:1px solid #4a5d6b;border-radius:4px;padding:3px 6px;margin-left:auto;
 }
 .trade-shell .reduce-only-help{font-size:11px;line-height:1.55;color:#90a6b7;margin:8px 0 0}
+
+/* UX-HL-04-B1 — actual account margin is unavailable, never a made-up balance. */
+.trade-shell .account-margin-status{
+  margin:12px 0;padding:12px;
+  border:1px solid #345061;border-radius:9px;background:#142530;min-width:0;
+}
+.trade-shell .account-margin-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 10px}
+.trade-shell .account-margin-heading h3{margin:0;color:#d5e6ef;font-size:12px;font-weight:750}
+.trade-shell .account-margin-source{font-size:8px;font-weight:800;letter-spacing:.055em;color:#a9bfcc}
+.trade-shell .account-margin-list{display:grid;grid-template-columns:minmax(0,1fr);gap:0;margin:10px 0 0}
+.trade-shell .account-margin-row{display:flex;justify-content:space-between;align-items:baseline;min-width:0;gap:10px;padding:8px 0;border-top:1px solid #2c414f}
+.trade-shell .account-margin-row dt{font-size:11px;color:#a9bdc9}
+.trade-shell .account-margin-status dd{margin:0;text-align:right;font-size:12px;font-weight:650;color:#bac7d1;white-space:nowrap}
+.trade-shell .account-margin-status dd small{font-size:10px;font-weight:500;color:#91a8b7}
+.trade-shell .account-margin-help{font-size:10px;line-height:1.6;color:#9aafbd;margin:9px 0 0}

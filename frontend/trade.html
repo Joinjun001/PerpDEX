@@ -93,6 +93,18 @@
             <p id="quantity-error" class="price-error" role="alert" hidden>수량은 0.0001~100 범위의 유효한 숫자로 입력하세요.</p>
             <div class="quick-amounts" role="group" aria-label="빠른 수량 선택"><button type="button" data-qty="0.01" aria-pressed="false">0.01</button><button type="button" data-qty="0.05" aria-pressed="true" class="active">0.05</button><button type="button" data-qty="0.1" aria-pressed="false">0.1</button><button type="button" data-qty="0.25" aria-pressed="false">0.25</button></div>
             <div class="leverage-label"><label for="leverage">Leverage</label><output id="leverage-output">3×</output></div><input class="leverage-input" id="leverage" type="range" min="1" max="10" step="1" value="3" aria-label="모의 레버리지" aria-describedby="leverage-error"><p id="leverage-error" class="price-error" role="alert" hidden>모의 레버리지는 1~10 사이의 정수만 허용됩니다.</p><div class="leverage-ticks"><span>1×</span><span>3×</span><span>5×</span><span>10×</span></div>
+            <section class="account-margin-status" aria-labelledby="account-margin-title" aria-describedby="account-margin-help" data-source="UNAVAILABLE">
+              <div class="account-margin-heading">
+                <h3 id="account-margin-title">Account Margin</h3>
+                <span class="account-margin-source">ACCOUNT DATA · UNAVAILABLE</span>
+              </div>
+              <dl class="account-margin-list">
+                <div class="account-margin-row"><dt>Available Margin</dt><dd id="available-margin" class="margin-unavailable">— <small>미연결</small></dd></div>
+                <div class="account-margin-row"><dt>Reserved Margin</dt><dd id="reserved-margin" class="margin-unavailable">— <small>미연결</small></dd></div>
+                <div class="account-margin-row"><dt>Position Margin</dt><dd id="position-margin" class="margin-unavailable">— <small>미연결</small></dd></div>
+              </dl>
+              <p id="account-margin-help" class="account-margin-help">지갑 및 인증된 계정·증거금 조회 API가 미연결 상태입니다. 실제 잔액이나 주문 가능 금액을 표시하지 않습니다. 아래 Indicative margin은 입력 기반 MOCK 미리보기이며 사용 가능한 증거금이 아닙니다.</p>
+            </section>
             <div class="reduce-only-option" role="group" aria-labelledby="reduce-only-label">
               <div class="reduce-only-row">
                 <input id="reduce-only" name="reduceOnly" type="checkbox" disabled aria-describedby="reduce-only-help">
