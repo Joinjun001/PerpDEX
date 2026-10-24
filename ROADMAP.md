@@ -31,7 +31,7 @@
 
 | 마일스톤 | 목적 | 상태 |
 | --- | --- | --- |
-| **M3** | 고정소수점/신뢰 시장·오라클 입력, 이중 분개 격리 담보·주문 증거금 예약 | **In Progress — M3-T1 로컬 구현 완료, M3-T2~ 남음** |
+| **M3** | 고정소수점/신뢰 시장·오라클 입력, 이중 분개 격리 담보·주문 증거금 예약 | **Local foundation QA completed — M3-T1/T2-A/T3-A/T4 완료, M3-T2-B 및 T3-B는 실거래 승인/포지션·리스크 의존성 대기** |
 | **M4** | 순롱·순숏 포지션, 부분 체결·평균 진입가·realized/unrealized PnL, OI 영속 | Planned (M3 선행) |
 | **M5** | 레버리지·초기/유지증거금 위험 엔진, signed order v2·reduce-only·원자적 체결 게이트 | Planned (M4 선행) |
 | **M6** | funding index/rate 및 주기적 롱·숏 펀딩 분개·재시작 복구 | Planned (M5 선행) |
@@ -50,4 +50,9 @@ M3 시작 TASK: `docs/tasks/M3-T1-market-risk-foundation/{SPEC,TODO,RESULT,QA}.m
 | M3-T1 | trusted MarketConfig, BigInt fixed-point, mock PriceSnapshot, tick/lot/오라클 경계 | Local Completed (13개 신규 테스트; 운영 정책 미승인) |
 | M3-T2 | 영속 증거금 이중 분개 원장, 계정별 available/reserved/position margin와 잔액·중복 불변식 | In Progress (A 내부 이동·두 분개 로컬 구현 완료, B 예치 증빙/실정산 통합은 보안 승인 대기) |
 | M3-T3 | 서명 주문 전 증거금 예약·취소 해제의 DB 원자성/복구 | In Progress: A v2 SIMULATION_ONLY 예약·취소 원자성 로컬 완료, B 부분 체결/포지션 위험 검사 연결 대기 |
-| M3-T4 | 격리 계정·실 PostgreSQL 다중 연결/리플레이 회귀 | Next (임시 개발용 DB·서명 shadow 예약/취소 동시성 확인) |
+| M3-T4 | 격리 계정·실 PostgreSQL 다중 연결/리플레이 회귀 | Local Completed (실 PostgreSQL 15 seed 8/8, 서버 재시작 후 verify 1/1, 기존 M2 PG 4/4) |
+
+### 현재 활성 개발: M4 포지션 엔진
+
+- **M4-T1 (Next):** 무기한 선물의 정수 수량·평균진입가·증감/반전·Realized/Unrealized PnL을 순수 TypeScript 상태 전이 모델로 구현하고 과도한 overflow/반올림·자산 스케일·계정/시장 격리 테스트. 실제 담보/정산·매칭/체결/청산과 연결하지 않음.
+- M4-T2~: 체결별 포지션 반영, 순롱·순숏/OI 영속, 양측 이중 분개 및 재생. M5: 주문 위험/포지션 승인과 원자적 예약. 별도 승인 전 실 주문 활성화 금지.

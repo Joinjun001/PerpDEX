@@ -162,3 +162,7 @@ forge build && forge test -vv
 `backend/src/perp/sim-order.ts`는 **SIMULATION_ONLY EIP-712 v2** 주문·취소 서명과 신뢰된 시장 정책 전체 해시/로컬 oracle 검증을 사용합니다. 주문 nonce/새로운 `perp_sim_orders` 저장/이중 분개 증거금 예약이 한 트랜잭션에서 성공 또는 함께 롤백되고, 별도 주문 취소 서명이 nonce tombstone/정확한 원래 예약금 해제를 원자적으로 처리합니다. `009_perp_sim_orders.sql`은 수동 관리자 마이그레이션 목록에만 추가되었고 운영 DB는 변경하지 않았습니다.
 
 이 함수는 **공개 주문 API, M2 v1 matching/fill, Vault, 실제 자산/온체인 실행에 연결하지 않았습니다**. 포지션·위험 엔진 없는 부분 체결 후 예약 증감은 구현하지 않았고, 실거래용 collateral/수수료/청산 정책이 승인되지 않았으므로 모의 계산액을 실제로 사용할 수 없습니다. 테스트: `cd backend && node --experimental-strip-types --test test/perp-sim-order.test.ts`.
+
+## M3-T4 — 실 PostgreSQL 다중 연결 shadow 주문·마진 QA
+
+승인된 개발용 PostgreSQL 15(Unix 소켓, TCP 비활성, 테스트 DB, 별도 `perpdex_qa_<12hex>` 스키마)에서 EIP-712 v2 **SIMULATION_ONLY** 주문의 동시 Nonce 접수·예약/취소 경합·잔액 초과 방지·이중 분개 실패 롤백 및 PostgreSQL 서버 재시작 복구를 검증했습니다. 명령: `cd backend && PERPDEX_TEST_PG_SOCKET=... PERPDEX_TEST_PG_SCHEMA=... PERPDEX_TEST_PG_PHASE=seed npm run test:postgres-perp`; 실제 서버 재시작 후 같은 스키마로 `PERPDEX_TEST_PG_PHASE=verify` 실행합니다. 결과/사람 승인 게이트: `docs/tasks/M3-T4-postgres-margin-concurrency/QA.md`. 개발용 검증만으로 포지션·온체인·운영 출금이 활성화되지 않습니다.

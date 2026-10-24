@@ -7,3 +7,7 @@
 - **모의 실행 전용**: 실제 시장 risk/mark snapshot 공급·청산·funding/PnL, 서명 v2 공개 API/매칭·부분 체결, 실 PostgreSQL 여러 연결, 실제 담보 예치/출금·Vault 보호, 운영 마이그레이션/배포·push 미검증/미실행.
 
 - `cd backend && npm run build` 성공, `cd backend && npm test` 전체 **184/184** 통과, `git diff --check` 통과.
+
+## M3-T4 후속 PostgreSQL 검증
+
+- 실제 PostgreSQL 15.19 다중 연결 및 서버 재시작 QA: 8개 정상 동시성 시나리오 + 재시작 후 1개 복구 시나리오 모두 통과. `docs/tasks/M3-T4-postgres-margin-concurrency/QA.md` 참고. M3-T3-B 실제 체결/예약 조정은 계속 미구현.
