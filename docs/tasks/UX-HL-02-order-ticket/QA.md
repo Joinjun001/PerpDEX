@@ -200,3 +200,13 @@
 - 수정 후 핵심 3파일 node --test frontend/order-interactions.test.mjs frontend/order-review.test.mjs frontend/order-ticket.test.mjs 78/78 PASS, 전체 node --test frontend/*.test.mjs 198/198 PASS (기존 196+2). 전체 frontend JS node --check 및 npm --prefix backend run build(tsc --noEmit) PASS.
 - Python HTMLParser frontend/index.html·frontend/trade.html 태그 중첩·고유 ID, CSP connect-src none/form-action none, 미연결 계정 tbody 5개, 초기 정적 aria-describedby/도움말/비활성 Preview 및 git diff --check PASS.
 - 실제 Chromium/스크린리더/모바일 음성·시각 인수 미실행. 실거래·지갑/계정 API·Sepolia 트랜잭션·운영 DB·원격 Push/배포·자격증명/샌드박스 우회 없음.
+
+## 2026-10-25 UX-HL-02-S1 — change 이벤트-only 주문 값 변경 회귀
+
+- 시작 로컬 main HEAD 5f907f8, Git clean, origin/main보다 56커밋 ahead. PROJECT_STATE/ROADMAP·Hyperliquid UX reference·UX-HL-01-U1/UX-HL-02-R1 SPEC/TODO/QA/RESULT 및 실제 frontend/main.js, trade.html, preview-model, order-review, 모바일/계정 탭·기존 테스트 확인.
+- 브라우저: Playwright/Chromium .local-browser-qa 약 643MB 존재. 비특권 runuser -u node -- unshare -Ur true 명령은 Operation not permitted. 샌드박스/권한 우회 없이 UX-HL-01-U2/T2, UX-HL-02-R2/S2 실제 브라우저 인수 보류.
+- 수정 전 신규 2건 FAIL: 정상 검토를 생성하고 quantity=0.2로 값만 변경한 뒤 change만 발행하면 이전 검토 패널이 여전히 visible. Limit=40000으로 change만 발행해도 앞선 가격의 검토가 visible. 이는 JS addEventListener('input')만 등록한 기존 동작의 누락이다.
+- 수정: frontend/main.js의 기존 수량·Limit 가격·레버리지 콜백을 각 이름 있는 공용 핸들러로 바꾸어 input/change를 함께 구독. 검토된 수치의 동등성 비교·검토 무효화 및 renderTicket 재검증은 기존 알고리즘 그대로 재사용.
+- 수정 후 신규 frontend/order-interactions.test.mjs 2건 PASS: change-only 수정·잘못된 값/수정 복구 및 참고 USD 금액·리뷰 감춤 확인. 대상 node --test frontend/order-interactions.test.mjs 61/61 PASS, 전체 node --test frontend/*.test.mjs 204/204 PASS(기존 202+신규2).
+- 전체 frontend JS node --check, npm --prefix backend run build(tsc --noEmit), Python HTMLParser index.html/trade.html 구조·고유 ID, CSP connect-src none/form-action none, 계정 미연결/비실거래 고지, git diff --check PASS.
+- 실 Chrome/스크린리더/모바일 인수 미실행. 실제 API·실주문·Sepolia 트랜잭션·운영 DB·자격증명·원격 push·배포·보안 우회 없음.

@@ -155,3 +155,9 @@
 - 정적 거래 폼은 정상 상태에서 중립적인 안내(quantity-help, limit-price-help, leverage-help)만 참조한다. 수량은 0.0001~100(현재 자산 기준), 레버리지는 1~10×의 모의 입력 범위를 명시하며 진짜 위험엔진/실거래와 구분한다.
 - 기존 renderTicket 검증 결과에 맞춰 aria-invalid/오류 hidden과 동일한 분기로 오류 ID를 aria-describedby에 조건부 추가하거나 제거한다. 즉 수량은 quantity-help[ quantity-error], 가격은 limit-price-help[ limit-price-error], 레버리지는 leverage-help[ leverage-error]가 된다.
 - 기존 Market/Limit 상태, 유효성 범위, review 활성 조건, 값·주문 미리보기, CSP/미연결 및 승인 제약은 변경하지 않는다. R2 실제 브라우저·스크린리더 인수는 보안 제한을 우회하지 않고 보류한다.
+
+## UX-HL-02-S1 (2026-10-25) — change-only 입력 커밋에서 오래된 모의 검토 제거
+
+- 재현된 거래 흐름 결함: 기존 main.js는 수량·Limit 가격·레버리지 변화에 input 이벤트만 구독하였다. 입력 값이 바뀌었더라도 change 이벤트만 발생하는 입력 커밋 경로(브라우저 값 복원, 일부 보조 입력, 통합/자동화 이벤트)에서는 기존 검토 패널·참고 금액·입력 오류 상태가 변경 전 주문 조건으로 남았다.
+- 세 필드의 원래 input 처리 코드를 각각 단일 핸들러로 보존하고 input/change 모두 해당 함수를 구독한다. 수정된 가격/수량/레버리지가 이전 검토와 다를 때 기존 검토를 숨기고 renderTicket으로 참고 금액·유효성·비활성 버튼 상태를 동기화한다. 기존과 값이 유효하고 수치적으로 동일하면 검토 유지(중복 input/change 경로에서도 무의미한 초기화 없음).
+- 기존 MODE Market/Limit·Long/Short, 전환별 검토 초기화, 숫자 범위·접근성, DEMO-only/계정 미연결 및 CSP 정책 보존. 실제 브라우저의 change-only 상황 인수는 UX-HL-02-S2에서 별도 수행하며 샌드박스를 우회하지 않는다.

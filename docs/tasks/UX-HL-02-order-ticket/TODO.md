@@ -112,3 +112,10 @@
 - [x] R1 기존 정적 aria-describedby를 단일 오류 연결로 기대한 회귀 2건을 새 안내/조건부 오류 계약에 맞게 갱신
 - [x] R1 프런트 전체 198/198·JS syntax·TypeScript build·HTML 구조/CSP/git diff 검사
 - [ ] R2 실제 Chromium 모바일·키보드/스크린리더에서 정상/오류/복구 설명 음성 안내 인수
+
+- [x] S1 change 이벤트만 전달되는 수량 변경으로 기존 주문 검토가 남는 결함을 수정 전 실패 테스트 재현
+- [x] S1 change-only Limit 가격 변경으로 오래된 검토가 남는 결함을 수정 전 실패 테스트 재현
+- [x] S1 세 입력 input/change 이벤트가 동일한 기존 정합성 검증 및 stale preview 제거 함수를 공유하도록 변경
+- [x] S1 변경 후 무효/복구 수량 및 무효 Limit 가격의 미리보기 차단·오류 표시, 레버리지 변경 검증
+- [x] S1 프런트 전체 204/204·JS 문법·TypeScript 빌드·HTML 구조/CSP/git diff 검사
+- [ ] S2 정상 Chromium/모바일·키보드/스크린리더에서 자동 완성/복원·change-only 입력과 input+change 중복의 검토 동기화 인수

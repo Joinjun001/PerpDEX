@@ -709,6 +709,48 @@ test('UX-HL-02-I1 quick quantity buttons expose selected state through aria-pres
   app.qty('0.01').dispatch('click');
   expectPressed('0.01');
 });
+test('UX-HL-02-S1 a change-only quantity update invalidates stale DEMO review',async()=>{
+  const app=await boot(),id=app.id;
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  id('quantity').value='0.2';
+  id('quantity').dispatch('change');
+  assert.equal(id('order-result').hidden,true,
+    'a committed change event must never leave a review for old quantity visible');
+  assert.equal(id('reference-price').textContent,'$65,240.50');
+  id('quantity').value='0';
+  id('quantity').dispatch('change');
+  assert.equal(id('preview-order').disabled,true);
+  assert.equal(id('quantity-error').hidden,false);
+  id('quantity').value='0.05';
+  id('quantity').dispatch('change');
+  assert.equal(id('preview-order').disabled,false);
+  assert.equal(id('quantity-error').hidden,true);
+});
+
+test('UX-HL-02-S1 change-only Limit and leverage edits keep review synchronized',async()=>{
+  const app=await boot(),id=app.id;
+  id('limit-type').dispatch('click');
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  id('limit-price').value='40000.00';
+  id('limit-price').dispatch('change');
+  assert.equal(id('order-result').hidden,true,
+    'a committed different Limit price must invalidate the old preview');
+  assert.equal(id('reference-price').textContent,'$40,000.00');
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  id('leverage').value='5';
+  id('leverage').dispatch('change');
+  assert.equal(id('order-result').hidden,true,
+    'a committed changed leverage must invalidate the old preview');
+  assert.equal(id('leverage-output').textContent,'5×');
+  id('limit-price').value='-10';
+  id('limit-price').dispatch('change');
+  assert.equal(id('preview-order').disabled,true);
+  assert.equal(id('limit-price-error').hidden,false);
+  assert.equal(id('order-result').hidden,true);
+});
 test('B2-A changes in symbol, side, quantity, leverage, limit and type hide stale preview',async()=>{
   const app=await boot(),id=app.id;
   const show=()=>{

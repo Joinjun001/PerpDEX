@@ -145,3 +145,10 @@
 - frontend/order-interactions.test.mjs: 정상→오류→복구에서 수량/Limit 가격/레버리지의 접근성 설명 ID 정확성 2건 신규 수정 전 FAIL. frontend/order-review.test.mjs, frontend/order-ticket.test.mjs는 이전 정적 오류 ID 검사를 새 계약에 맞게 갱신.
 - 전체 프런트 198/198 PASS 및 JS/TS/HTML/CSP/Git diff PASS. 실제 스크린리더 인수는 UX-HL-02-R2 미완료.
 - M5~M9·실계정/지갑·실주문·실체인·운영 DB·원격 push/배포 제한 유지.
+
+## 2026-10-25 UX-HL-02-S1 — change-only 입력에서 오래된 주문 검토 방지 로컬 완료
+
+- frontend/main.js: 수량·Limit 가격·레버리지의 기존 검토 동등성 판정·참고 금액/오류 갱신 함수에 input과 change 이벤트를 연결. 실제 수정 시 오래된 preview 제거, 기존 정상 상태 유지.
+- frontend/order-interactions.test.mjs: change-only 수량/Limit/레버리지 값 변경·미리보기 제거, 참고 가격/금액, 무효 입력의 차단 및 복구 신규 2건. 두 신규 회귀는 수정 전 FAIL 확인.
+- 전체 프런트 204/204 PASS, JS 문법/TS build/HTML/CSP/Git diff PASS. 실제 거래·지갑·API 요청 및 계정 데이터는 계속 미연결.
+- S2 실제 Chromium/모바일 보조입력·스크린리더 인수 미완료. M5~M9 서버·DB·Sepolia·원격 push/배포 관련 기존 승인 게이트 유지.

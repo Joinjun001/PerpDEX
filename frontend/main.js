@@ -299,7 +299,7 @@ for(const [type,id] of [['MARKET','market-type'],['LIMIT','limit-type']]){
     byId('order-result').hidden=true;
   });
 }
-byId('limit-price').addEventListener('input',()=>{
+const onLimitPriceEdit=()=>{
   const price=byId('limit-price').value;
   // Only a currently visible Limit review with an unchanged valid price
   // survives equivalent formatting edits (e.g. 60000.50 -> 60000.5).
@@ -307,8 +307,9 @@ byId('limit-price').addEventListener('input',()=>{
     validPreviewLimitPrice(price)&&Number(price)===reviewedLimitPrice;
   renderTicket();
   if(!unchanged)byId('order-result').hidden=true;
-});
-byId('leverage').addEventListener('input',()=>{
+};
+for(const eventType of ['input','change'])byId('limit-price').addEventListener(eventType,onLimitPriceEdit);
+const onLeverageEdit=()=>{
   // A range input event may fire without an actual change (e.g. a boundary
   // key press). Retain a currently visible review only for the same valid lev.
   const leverage=byId('leverage').value;
@@ -316,8 +317,9 @@ byId('leverage').addEventListener('input',()=>{
     validPreviewLeverage(leverage)&&Number(leverage)===reviewedLeverage;
   renderTicket();
   if(!unchanged)byId('order-result').hidden=true;
-});
-byId('quantity').addEventListener('input',()=>{
+};
+for(const eventType of ['input','change'])byId('leverage').addEventListener(eventType,onLeverageEdit);
+const onQuantityEdit=()=>{
   const quantity=byId('quantity').value;
   // A text-only change (0.05 -> 0.050) does not change the reviewed order.
   // Never restore a dismissed/stale review or retain it for invalid input.
@@ -325,7 +327,8 @@ byId('quantity').addEventListener('input',()=>{
     validPreviewQuantity(quantity)&&Number(quantity)===reviewedQuantity;
   renderTicket();
   if(!unchanged)byId('order-result').hidden=true;
-});
+};
+for(const eventType of ['input','change'])byId('quantity').addEventListener(eventType,onQuantityEdit);
 document.querySelectorAll('[data-qty]').forEach(b=>b.addEventListener('click',()=>{
   // Keep the review for the same valid amount even if text differs (e.g. 0.050).
   if(matchesQuickQuantity(byId('quantity').value,b.dataset.qty))return;
