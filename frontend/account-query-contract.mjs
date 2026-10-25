@@ -129,9 +129,9 @@ export function validateAccountQueryResponse(raw,expected){
  */
 export function createAccountQueryCoordinator(){
   let identity=null,epoch=0,nextId=0;
-  const lastRevision=new Map(),active=new Map(),results=new Map();
+  const lastRevision=new Map(),lastContent=new Map(),active=new Map(),results=new Map();
   function reset(){
-    epoch++;active.clear();lastRevision.clear();results.clear();
+    epoch++;active.clear();lastRevision.clear();lastContent.clear();results.clear();
     for(const {id} of ACCOUNT_TABS)results.set(id,Object.freeze({
       state:'disconnected',records:Object.freeze([]),revision:null,
     }));
@@ -175,7 +175,14 @@ export function createAccountQueryCoordinator(){
       const previous=lastRevision.get(token.tab);
       if(previous!==undefined&&validated.revision<previous)
         invalid('older server revision');
+      // A server revision identifies a snapshot: the same revision must not
+      // overwrite an accepted order/account view with contradictory records.
+      // Normalized records contain only bounded primitives and fixed keys.
+      const content=JSON.stringify(validated.records);
+      if(previous===validated.revision&&lastContent.get(token.tab)!==content)
+        invalid('conflicting records at the same server revision');
       lastRevision.set(token.tab,validated.revision);
+      lastContent.set(token.tab,content);
       active.delete(token.tab);
       results.set(token.tab,Object.freeze({
         state:validated.records.length?'ready':'empty',

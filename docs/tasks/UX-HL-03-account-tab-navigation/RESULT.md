@@ -54,3 +54,10 @@
 - frontend/account-query-contract.test.mjs: 수정 전 FAIL이었던 상태-잔량 모순 2건을 회귀로 추가. 완전 FILLED, 부분 CANCELED, 잔량이 남은 OPEN을 정상 수락하는 대조군 포함.
 - 전체 프런트 178/178 PASS, JS 문법·TypeScript build·HTML 구조·CSP·git diff 검사 PASS. UI는 여전히 정적 account unavailable; 실제 서버 연결·주문 상태 동기화 미수행.
 - UX-HL-03-G2는 신뢰 가능한 계정 API 및 안전한 브라우저 환경 인수 필요. M5~M9 백엔드 상태·Push/배포·실거래/권한 게이트 불변.
+
+## 2026-10-25 UX-HL-03-H1 — 동일 revision 상충 스냅샷 방지 로컬 완료
+
+- frontend/account-query-contract.mjs: 탭별 성공 기록 표현을 revision과 함께 보관하여 동일 revision 다른 내용은 error/빈 기록, 동일 내용은 멱등 수락. 더 높은 revision/세션 교체는 기존 동작 유지.
+- frontend/account-query-contract.test.mjs: 같은 revision의 주문 ID 충돌, empty→nonempty 계정 기록 충돌 및 재조회 멱등·상위 revision 회복을 검증하는 신규 2건(수정 전 FAIL).
+- 전체 프런트 180/180 PASS, JS/TypeScript/HTML/CSP/Git diff PASS. 정적 데모·계정 미연결 정책 유지.
+- H2 신뢰된 서버 revision·실브라우저 인수 미완료. M5~M9 백엔드/지갑·실거래/DB·push/배포 제한 변경 없음.

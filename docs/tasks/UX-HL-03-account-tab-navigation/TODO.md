@@ -46,3 +46,9 @@
 - [x] G1 기존 Sepolia/계정·탭·request ID·revision·stale 데이터 검증 유지
 - [x] G1 프런트 전체 178/178·모든 JS 문법·TypeScript 빌드·HTML 구조/CSP/Git diff 검사
 - [ ] G2 신뢰된 테스트넷 읽기 어댑터와 실제 브라우저가 허용된 환경에서 주문 상태/수량·모바일·보조공학 UI 인수
+
+- [x] H1 같은 revision의 상충 주문 ID 및 empty→nonempty 스냅샷이 승인되는 문제 신규 회귀 2건 수정 전 FAIL 확인
+- [x] H1 정규화된 최근 승인 records를 보관하고 같은 revision의 서로 다른 내용은 error/기록 비노출
+- [x] H1 같은 revision·같은 records 재조회, 더 높은 revision 변화 허용, 세션 변경/stale 차단 유지
+- [x] H1 프런트 전체 180/180·JavaScript syntax·TypeScript build·HTML 구조/CSP/git diff 검증
+- [ ] H2 신뢰된 계정 read API 및 정상 Chromium/키보드·스크린리더에서 revision 오류 상태 인수

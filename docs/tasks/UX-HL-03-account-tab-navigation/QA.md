@@ -72,3 +72,14 @@
 - 수정 후 대상 node --test frontend/account-query-contract.test.mjs 15/15 PASS, 전체 node --test frontend/*.test.mjs 178/178 PASS(176+2). 모든 frontend JS node --check, npm --prefix backend run build(tsc --noEmit) PASS.
 - HTMLParser frontend/index.html, frontend/trade.html 중첩 태그·고유 ID 확인, CSP connect-src none, 정적 미연결 계정 테이블 tbody 5개와 DEMO-only/no execution 계약, git diff --check PASS.
 - 실제 모바일·스크린리더·인증된 계정 조회·실체인 인수는 미실행. 자격증명·Sepolia 트랜잭션·원격 push/배포·운영 DB·샌드박스 우회 없음.
+
+## 2026-10-25 UX-HL-03-H1 — 동일 revision 상충 스냅샷 검증
+
+- 시작 로컬 main HEAD 4497d8b, Git clean, origin/main 대비 44커밋 ahead. PROJECT_STATE/ROADMAP/Hyperliquid UX reference, UX-HL-03 SPEC/TODO/QA/RESULT 및 실제 프런트 account-query-contract, read-flow, 테스트/거래 UI 확인.
+- .local-browser-qa Chromium/Playwright 약 643MB 확인. 비특권 runuser -u node -- unshare -Ur true 실행 Operation not permitted. 우회 없이 G2/H2 실브라우저 인수 보류.
+- 수정 전 신규 2건 FAIL: revision 15의 open-orders order-a 승인 뒤 같은 revision의 order-b 승인, revision 4의 empty positions 승인 뒤 같은 revision의 nonempty positions 승인.
+- 수정: coordinator의 lastContent Map에 성공한 validated.records JSON 표현 저장. 이전 revision==새 revision이면 기록 내용·순서 동일해야 수용. 큰 revision은 허용, 작은 revision 기존 차단 유지. reset 시 lastContent 초기화.
+- 수정 후 대상 node --test frontend/account-query-contract.test.mjs 17/17 PASS. 동일 revision·동일 empty 재조회 수용, 충돌 시 error/빈 records 및 revision 16 정상 회복 대조 테스트 포함.
+- 전체 node --test frontend/*.test.mjs 180/180 PASS(기존 178+신규 2). 모든 frontend JS node --check 및 npm --prefix backend run build (tsc --noEmit) PASS.
+- Python HTMLParser index.html/trade.html 구조·고유 ID, CSP connect-src none, 정적 미연결 계정 tbody 5개와 DEMO/no execution 고지, git diff --check PASS.
+- 신뢰된 계정 API·실 브라우저 인수 미수행. 자격증명·Sepolia 트랜잭션·운영 DB·원격 push/배포·샌드박스 우회 없음.

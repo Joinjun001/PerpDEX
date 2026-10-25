@@ -178,6 +178,38 @@ test('B2-B1 older same-tab request cannot overwrite latest state or inject error
   assert.equal(gate.get('positions').state,'error');
   assert.equal(gate.get('positions').records.length,0);
 });
+test('UX-HL-03-H1 same revision cannot replace accepted records with contradictory rows',()=>{
+  const gate=createAccountQueryCoordinator();
+  gate.connect(C);
+  const first=gate.begin('open-orders');
+  const original=row('open-orders','order-a');
+  assert.equal(gate.accept(first,response(first,[original],15)),true);
+  assert.equal(gate.get('open-orders').records[0].id,'order-a');
+  const second=gate.begin('open-orders');
+  const conflicting={...original,id:'order-b'};
+  assert.equal(gate.accept(second,response(second,[conflicting],15)),false,
+    'same revision with changed order ID must be rejected');
+  assert.equal(gate.get('open-orders').state,'error');
+  assert.deepEqual(gate.get('open-orders').records,[]);
+  const recovery=gate.begin('open-orders');
+  assert.equal(gate.accept(recovery,response(recovery,[conflicting],16)),true,
+    'a newer revision may legitimately change records');
+  assert.equal(gate.get('open-orders').records[0].id,'order-b');
+});
+test('UX-HL-03-H1 equal revision idempotent reads allowed; empty vs nonempty conflict blocked',()=>{
+  const gate=createAccountQueryCoordinator();
+  gate.connect(C);
+  const initial=gate.begin('positions');
+  assert.equal(gate.accept(initial,response(initial,[],4)),true);
+  const identical=gate.begin('positions');
+  assert.equal(gate.accept(identical,response(identical,[],4)),true,
+    'same-revision same-data polling is idempotent');
+  const conflicting=gate.begin('positions');
+  assert.equal(gate.accept(conflicting,response(conflicting,[row('positions')],4)),false,
+    'same revision cannot turn empty account into nonempty account');
+  assert.equal(gate.get('positions').state,'error');
+  assert.deepEqual(gate.get('positions').records,[]);
+});
 test('B2-B1 disconnect/reconnect invalidates prior request even for same account',()=>{
   const gate=createAccountQueryCoordinator();
   gate.connect(C);

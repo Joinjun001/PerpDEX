@@ -66,3 +66,10 @@
 - Open Orders의 OPEN 상태는 remainingQuantityAtomic>0이면서 기존 원장 보존식 quantityAtomic=filledQuantityAtomic+remainingQuantityAtomic 및 정수형/소유 계정/체인 검증을 충족해야 한다.
 - 상태/원자 단위 문자열 검증만 개선한다. 실서버·검증되지 않은 API·지갑·오더북·스마트컨트랙트/운영 DB·실거래를 연결하지 않는다. 로컬 인증 경계나 모델의 status 값을 실제 서버 사실로 해석하지 않는다.
 - UX-HL-03-G2 실제 인증된 계정 UI/브라우저 인수는 신뢰 가능한 서버 및 Chromium 샌드박스 환경이 마련된 후 별도 진행한다.
+
+## UX-HL-03-H1 (2026-10-25) — 동일 revision의 상충 계정 기록 차단
+
+- 재현된 조회 상태 결함: 계정별 탭 coordinator가 더 낮은 서버 revision만 거부해 동일 revision으로 다시 조회할 때 기록 ID나 값/행 유무가 달라져도 이미 승인된 스냅샷을 덮어썼다. 같은 데이터 버전이 서로 다른 내역을 표시하는 위험이다.
+- 동일 탭의 직전 성공 revision과 새 승인 revision이 동일하면 정규화된 records의 JSON 표현(레코드 값 및 순서 포함)도 같아야 한다. 같으면 멱등 재조회를 허용하고, 다르면 기존 fail-closed error/빈 기록 처리.
+- 더 큰 revision의 데이터 변경 허용, 더 낮은 revision 거부, 계정/출처 변경·disconnect/reconnect 시 비교 기록 초기화 유지.
+- 오프라인 계약 정합성 검증일 뿐 서버 진위·계정 소유권·DB 진실성을 증명하지 않는다. 실제 지갑/계정 API는 연결하지 않는다. 신뢰 가능한 서버·브라우저 H2 인수는 미완료.
