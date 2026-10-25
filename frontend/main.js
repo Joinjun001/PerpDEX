@@ -21,8 +21,14 @@ function updateMarket(){
     const sample=describeSampleChart(b.dataset.market,sampleChart(b.dataset.market,64));
     const delta=sample.changePercent;
     const pickerChange=byId('market-change-'+b.dataset.market);
-    pickerChange.textContent=(delta>=0?'+':'−')+Math.abs(delta).toFixed(2)+'%';
+    const changeLabel=(delta>=0?'+':'−')+Math.abs(delta).toFixed(2)+'%';
+    pickerChange.textContent=changeLabel;
     pickerChange.className='market-change '+(delta>=0?'positive':'negative');
+    // A market option's own accessible name must disclose that its price
+    // and change are generated samples, not actionable live quotes.
+    b.setAttribute('aria-label',b.dataset.market+'-USD-PERP 고정 모의 기준 가격 '+
+      FORMAT_USD.format(MARKETS[b.dataset.market].price)+' USD · 샘플 변화 '+
+      changeLabel+' · 실제 시세 아님');
   });
   byId('chart-title').replaceChildren(document.createTextNode(m.symbol+' / USD '),node('span','', 'Perpetual'));
   byId('chart-price').textContent=FORMAT_USD.format(m.price);

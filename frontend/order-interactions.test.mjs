@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
+import {MARKETS,FORMAT_USD,sampleChart,describeSampleChart} from './preview-model.mjs';
 
 /**
  * Real frontend/main.js event handlers executed against a deliberately narrow
@@ -121,6 +122,30 @@ test('B2-A main.js actually initializes MOCK chart, orderbook, ticket and blocke
   assert.equal(id('limit-price-field').hidden,true);
   assert.equal(id('limit-price').disabled,true);
   assert.equal(id('order-result').hidden,true);
+});
+test('UX-HL-01-U1 market picker announces each synthetic price and sample change as non-live',async()=>{
+  const app=await boot();
+  for(const selected of ['BTC','ETH','SOL','BTC']){
+    app.market(selected).dispatch('click');
+    for(const market of ['BTC','ETH','SOL']){
+      const button=app.market(market);
+      const sample=describeSampleChart(market,sampleChart(market,64));
+      const change=(sample.changePercent>=0?'+':'−')+Math.abs(sample.changePercent).toFixed(2)+'%';
+      assert.equal(button.getAttribute('aria-label'),
+        market+'-USD-PERP 고정 모의 기준 가격 '+FORMAT_USD.format(MARKETS[market].price)+
+        ' USD · 샘플 변화 '+change+' · 실제 시세 아님');
+      assert.equal(button.getAttribute('aria-pressed'),String(market===selected));
+    }
+  }
+});
+test('UX-HL-01-U1 no-script market buttons also identify sample price provenance',()=>{
+  for(const market of ['BTC','ETH','SOL']){
+    const markup=html.match(new RegExp('<button[^>]*data-market="'+market+'"[^>]*>'))?.[0];
+    assert.ok(markup,'missing '+market+' static market button');
+    assert.match(markup,/aria-label="[^"]*고정 모의 기준 가격[^"]*샘플 변화[^"]*실제 시세 아님"/);
+    assert.match(markup,/aria-pressed="(?:true|false)"/);
+  }
+  assert.match(html,/connect-src 'none'/);
 });
 test('UX-HL-01-Q1 selected market is reflected in the browser tab title with explicit DEMO context',async()=>{
   const app=await boot();

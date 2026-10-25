@@ -115,3 +115,10 @@
 - [x] T1 renderChart의 기존 샘플 변화율로 badge data-trend를 갱신하고 하락 색상 CSS·기본 BTC 상승 속성 추가
 - [x] T1 MOCK/주문·계정 연결 안전 정책 유지, 프런트 전체 200/200·JS/TypeScript·HTML/CSP/git diff 검사
 - [ ] T2 정상 Chromium 데스크톱/모바일에서 가격 배지의 시각 대비·색각 접근성·스크린리더 인수
+
+- [x] U1 각 시장 선택 버튼에 고정 MOCK 가격의 출처가 접근성 이름으로 명시되지 않은 결함을 수정 전 DOM/정적 회귀 2건 FAIL로 재현
+- [x] U1 시장별 실제 생성 차트에 기반한 기준 가격/변화율 및 비실시간 안내를 각 버튼 aria-label에 기록, 시장 선택 aria-pressed 유지
+- [x] U1 기본 BTC/ETH/SOL 정적 버튼에도 초기 샘플 가격 출처 고지 적용
+- [x] U1 이전 HTML 속성 인접성 가정 테스트를 속성 순서 독립 검사로 갱신
+- [x] U1 프런트 전체 202/202, JS 문법, TypeScript build, HTML 구조/CSP/Git diff PASS
+- [ ] U2 정상 Chromium/모바일·키보드·스크린리더에서 가격 출처 설명 및 선택 상태의 실제 발표 인수

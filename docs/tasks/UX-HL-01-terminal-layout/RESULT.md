@@ -183,3 +183,11 @@
 - frontend/trade.html: 기본 BTC 상승 샘플의 배지 상태를 명시.
 - frontend/order-interactions.test.mjs, frontend/chart-sample-accessibility.test.mjs: BTC/SOL/ETH/SOL 전환 후 차트 색상과 배지 상태 동기화, 하락 색상 CSS 및 기본 HTML을 검증하는 신규 2건(수정 전 FAIL).
 - 전체 프런트 200/200, JS/TS/HTML/CSP/git diff PASS. 실제 브라우저 T2 인수 미완료. 계정 미연결, MOCK 전용·실거래·M5~M9·원격 push/배포 제한 보존.
+
+## 2026-10-25 UX-HL-01-U1 — 시장 선택의 MOCK 가격 출처 접근성 로컬 완료
+
+- frontend/main.js: 각 시장 버튼의 aria-label에 해당 시장의 고정 모의 기준 가격 USD·샘플 첫/마지막 가격 변화율·실제 시세 아님을 명시하고 시장 전환 시 동기화.
+- frontend/trade.html: JavaScript 로딩 전 BTC·ETH·SOL 버튼에도 동일한 데이터 출처 안내. 가격·차트·주문/계정 연동 변경 없음.
+- frontend/order-interactions.test.mjs: 시장 선택/재선택 전반의 가격 출처 라벨·aria-pressed 및 정적 no-script 라벨 신규 2건(수정 전 FAIL).
+- frontend/hyperliquid-terminal.test.mjs: 기존 BTC/ETH 속성 순서에 의존한 테스트를 보완하여 기존 aria-pressed 계약 보존.
+- 관련 65/65, 전체 202/202, JS/TS/HTML/CSP/Git diff PASS. 정상 Chromium/키보드/스크린리더 U2 인수 미완료; M5~M9·실계정·실주문·원격 push/배포 제한 유지.

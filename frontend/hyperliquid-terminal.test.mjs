@@ -52,8 +52,8 @@ test('UX-HL-01-A: previous preview controls and accessible market state remain p
   for(const id of ['order-form','preview-order','buy-tab','sell-tab','leverage','quantity','market-picker','market-chart','asks','bids','recent-trades']){
     assert.ok(html.includes('id="'+id+'"'),id);
   }
-  assert.match(html,/data-market="BTC" aria-pressed="true"/);
-  assert.match(html,/data-market="ETH" aria-pressed="false"/);
+  assert.match(html,/data-market="BTC"[^>]*aria-pressed="true"/);
+  assert.match(html,/data-market="ETH"[^>]*aria-pressed="false"/);
   assert.match(html,/class="demo-banner"/);
   assert.match(html,/SIMULATION PREVIEW/);
   assert.match(html,/TRADING TERMINAL/);

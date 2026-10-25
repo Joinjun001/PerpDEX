@@ -231,3 +231,15 @@
 - 수정 후 node --test frontend/order-interactions.test.mjs frontend/chart-sample-accessibility.test.mjs 65/65 PASS, node --test frontend/*.test.mjs 200/200 PASS (이전 198+신규 2). frontend JS 모두 node --check, npm --prefix backend run build(tsc --noEmit) PASS.
 - HTMLParser frontend/index.html·frontend/trade.html 구조/고유 ID, CSP connect-src none/form-action none, MOCK-only·계정 미연결·비활성 Reduce Only, git diff --check PASS.
 - 실제 Chromium/스크린리더/모바일 인수 미실행. 실계정 API·실거래·Sepolia 트랜잭션·운영 DB·원격 push/배포·자격증명·권한 우회 없음.
+
+## 2026-10-25 UX-HL-01-U1 — 모의 시세 출처의 시장 버튼 접근성
+
+- 시작 main HEAD 7bd8fad, Git clean, origin/main 대비 55커밋 ahead. PROJECT_STATE/ROADMAP/Hyperliquid UX reference, UX-HL-01-T1·UX-HL-02-R1 SPEC/TODO/QA/RESULT, 실제 frontend/main.js/preview-model/trade.html·CSS·모바일/계정 내비게이션과 기존 테스트 점검.
+- .local-browser-qa Chromium/Playwright 약 643MB 존재, 비특권 runuser -u node -- unshare -Ur true → Operation not permitted. 보안 제한 우회 없이 UX-HL-01-T2/S2/U2 및 UX-HL-02-R2 실제 Chromium·스크린리더 인수 미완료.
+- 확인된 위험: 개별 시장 버튼에는 BTC/ETH/SOL 가시 가격/변화율과 aria-pressed는 있지만, 버튼 자체에 '고정 모의 시세/실제 시세 아님'에 해당하는 접근성 이름은 없었다. 문서의 데이터 출처·실시세 비표시 정책과 보조공학 탐색에 간극이 있었다.
+- 신규 frontend/order-interactions.test.mjs 2건 수정 전 FAIL: 동적 BTC/ETH/SOL/BTC 전환 후 각 시장 버튼의 모의 USD 가격·생성 샘플 변화율·비실시간 라벨 누락 및 초기 정적 BTC/ETH/SOL ARIA 라벨 누락.
+- 수정: frontend/main.js에서 이미 계산한 64 샘플의 changePercent와 MARKETS 기준 가격으로 시장별 aria-label 설정, frontend/trade.html에는 같은 초기 문자열 선언. 기존 aria-pressed·MOCK 계산·주문 로직 변경 없음.
+- 초기 전체 테스트는 기존 frontend/hyperliquid-terminal.test.mjs 한 건이 HTML의 data-market/aria-pressed 인접성을 가정해서 FAIL. 속성 사이에 새 aria-label이 추가되어도 선택 상태를 검사하도록 BTC/ETH 정규식을 개선. 기존 의미는 보존.
+- 수정 후 관련 node --test frontend/order-interactions.test.mjs frontend/hyperliquid-terminal.test.mjs 65/65 PASS, 전체 node --test frontend/*.test.mjs 202/202 PASS (기존 200+2). 전체 frontend JS node --check 및 npm --prefix backend run build(tsc --noEmit) PASS.
+- Python HTMLParser index.html/trade.html 태그 구조·고유 ID, CSP connect-src none/form-action none, 미연결 계정 tbody 5개·LOCAL PREVIEW/NO EXECUTION·초기 market aria-label 및 git diff --check PASS.
+- 실제 Chromium/모바일/스크린리더 음성·시각 인수는 미실행. 지갑/API·실거래·Sepolia 트랜잭션·운영 DB·자격증명 사용·원격 push/배포·보안 우회 없음.
