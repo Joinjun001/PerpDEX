@@ -133,6 +133,38 @@ test('B2-B2-A missing/empty ready records fail closed without stale rows',()=>{
  assert.equal(f.read('positions','table').hidden,true);
  assert.equal(f.read('positions','view').dataset.accountState,'error');
 });
+test('UX-HL-03-C1 malformed ready records fail closed as an error state, not a render crash',()=>{
+ const f=fixture(),good=dataRow('positions');
+ const cases=[null,42,'broken'];
+ for(const bad of cases){
+   assert.equal(renderAccountTabSnapshot(f.root,'positions',
+     {state:'ready',records:[good]},{allowValidatedRecords:true}),'ready');
+   assert.equal(renderAccountTabSnapshot(f.root,'positions',
+     {state:'ready',records:[bad]},{allowValidatedRecords:true}),'error');
+   assert.equal(f.read('positions','body').children.length,0,'stale account rows cleared');
+   assert.equal(f.read('positions','table').hidden,true);
+   assert.equal(f.read('positions','view').hidden,false);
+   assert.equal(f.read('positions','view').dataset.accountState,'error');
+   assert.match(f.read('positions','title').textContent,/가져오지 못했습니다/);
+ }
+});
+
+test('UX-HL-03-C1 throwing record accessor never crashes account UI or leaks rows',()=>{
+ const f=fixture();
+ const record={...dataRow('open-orders')};
+ Object.defineProperty(record,'side',{get(){throw Error('invalid external record');}});
+ const state=renderAccountTabSnapshot(f.root,'open-orders',
+   {state:'ready',records:[dataRow('open-orders'),record]},{allowValidatedRecords:true});
+ assert.equal(state,'error');
+ assert.equal(f.read('open-orders','body').children.length,0);
+ assert.equal(f.read('open-orders','table').hidden,true);
+ assert.equal(f.read('open-orders','view').hidden,false);
+ assert.equal(f.read('open-orders','view').dataset.accountState,'error');
+ // Later trusted snapshots can still render after a malformed one.
+ assert.equal(renderAccountTabSnapshot(f.root,'open-orders',
+   {state:'ready',records:[dataRow('open-orders')]},{allowValidatedRecords:true}),'ready');
+ assert.equal(f.read('open-orders','body').children.length,1);
+});
 test('B2-B2-A stale response, newer failure and disconnect clear previous rows',()=>{
  const f=fixture(),gate=createAccountQueryCoordinator();
  gate.connect(ctx);

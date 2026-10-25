@@ -19,3 +19,10 @@
 - frontend/account-table-scroll-hint.test.mjs 신규 10건 포함 전체 프런트 103/103 PASS. JS/TS/HTML/CSP/git 검증 PASS.
 - 실제 공개 웹사이트는 미배포, 실제 데이터/지갑/API 연동 없음. 미연결 상태에서는 힌트 표시되지 않음. 브라우저 시각/스크린리더 시험 미실행.
 - 다음: UX-HL-03-B2 및 A2의 실제 브라우저/키보드/터치 인수(실행 환경 확보 시); 환경 미가용이면 ROADMAP의 독립 미완료 UX 중 안전하게 검증 가능한 작업을 새 TASK로 선정.
+
+## 2026-10-25 UX-HL-03-C1 — 로컬 완료
+
+- frontend/account-tabs-renderer.mjs: 잘못된 ready 계정 행이나 읽기 예외를 UI 중단 대신 명시적인 error 상태로 fail-closed 전환. 기존 또는 부분 행 노출 방지, 정상 스냅샷 렌더링 회복 가능.
+- frontend/account-tabs-renderer.test.mjs: null/primitive 및 예외를 던지는 계정 행의 오류 상태/행 삭제·복구 회귀 2건 추가, 수정 전 실패 확인.
+- 전체 프런트 170/170 PASS 및 JS 문법·TypeScript 빌드·HTML/CSP·git diff PASS. 실제 Chromium C2 시각/접근성 인수 미완료.
+- 정적 미연결 계정 탭과 검증된 조회 계약/인증 선행 요구, 실거래·지갑·실체인·운영 DB·원격 push/배포 차단은 변경 없음.

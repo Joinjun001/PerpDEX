@@ -47,6 +47,14 @@ function rowValue(record,key){
   // Preserve atomic units as atomic; no implied human decimal precision or USD.
   return key.endsWith('Atomic')?String(value)+' (atomic)':String(value);
 }
+function failReadySnapshot(els,tabId){
+  const view=accountViewFor(tabId,'error');
+  els.title.textContent=view.title;
+  els.description.textContent=view.description;
+  els.empty.dataset.accountState='error';
+  return 'error';
+}
+
 /**
  * Shows no account records unless caller specifically enables an authenticated
  * adapter boundary AND supplies a successfully validated coordinator snapshot.
@@ -67,24 +75,29 @@ export function renderAccountTabSnapshot(
   els.table.hidden=true;
   els.empty.dataset.accountState=state;
   if(state==='ready'){
-    if(!Array.isArray(snapshot.records)||snapshot.records.length===0){
-      const view=accountViewFor(tabId,'error');
-      els.title.textContent=view.title;
-      els.description.textContent=view.description;
-      els.empty.dataset.accountState='error';
-      return 'error';
-    }
+    if(!Array.isArray(snapshot.records)||snapshot.records.length===0)
+      return failReadySnapshot(els,tabId);
     const doc=root.ownerDocument??root;
     // Column keys are module-owned only; never use raw server-provided column names.
-    const fragment=doc.createDocumentFragment();
-    for(const record of snapshot.records){
-      const tr=doc.createElement('tr');
-      for(const key of FIELDS[tabId]){
-        tr.appendChild(textCell(doc,rowValue(record,key)));
+    // Build off-DOM so a malformed record cannot leave partial or stale account rows.
+    try{
+      const fragment=doc.createDocumentFragment();
+      for(const record of snapshot.records){
+        if(record===null||typeof record!=='object'||Array.isArray(record))
+          return failReadySnapshot(els,tabId);
+        const tr=doc.createElement('tr');
+        for(const key of FIELDS[tabId]){
+          tr.appendChild(textCell(doc,rowValue(record,key)));
+        }
+        fragment.appendChild(tr);
       }
-      fragment.appendChild(tr);
+      els.tbody.appendChild(fragment);
+    }catch{
+      // This presenter is not the trusted validator. If a caller supplies a
+      // corrupt "ready" record, render an explicit error instead of crashing.
+      clearRows(els.tbody);
+      return failReadySnapshot(els,tabId);
     }
-    els.tbody.appendChild(fragment);
     els.empty.hidden=true;
     els.table.hidden=false;
     els.title.textContent='';

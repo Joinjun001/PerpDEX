@@ -13,3 +13,10 @@
 - [x] B1 리사이즈·breakpoint 변경·테이블/tabpanel hidden 변경 및 기존 탭 activation 시 안내 갱신
 - [x] B1 신규 10건 단위·DOM 상태 회귀, 전체 103/103, JS/TS/HTML/CSP·Git diff 검사
 - [ ] B2 실제 모바일 브라우저 및 키보드/스크린리더·가로 스크롤 인수 (브라우저 도구 미가용)
+
+- [x] C1 null/primitive/throwing accessor가 포함된 ready records가 계정 렌더링을 중단시키는 문제를 실제 renderer 회귀 2건 수정 전 FAIL로 재현
+- [x] C1 임시 DocumentFragment 단계에서 행의 기본 형태와 속성 접근을 확인하고 오류가 발생하면 fail-closed error 상태 표시
+- [x] C1 이전 ready 행 제거, 부분 행 비노출, 다른 정상 ready snapshot의 재렌더링 확인
+- [x] C1 기존 allowValidatedRecords=false·validator/coordinator·정적 미연결 상태 및 5개 계정 탭 보존
+- [x] C1 프런트 전체 170/170·JS syntax·TypeScript build·HTML/CSP/git diff 검증
+- [ ] C2 안전한 실제 Chromium/스크린리더/모바일 환경에서 오류 및 회복의 시각적·보조공학 인수

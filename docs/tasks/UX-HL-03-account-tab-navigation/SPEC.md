@@ -27,3 +27,11 @@
 - ResizeObserver/MutationObserver/viewport resize/media query change가 제공되면 상태 변경 시 재계산한다. 미가용 환경에서는 초기화와 탭 activation에서 재계산.
 - 새로운 계정 데이터, wallet 연결, 서버/API fetch, testnet/real 거래는 추가하지 않는다. 현재 static demo의 5개 tbody는 비어 있다.
 - 브라우저/모바일 실제 뷰포트/터치/스크린리더가 없으므로 이벤트·크기 모의 DOM 테스트만으로 시각 인수 완료라고 주장하지 않는다.
+
+## UX-HL-03-C1 (2026-10-25) — 비정상 계정 ready 행의 오류 상태 전환
+
+- 확인된 렌더링 결함: 인증된 조회 어댑터가 향후 부정확한 ready snapshot을 전달했을 때, records 안에 null·숫자·문자열·예외를 던지는 접근자가 들어가면 account-tabs-renderer.mjs의 rowValue 접근 중 TypeError가 발생해 정상적인 계정 오류 상태로 전환되지 못했다.
+- renderer는 계정 신원 검증기가 아니다. 상위 validateAccountQueryResponse 및 coordinator 승인 절차는 계속 필요하며, 해당 모듈의 기본 allowValidatedRecords=false 차단을 유지한다.
+- allowValidatedRecords=true인 주입 경로에서만 ready snapshot의 각 행이 객체인지 확인하고, off-DOM DocumentFragment에만 안전하게 모든 셀을 구성한다. 하나라도 잘못된 행이 있거나 예외가 발생하면 기존 본문 행을 제거하고 테이블을 숨기며 error 상태와 오류 문구를 표기한다.
+- 부분적인 테이블/이전 계정 행을 남기지 않으며 이후 정상적으로 검증된 ready snapshot은 다시 표시할 수 있어야 한다.
+- static trade.html에서 실제 계정/지갑 API나 fetch를 활성화하지 않으며, 토큰 금액 단위 변환/정산·거래 기능을 추가하지 않는다. 실브라우저 인수는 C2 미완료 상태로 기록한다.

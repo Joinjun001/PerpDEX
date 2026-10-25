@@ -22,3 +22,13 @@
 - Node 프런트엔드 전체 **103/103 PASS** (기존 93 + 신규 10). JavaScript syntax PASS, npm --prefix backend run build TypeScript PASS.
 - HTMLParser index.html 고유 ID 4개, trade.html 고유 ID 64개, 태그/중복 ID 검사 PASS. 신규 hidden 안내 5개, CSP connect-src none, git diff --check PASS.
 - 미실행: 실제 브라우저 viewport/터치/스크린리더·포커스/스크롤 시각 인수. 실제 지갑/backend API/데이터를 사용하지 않음. 원격 push/배포·실자금/온체인 거래 없음.
+
+## 2026-10-25 UX-HL-03-C1 — 비정상 ready 계정 행의 안전한 오류 상태
+
+- 시작 main HEAD 8c90040, Git clean, origin/main보다 39개 로컬 커밋 ahead. PROJECT_STATE/ROADMAP/UX reference, UX-HL-02-N1 TASK 문서, 실제 frontend/account-tabs.js/account-tabs-renderer.mjs/contract/read-flow 및 기존 렌더러 통합 테스트, UX-HL-03 SPEC/TODO/QA/RESULT 점검.
+- 프로젝트 로컬 Playwright/Chromium 설치 약 643MB. 비특권 사용자 runuser -u node -- unshare -Ur true는 Operation not permitted. 브라우저 N2/Q2/C2 인수는 보류하고 샌드박스·권한 우회 없음.
+- 사전 실패 재현: 신규 테스트 2건 모두 수정 전 FAIL. ready records:[null/42/'broken']은 TypeError, 정상 행 다음 throwing getter를 포함한 행은 예외로 렌더 중단. 정상 오류 상태/행 제거 보장되지 않음.
+- 수정: frontend/account-tabs-renderer.mjs의 failReadySnapshot 공통 함수와 off-DOM 구성 try/catch. null·primitive·array 레코드 및 읽기 예외를 명시적으로 error로 전환, 모든 이전 행 제거/테이블 숨김·기존 오류 문구 표시. 정상 snapshot 후속 렌더링 동작 보존.
+- 수정 후 대상 node --test frontend/account-tabs-renderer.test.mjs 11/11 PASS, 전체 node --test frontend/*.test.mjs 170/170 PASS(기존 168+2). 전체 frontend JS node --check 및 npm --prefix backend run build(tsc --noEmit) PASS.
+- Python HTMLParser index.html/trade.html 태그 및 고유 ID, CSP connect-src none, trade.html 내 account tbody 5개 빈 상태 및 MOCK-only 고지, git diff --check PASS.
+- DOM 단위/모의 테스트만 수행. 실제 인증, 지갑·계정 API 조회, 운영 DB·Sepolia 트랜잭션·push/배포/권한 우회 미실행. 실브라우저·스크린리더 시각 인수 미완료.
