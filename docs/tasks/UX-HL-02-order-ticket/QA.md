@@ -159,3 +159,13 @@
 - 수정 후 대상 node --test frontend/order-interactions.test.mjs 48/48 PASS, 전체 node --test frontend/*.test.mjs 168/168 PASS(기존 166+신규 2). 모든 frontend JavaScript node --check, npm --prefix backend run build(tsc --noEmit) PASS.
 - Python HTMLParser frontend/index.html·frontend/trade.html 중첩 태그 및 고유 ID 검사, CSP connect-src none·미연결 계정 tbody 5개·실주문 금지 고지 및 git diff --check PASS.
 - 실제 브라우저·모바일/스크린리더·키보드 기본 동작 인수, 실거래·Sepolia 트랜잭션·운영 DB·자격증명·원격 push/배포 미실행.
+
+## 2026-10-25 UX-HL-02-O1 — 레버리지 슬라이더 눈금 비율
+
+- 시작 main HEAD 4e208cb, Git clean, origin/main 대비 48커밋 ahead. PROJECT_STATE/ROADMAP, Hyperliquid UX reference, UX-HL-02 SPEC/TODO/QA/RESULT, frontend/main.js, trade.html/trade.css/styles.css 및 기존 프런트 전체 테스트 확인.
+- 브라우저: .local-browser-qa Chromium/Playwright 약 643MB 존재하나 비특권 runuser -u node -- unshare -Ur true → Operation not permitted. 권한·샌드박스 우회 없이 J2/O2 실제 Chromium·인증 API 인수 보류.
+- 실제 결함: CSS 기본 .leverage-ticks display:flex; justify-content:space-between은 4개의 1×·3×·5×·10× 눈금을 0%, 33.33%, 66.67%, 100%에 배치한다. 실제 1~10 range 내 3×·5× 위치는 각각 약 22.22%, 44.44%. 수정 전 신규 정적 회귀 2건 중 실제 CSS 위치 검증 1건 FAIL, HTML 범위·라벨 검증 1건 PASS.
+- 수정: frontend/trade.css에서 눈금을 position:relative/block으로 배치, 중간 span 22.22%·44.44%, 양 끝 0/100%. pointer-events:none을 사용해 눈금이 실제 슬라이더 입력을 가로막지 않도록 함. html·JavaScript·입력 이벤트·레버리지/주문 계산 불변.
+- 수정 후 node --test frontend/leverage-ticks.test.mjs 2/2 PASS; 전체 node --test frontend/*.test.mjs 188/188 PASS(기존 186+2). 모든 frontend JS node --check, npm --prefix backend run build(tsc --noEmit) PASS.
+- Python HTMLParser index.html/trade.html 구조·중복 ID, CSP connect-src none·빈 계정 tbody 5개·실거래 미실행 안내 및 Git diff --check PASS.
+- 실제 Chromium 픽셀/모바일 터치/키보드/스크린리더 인수는 미수행. 지갑·실주문·Sepolia 트랜잭션·운영 DB·자격증명·원격 Push/배포/샌드박스 우회 없음.

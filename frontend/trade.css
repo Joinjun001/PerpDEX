@@ -312,3 +312,15 @@
 /* UX-HL-01-O1 — distinct synthetic spread label, not a live quote. */
 .trade-shell .market-column .book-mid output{font-weight:700;color:#c5d2dc}
 .trade-shell .market-column .book-mid small{font-size:8px;color:#8ca6b7}
+
+/* UX-HL-02-O1 — align labeled leverage stops with the actual 1..10 slider.
+ * 3x is at (3-1)/(10-1)=22.22%; 5x is at 44.44%, not at thirds. */
+.trade-shell .leverage-ticks{position:relative;display:block;height:18px}
+.trade-shell .leverage-ticks span{
+  position:absolute;top:0;transform:translateX(-50%);white-space:nowrap;
+  pointer-events:none;
+}
+.trade-shell .leverage-ticks span:first-child{left:0;transform:none}
+.trade-shell .leverage-ticks span:nth-child(2){left:22.22%}
+.trade-shell .leverage-ticks span:nth-child(3){left:44.44%}
+.trade-shell .leverage-ticks span:last-child{right:0;left:auto;transform:none}

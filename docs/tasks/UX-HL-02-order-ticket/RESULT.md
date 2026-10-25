@@ -115,3 +115,10 @@
 - frontend/order-interactions.test.mjs: Market/Limit에서 동일 입력의 리뷰·금액 보존, 실제 값 변경/invalid 검증/리뷰 자동 재등장 차단 회귀 2건 추가(수정 전 FAIL).
 - 전체 frontend 테스트 168/168 및 JS/TS/HTML/CSP/git diff 통과. 브라우저 N2는 안전 샌드박스 지원 환경에서 인수 진행.
 - 서버·실주문·계정 인증·지갑/실체인·운영 DB/원격 push·배포에는 영향 없음.
+
+## 2026-10-25 UX-HL-02-O1 — 레버리지 눈금 위치 로컬 개선
+
+- frontend/trade.css: 실제 native 1~10 슬라이더의 3×·5× 값에 맞춰 눈금을 22.22%·44.44%에 배치; 양끝 1×·10× 유지. 실제 주문/가격/증거금 계산 변경 없음.
+- frontend/leverage-ticks.test.mjs: range 1~10/1단계와 4개 표시 눈금이 변경되지 않았는지, 중간 눈금 위치가 임의 등간격이 아닌 실제 정수 단계 비율인지 회귀 검증. 수정 전 배치 검증 1건 FAIL.
+- 전체 프런트 188/188 PASS, JS/TS/HTML/CSP/Git diff PASS. 실제 브라우저 O2 시각 및 스크린리더 인수 보류.
+- 실계정/지갑·서명 주문, Sepolia·운영 DB·배포/원격 Push 금지 유지.
