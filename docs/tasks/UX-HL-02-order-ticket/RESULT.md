@@ -108,3 +108,10 @@
 - frontend/order-interactions.test.mjs: 실제 main.js에서 BUY/SELL, Market/Limit 변경/재클릭과 aria-pressed·DEMO 미리보기 경계의 신규 2건 회귀(수정 전 FAIL).
 - 전체 프런트 164/164 PASS, JS/TypeScript/HTML/CSP/git diff 검사 PASS. 서명·지갑·백엔드·실주문·운영 DB 연결 및 Push/배포 없음.
 - UX-HL-02-M2 실브라우저/스크린리더 인수는 Chromium 샌드박스 지원 환경에서만 수행 가능.
+
+## 2026-10-25 UX-HL-02-N1 — 로컬 완료
+
+- frontend/main.js: 성공한 DEMO 리뷰의 레버리지 정수값을 보관하고 동일한 유효 레버리지 input 이벤트가 발생한 경우 기존 리뷰 유지. 실제 수치 변경/유효하지 않은 값 및 이미 무효화한 리뷰는 유지하지 않음.
+- frontend/order-interactions.test.mjs: Market/Limit에서 동일 입력의 리뷰·금액 보존, 실제 값 변경/invalid 검증/리뷰 자동 재등장 차단 회귀 2건 추가(수정 전 FAIL).
+- 전체 frontend 테스트 168/168 및 JS/TS/HTML/CSP/git diff 통과. 브라우저 N2는 안전 샌드박스 지원 환경에서 인수 진행.
+- 서버·실주문·계정 인증·지갑/실체인·운영 DB/원격 push·배포에는 영향 없음.

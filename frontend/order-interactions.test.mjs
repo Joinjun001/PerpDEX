@@ -391,6 +391,46 @@ test('UX-HL-02-H1 active preset does not replace invalid draft unless quantity c
   assert.equal(id('quantity').value,'0.25');
   assert.equal(id('order-result').hidden,true);
 });
+test('UX-HL-02-N1 unchanged leverage input does not discard the reviewed demo order',async()=>{
+  const app=await boot(),id=app.id;
+  for(const mode of ['MARKET','LIMIT']){
+    if(mode==='LIMIT')id('limit-type').dispatch('click');
+    id('order-form').dispatch('submit');
+    assert.equal(id('order-result').hidden,false,mode);
+    const review=id('order-result').children[1];
+    const margin=id('margin').textContent;
+    for(const same of ['3','3']){
+      id('leverage').value=same;
+      id('leverage').dispatch('input');
+      assert.equal(id('order-result').hidden,false,mode+' unchanged slider value');
+      assert.equal(id('order-result').children[1],review,'keep exact reviewed DOM');
+      assert.equal(id('margin').textContent,margin);
+      assert.equal(id('leverage').getAttribute('aria-invalid'),'false');
+    }
+    id('leverage').value='4';
+    id('leverage').dispatch('input');
+    assert.equal(id('order-result').hidden,true,'changed leverage must invalidate');
+    id('leverage').value='3';
+    id('leverage').dispatch('input');
+    assert.equal(id('order-result').hidden,true,'stale review must not reappear');
+  }
+});
+test('UX-HL-02-N1 invalid slider value invalidates even when last reviewed leverage matched',async()=>{
+  const app=await boot(),id=app.id;
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  id('leverage').value='3';
+  id('leverage').dispatch('input');
+  assert.equal(id('order-result').hidden,false);
+  id('leverage').value='03';
+  id('leverage').dispatch('input');
+  assert.equal(id('order-result').hidden,true);
+  assert.equal(id('preview-order').disabled,true);
+  assert.equal(id('leverage').getAttribute('aria-invalid'),'true');
+  id('leverage').value='3';
+  id('leverage').dispatch('input');
+  assert.equal(id('order-result').hidden,true);
+});
 test('UX-HL-02-M1 order preview direction arrow follows the selected Long or Short side',async()=>{
   const app=await boot(),id=app.id;
   const previewArrow=()=>id('preview-order').children.at(-1).textContent;

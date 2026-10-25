@@ -209,6 +209,7 @@ function dismissDemoReview(){
 }
 let reviewedQuantity=null;
 let reviewedLimitPrice=null;
+let reviewedLeverage=null;
 function displayOrderPreview(event){
   event.preventDefault();
   const panel=byId('order-result');
@@ -222,6 +223,7 @@ function displayOrderPreview(event){
     renderDemoOrderReview(panel,document,review,{onClose:dismissDemoReview});
     reviewedQuantity=Number(byId('quantity').value);
     reviewedLimitPrice=view.orderType==='LIMIT'?Number(byId('limit-price').value):null;
+    reviewedLeverage=Number(byId('leverage').value);
   }catch{
     // A keyboard-triggered form submission can occur even when the preview
     // button is disabled. Route focus to the failing field rather than a
@@ -282,8 +284,13 @@ byId('limit-price').addEventListener('input',()=>{
   if(!unchanged)byId('order-result').hidden=true;
 });
 byId('leverage').addEventListener('input',()=>{
+  // A range input event may fire without an actual change (e.g. a boundary
+  // key press). Retain a currently visible review only for the same valid lev.
+  const leverage=byId('leverage').value;
+  const unchanged=!byId('order-result').hidden&&
+    validPreviewLeverage(leverage)&&Number(leverage)===reviewedLeverage;
   renderTicket();
-  byId('order-result').hidden=true;
+  if(!unchanged)byId('order-result').hidden=true;
 });
 byId('quantity').addEventListener('input',()=>{
   const quantity=byId('quantity').value;

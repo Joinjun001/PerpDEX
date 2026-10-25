@@ -81,3 +81,9 @@
 - [x] M1 Market/Limit 전환, 방향 재선택, 기존 aria-pressed·Long/Short 텍스트와 미리보기 DEMO-only 동작 유지
 - [x] M1 전체 프런트 164/164, JS syntax/TypeScript build/HTML 구조·고유 ID/CSP/git diff 검증
 - [ ] M2 안전한 실제 브라우저에서 화살표 표시·모바일·키보드/스크린리더 인수 (Chromium 샌드박스 허용 환경 의존)
+
+- [x] N1 유효한 레버리지 3×에서 동일한 input 이벤트가 발생해 DEMO 검토를 불필요하게 숨기는 결함을 실제 main.js 신규 이벤트 회귀 2건 수정 전 FAIL로 재현
+- [x] N1 성공한 검토의 레버리지 숫자값 저장 및 유효한 동일 값 이벤트에서 검토 DOM 보존
+- [x] N1 Market/Limit 모두 실제 변경, 부적합 입력, 결과 숨김 후 이전값 복구를 검토 무효화로 유지
+- [x] N1 전체 프런트 168/168·JS syntax·TypeScript build·HTML 구조/고유 ID/CSP/git diff 검사
+- [ ] N2 샌드박스 Chromium 실제 모바일/키보드/스크린리더에서 동일값 범위 입력과 리뷰 상태의 실제 인수

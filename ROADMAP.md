@@ -108,6 +108,8 @@ PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성�
 - **UX-HL-02-L2 (Pending browser)**: 실제 Chromium/모바일·키보드/스크린리더에서 가격 표기 편집의 검토 유지·초기화 인수 미완료.
 - **UX-HL-02-M1 (Local Completed)**: Short 주문 미리보기 버튼에 Long과 동일한 상승 화살표가 표시되던 결함 수정. BUY/SELL·Market/Limit 전환 회귀 2건 포함 프런트 164/164 PASS.
 - **UX-HL-02-M2 (Pending browser)**: Long/Short 방향 버튼의 모바일·키보드/스크린리더 실제 인수 미완료.
+- **UX-HL-02-N1 (Local Completed)**: 레버리지 슬라이더가 동일값 input 이벤트에도 DEMO 검토를 숨기던 문제 수정. 성공한 검토의 유효 수치 유지, 실제 레버리지 변경·부적합 입력/이미 닫힌 리뷰는 무효화. 2건 신규 포함 프런트 168/168 PASS.
+- **UX-HL-02-N2 (Pending browser)**: 실제 샌드박스 브라우저의 모바일/키보드/스크린리더에서 레버리지 값 유지·변경 및 검토 표시 상태 인수 미완료.
 
 ### Hyperliquid 주문 티켓 UX 진행
 

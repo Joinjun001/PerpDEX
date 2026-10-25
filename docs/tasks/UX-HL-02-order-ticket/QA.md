@@ -149,3 +149,13 @@
 - frontend/main.js에서 같은 renderTicket 처리의 아이콘 span을 sideBuy?↗:↘ 방향으로 계산한다. 기존 주문 미리보기·검증·데이터·모델은 변경하지 않는다.
 - 재검증: 신규 2건 포함 실제 DOM 이벤트 44/44 PASS, 프런트 전체 164/164 PASS (162+2), 모든 프런트 JS 문법, npm --prefix backend run build의 tsc --noEmit PASS. HTMLParser/index.html/trade.html 중첩/고유 ID·정적 CSP connect-src none·계정 tbody 5개 미연결·git diff --check PASS.
 - 화면 실렌더링/보조공학·모바일 인수 미실행. 지갑/인증·실체인 트랜잭션·실거래·운영 DB·원격 Push/배포·보안 제한 우회 미실행.
+
+## 2026-10-25 UX-HL-02-N1 — 레버리지 동일 입력 이벤트 시 DEMO 리뷰 상태 검증
+
+- 시작 HEAD 63a4b56, main 작업 트리 clean, origin/main 대비 38커밋 ahead. PROJECT_STATE, ROADMAP, Hyperliquid UX reference, UX-HL-01-Q1·UX-HL-02 SPEC/TODO/QA/RESULT, 실제 frontend/main.js/preview-model.mjs/order-interactions 테스트 점검.
+- 브라우저 체크: 프로젝트 내부 Playwright/Chromium 643 MB 설치 존재. 비특권 사용자 runuser -u node -- unshare -Ur true는 Operation not permitted. 권한·안전 검사 우회 없이 UX-HL-01-Q2 및 UX-HL-02-N2 브라우저 인수 미완료 유지.
+- 수정 전 main.js leverage input은 renderTicket 뒤 order-result.hidden=true를 무조건 실행. 신규 회귀 2개에서 3× 검토 후 값 변화 없이 input 이벤트를 다시 보내자 검토가 숨겨져 둘 다 FAIL.
+- 수정: 성공한 DEMO 검토의 reviewedLeverage를 Number(...)로 보관. 같은 값 input 이벤트 때 검토가 이미 보이고 validPreviewLeverage 검사에 성공한 경우에만 기존 DOM·금액을 보존한다. 실제 3×→4× 변경/부적합 03/이미 숨긴 리뷰는 기존처럼 무효화, 값 복귀로 stale 리뷰 재표시하지 않음.
+- 수정 후 대상 node --test frontend/order-interactions.test.mjs 48/48 PASS, 전체 node --test frontend/*.test.mjs 168/168 PASS(기존 166+신규 2). 모든 frontend JavaScript node --check, npm --prefix backend run build(tsc --noEmit) PASS.
+- Python HTMLParser frontend/index.html·frontend/trade.html 중첩 태그 및 고유 ID 검사, CSP connect-src none·미연결 계정 tbody 5개·실주문 금지 고지 및 git diff --check PASS.
+- 실제 브라우저·모바일/스크린리더·키보드 기본 동작 인수, 실거래·Sepolia 트랜잭션·운영 DB·자격증명·원격 push/배포 미실행.
