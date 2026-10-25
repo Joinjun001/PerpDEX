@@ -68,3 +68,10 @@
 - frontend/account-query-contract.test.mjs: 수량 필드와 ID가 getter 재읽기에서 바뀌는 신규 2건 회귀(수정 전 FAIL). 출력이 검증된 값이며 원본 getter 호출이 1회임을 확인.
 - 프런트 전체 182/182 PASS, JS 문법·TypeScript build·HTML 구조/CSP/Git diff 검사 PASS. 인증된 계정 API/실거래/UI 연결은 하지 않음.
 - I2 인증 API 및 Chromium 모바일·키보드·스크린리더 실 인수 미완료. M5~M9 백엔드·실체인·운영 DB·원격 push·배포 승인 게이트 불변.
+
+## 2026-10-25 UX-HL-03-J1 — envelope 필드 1회 캡처 후 검증 로컬 완료
+
+- frontend/account-query-contract.mjs: 정확한 envelope key 검사 후 7개 속성을 1회 캡처해 원본을 재읽지 않고 revision·records 상한·ID/수량·계정 소유 정보 검증/출력에 동일 값 사용.
+- frontend/account-query-contract.test.mjs: 변하는 revision getter의 -1 저장 문제와 변하는 records getter의 101행 제한 우회 문제를 수정 전 FAIL 회귀 2건으로 확인하고 차단.
+- frontend 전체 184/184 PASS, JavaScript 문법·TypeScript 빌드·HTML/CSP·Git diff 검사 PASS. 오프라인 MOCK·계정 데이터 unavailable 상태 유지.
+- 실 브라우저 J2 및 신뢰된 계정 API 인수는 미완료. M5~M9 backend/지갑·실체인·운영 DB·push/배포 게이트 불변.

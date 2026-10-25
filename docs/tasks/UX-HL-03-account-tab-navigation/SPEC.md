@@ -80,3 +80,10 @@
 - 계정 조회 레코드의 own key 정확한 구성과 예상 필드 개수를 먼저 확인한 뒤 허용된 필드만 각 1회 읽어 별도의 일반 객체에 고정한다. 이 고정된 값만 기존 계정·체인·시장·ID·수량·주문 상태 검증에 사용하고 성공한 immutable record로 복사해 보관한다.
 - 소유 계정은 기존처럼 검증된 요청 context의 normalized account를 이용한다. 기존 응답 envelope, 필드 이름, uint256·status·revision·stale 검증은 보존한다. 불량 getter의 원래 값 자체를 신뢰하는 기능이나 실제 API/지갑 연결을 추가하지 않는다.
 - UX-HL-03-I2는 신뢰된 계정 API와 안전한 Chromium/키보드·스크린리더 환경에서 별도로 인수한다.
+
+## UX-HL-03-J1 (2026-10-25) — 계정 응답 envelope 값의 검증·저장 일치
+
+- 실제 결함: UX-HL-03-I1에서 레코드 필드는 검증 전 한 번만 읽도록 했으나, 상위 validateAccountQueryResponse는 raw.revision/raw.records를 검사 및 결과 구성 과정에서 여러 번 읽었다. 속성 getter가 값마다 다른 revision이나 records를 반환하면 실제 frozen 응답의 revision은 검증되지 않은 값이거나 100행 제한 검사가 다른 배열에 적용될 수 있었다.
+- 응답의 own field 구성이 정확한지 확인한 후 chainId/account/source/tab/requestId/revision/records의 허용된 7개 필드를 각각 정확히 한 번만 읽어 일반 객체에 캡처한다. 캡처한 값만 기존 ID/세션/체인/revision/최대 100행 및 각 레코드 유효성 검증과 normalized 응답 구성에 사용한다.
+- 이전 I1의 개별 레코드 1회 캡처, H1 동일 revision 충돌 방지, stale token, C1~G1 오류 처리 및 5개 탭 disconnected 기본값 유지. 실제 인증·지갑·테스트넷 트랜잭션/운영 API를 연결하지 않는다.
+- J2 실제 브라우저 및 신뢰된 인증 조회 계약 인수는 외부 환경에 의존하며 제한을 우회하지 않는다.

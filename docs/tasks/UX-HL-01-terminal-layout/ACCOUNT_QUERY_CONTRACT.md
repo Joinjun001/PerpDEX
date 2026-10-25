@@ -7,7 +7,7 @@
 - 파일: frontend/account-query-contract.mjs / account-query-contract.test.mjs
 - 5개 탭: positions, open-orders, order-history, trade-history, funding-history
 - expected context: Sepolia chainId 11155111, EVM 계정 0x40 hex, source LOCAL_DB 또는 VERIFIED_TESTNET, tab, 단조 증가 requestId
-- response 필드: chainId, account, source, tab, requestId, revision, records (정확히 7개 필드)
+- response 필드: chainId, account, source, tab, requestId, revision, records (정확히 7개 필드). envelope 자체의 허용 7개 속성도 각 1회만 캡처해 유효성 검사와 저장 결과를 일치시킨다(UX-HL-03-J1).
 - 각 record의 공통 필드: id, chainId, account, market=BTC-USD-PERP. 계정·체인·시장 필드가 요청과 정확히 같아야 함. 중복 id/알 수 없는 필드 거부, 100개 이하 기록만 허용.
 - positions: side LONG/SHORT, sizeAtomic, marginAtomic
 - open-orders: side BUY/SELL, status OPEN, quantityAtomic, filledQuantityAtomic, remainingQuantityAtomic. 수량=체결+잔량.

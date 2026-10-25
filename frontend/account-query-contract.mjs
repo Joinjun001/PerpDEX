@@ -105,9 +105,13 @@ export function validateAccountQueryResponse(raw,expected){
   tabCheck(expected.tab);
   if(!integer(expected.requestId)||expected.requestId===0)invalid('invalid request ID');
   if(!isObject(raw))invalid('missing response');
-  if(Object.keys(raw).length!==7||
-      ['chainId','account','source','tab','requestId','revision','records']
-        .some(key=>!Object.hasOwn(raw,key)))invalid('unknown response envelope fields');
+  const envelopeFields=['chainId','account','source','tab','requestId','revision','records'];
+  if(Object.keys(raw).length!==envelopeFields.length||
+      envelopeFields.some(key=>!Object.hasOwn(raw,key)))invalid('unknown response envelope fields');
+  // Capture each response field once, just as for individual account rows.
+  // Otherwise a changing getter may bypass the record-count bound or store
+  // a revision different from the integer that was actually validated.
+  raw=Object.fromEntries(envelopeFields.map(key=>[key,raw[key]]));
   if(raw.chainId!==context.chainId||address(raw.account)!==context.account||
      raw.source!==context.source||raw.tab!==expected.tab||
      raw.requestId!==expected.requestId)invalid('response identity mismatch');

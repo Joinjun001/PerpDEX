@@ -78,6 +78,33 @@ test('B2-B1 atomic values must be canonical bounded strings, not implicit JS coe
       response(funding,[{...row('funding-history'),paymentSignedAtomic:invalid}]),funding),TypeError);
   }
 });
+test('UX-HL-03-J1 response revision must be the once-validated safe integer',()=>{
+  const exp={...C,tab:'positions',requestId:73};
+  const supplied=response(exp,[row('positions')]);
+  let reads=0;
+  Object.defineProperty(supplied,'revision',{
+    enumerable:true,configurable:true,
+    get(){reads++;return reads===1?8:-1;},
+  });
+  const accepted=validateAccountQueryResponse(supplied,exp);
+  assert.equal(accepted.revision,8,'stored revision is exactly the revision that passed validation');
+  assert.equal(reads,1,'response revision is never read a second time');
+  assert.equal(Object.isFrozen(accepted),true);
+});
+
+test('UX-HL-03-J1 records count limit cannot be bypassed by switching getter results',()=>{
+  const exp={...C,tab:'trade-history',requestId:74};
+  const supplied=response(exp,[]);
+  const oversized=Array.from({length:101},(_,i)=>row('trade-history','rec'+i));
+  let reads=0;
+  Object.defineProperty(supplied,'records',{
+    enumerable:true,configurable:true,
+    get(){reads++;return reads===1?oversized:[];},
+  });
+  assert.throws(()=>validateAccountQueryResponse(supplied,exp),TypeError,
+    'the first 101-record snapshot cannot evade the 100-row limit on re-read');
+  assert.equal(reads,1,'records collection must be captured once');
+});
 test('UX-HL-03-I1 accepted positions preserve the exact numeric field that was validated',()=>{
   const exp={...C,tab:'positions',requestId:71};
   let reads=0;

@@ -58,3 +58,9 @@
 - [x] I1 허용 레코드 필드를 한 번씩만 읽어 snapshot을 만든 뒤 기존 엄격한 유효성 검사와 frozen 출력에 활용
 - [x] I1 frontend 계정 조회 계약 신규 2건 포함 182/182 PASS, JS 문법·TypeScript build·HTML 구조/CSP·git diff PASS
 - [ ] I2 정상적인 Chromium 샌드박스 및 신뢰 계정 API에서 조회 행 표시·오류/복구·접근성 실 인수
+
+- [x] J1 revision getter의 첫 읽기(유효)와 두 번째 읽기(음수)가 달라 부적합 revision이 frozen 응답에 저장되는 결함 수정 전 FAIL 확인
+- [x] J1 records getter가 첫 읽기 101개, 다음 읽기 0개일 때 100행 제한을 우회하는 결함 수정 전 FAIL 확인
+- [x] J1 response envelope 7개 허용 필드를 한 번씩 캡처 후 검증·저장하도록 수정, 기존 계정/체인/ID/revision/수량 규칙 유지
+- [x] J1 전체 프런트 184/184, JS 문법·TypeScript build·HTML 구조·CSP·Git diff 검증
+- [ ] J2 정상적인 Chromium 및 신뢰된 계정 API 환경에서 조회량 제한과 오류/접근성 인수

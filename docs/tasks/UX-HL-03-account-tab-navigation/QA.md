@@ -93,3 +93,13 @@
 - 수정 후 node --test frontend/account-query-contract.test.mjs 대상 19/19 PASS, 전체 node --test frontend/*.test.mjs 182/182 PASS (180+신규 2). 모든 frontend JS node --check 및 npm --prefix backend run build (tsc --noEmit) PASS.
 - Python HTMLParser 정적 index.html/trade.html 구조·고유 ID, CSP connect-src none, 미연결 계정 테이블 tbody 5개·LOCAL PREVIEW/NO EXECUTION 및 git diff --check PASS.
 - 실제 Chromium/모바일/스크린리더 인수 및 신뢰된 서버 계정 조회 미수행. 실제 지갑·인증/주문/운영 DB·Sepolia 트랜잭션·원격 push·배포·보안 우회 없음.
+
+## 2026-10-25 UX-HL-03-J1 — 응답 envelope 필드의 TOCTOU 검사
+
+- 시작 HEAD 9552cf5, Git main clean, origin/main 대비 로컬 46커밋 ahead. PROJECT_STATE/ROADMAP, Hyperliquid UX reference, UX-HL-03 SPEC/TODO/QA/RESULT, query-contract/read-flow/renderer와 frontend 전체 코드 확인.
+- 프로젝트 .local-browser-qa Chromium/Playwright 약 643MB 존재. 비특권 runuser -u node -- unshare -Ur true → Operation not permitted. 보안 제한 우회 없이 I2/J2 실제 브라우저·인증 계정 조회 인수 미완료.
+- 수정 전 frontend/account-query-contract.test.mjs 신규 2건 모두 FAIL: revision getter 첫 값 8은 정상이나 frozen validated.revision에는 재읽은 -1이 저장됨. records getter 첫 값 101개/다음 값 []에 의해 100행 상한을 통과함.
+- 수정: validateAccountQueryResponse에서 envelope 자체의 own key를 확인한 뒤 각 허용 필드를 정확히 1회 읽어 일반 객체로 고정. 동일 raw snapshot에서 기존 context, revision/records 개수, 개별 레코드, 중복 ID 검증 및 immutable 응답 구성. I1 레코드 필드 캡처 경계 유지.
+- 수정 후 대상 node --test frontend/account-query-contract.test.mjs 21/21 PASS, 전체 node --test frontend/*.test.mjs 184/184 PASS(기존 182+2). 모든 frontend JS node --check, npm --prefix backend run build(tsc --noEmit) PASS.
+- Python HTMLParser index.html/trade.html HTML 구조·고유 ID, CSP connect-src none 및 빈 계정 tbody 5개/DEMO no execution·Reduce Only disabled 고지, git diff --check PASS.
+- 실 브라우저/모바일·스크린리더·인증된 API 인수 미실행. 실거래·Sepolia 트랜잭션·지갑/운영 DB·원격 push/배포·자격증명·보안 제한 우회 없음.
