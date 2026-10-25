@@ -150,6 +150,8 @@ PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성�
 - **UX-HL-02-S2 (Pending browser)**: 정상 Chromium 모바일/키보드·스크린리더에서 change-only/중복 input+change 및 검토 갱신 인수 미완료.
 - **UX-HL-02-T1 (Local Completed)**: 좁은 화면에서 주문 미리보기 검토 패널이 제출 버튼 아래에 생성되지만 focus(preventScroll:true)로 자동 스크롤이 억제되는 결함 개선. 기본 panel.focus()로 복원해 노출 가능하게 함, 신규 2건 포함 프런트 206/206 PASS.
 - **UX-HL-02-T2 (Pending browser)**: 안전한 Chromium 모바일/데스크톱·키보드/스크린리더에서 새 검토 결과의 뷰포트 노출 및 포커스 스크롤 인수 미완료.
+- **UX-HL-02-U1 (Local Completed)**: JS 비활성화/로딩 실패 시에도 미리 계산된 모의 Reference/Notional/Indicative margin이 남아 입력 변경 후 오래된 수치로 오인되는 문제 수정. 정적 초기 — → 정상 JS 초기화 후 입력 기반 수치, 신규 2건 포함 프런트 210/210 PASS.
+- **UX-HL-02-U2 (Pending browser)**: 안전한 Chromium/모바일·키보드/스크린리더에서 JS-off/로드 실패/정상 복구의 주문 추정 금액 인수 미완료.
 
 ### Hyperliquid 주문 티켓 UX 진행
 

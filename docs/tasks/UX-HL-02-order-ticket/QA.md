@@ -221,3 +221,14 @@
 - 수정 후 node --test frontend/order-review.test.mjs frontend/order-interactions.test.mjs 72/72 PASS, 전체 node --test frontend/*.test.mjs 206/206 PASS(기존 204 +2). 전체 프런트 JS node --check, npm --prefix backend run build(tsc --noEmit) PASS.
 - Python HTMLParser 두 HTML 구조/고유 ID, CSP connect-src none/form-action none, Preview 버튼 초기 disabled, 계정 tbody 5개 및 DEMO 고지, git diff --check PASS.
 - 실제 모바일 자동 스크롤·포커스·키보드/스크린리더 시각 인수는 미수행. 지갑/실계정 API·실거래·Sepolia 트랜잭션·운영 DB·원격 push/배포·자격증명/샌드박스 우회 없음.
+
+## 2026-10-25 UX-HL-02-U1 — 정적 미리보기 금액의 입력 정합성
+
+- 시작 main HEAD 3860bac, Git clean, origin/main 대비 59커밋 ahead. PROJECT_STATE/ROADMAP/Hyperliquid UX reference, UX-HL-01-V1·UX-HL-02-T1 SPEC/TODO/QA/RESULT, 실제 frontend/main.js, preview-model.mjs, trade.html, order-review, 모바일·계정 탭 및 테스트 확인.
+- 브라우저: .local-browser-qa Playwright Chromium 캐시 약 643MB이나 비특권 runuser -u node -- unshare -Ur true → Operation not permitted. 보안·권한 우회 없이 UX-HL-01-V2, UX-HL-02-T2/S2/U2 실제 브라우저 인수는 미완료.
+- 결함: 초기 trade.html은 수량 0.05에 대해 $3,262.03/$1,087.34를 고정 표시. JavaScript 비활성 시 수량이 바뀌어도 금액이 그대로여서 'Indicative margin' 등 입력 기반 추정치를 잘못 보여줄 수 있음. Preview 버튼은 기존 UX-HL-02-Q1 정책에 따라 disabled.
+- 신규 frontend/order-interactions.test.mjs 2건: 정적 세 수치의 — 상태/JS 부재 고지·form-action none 검사는 수정 전 FAIL(실제 고정 금액 존재 확인), 정상 부팅 후 BTC 0.05의 $65,240.50/$3,262.03/$1,087.34 표시, 수량 0 입력 시 —/submit disabled, 0.1 복구 시 $6,524.05/$2,174.68 계산 검사는 기존 로직 PASS.
+- 수정: frontend/trade.html의 세 strong 출력값만 — 로 교체. frontend/main.js와 계산 로직 변경 없음. 기존 UX-HL-04-B1 테스트의 정적 $1,087.34 기대는 미초기화 — 와 메인 코드의 검증된 result.indicativeMargin 계산 존재 확인으로 갱신. Account Margin 세 항목은 계속 UNAVAILABLE, 실제 값 없음.
+- 수정 후 node --test frontend/order-interactions.test.mjs frontend/ux-hl-04-margin-status.test.mjs 67/67, node --test frontend/*.test.mjs 210/210 PASS(기존 208+2). frontend JS node --check, npm --prefix backend run build(tsc --noEmit) PASS.
+- Python HTMLParser index.html/trade.html 태그 구조/고유 ID, CSP connect-src none/form-action none, 계정 tbody 5개, 초기 disabled Preview/정적 3개 — 및 git diff --check PASS.
+- 실제 Chromium 시각·스크린리더/모바일 인수 미수행. 실거래·지갑/계정 API·Sepolia 트랜잭션·운영 DB·원격 push/배포·자격증명·샌드박스 우회 없음.

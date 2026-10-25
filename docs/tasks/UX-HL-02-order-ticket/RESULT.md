@@ -159,3 +159,11 @@
 - frontend/order-review.test.mjs, frontend/order-interactions.test.mjs: 새 검토 결과 표시·DOM 포커스 옵션·9개 항목/닫기 및 기존 호출 경로 신규 2건, 수정 전 FAIL 재현.
 - 관련 72/72, 전체 프런트 206/206, JavaScript/TypeScript/HTML/CSP/git diff PASS. 실제 Chromium 레이아웃 스크롤 인수는 T2 Pending.
 - 실계정/API/서명·실거래 및 M5~M9·운영 DB·원격 push/배포 안전 제한 변경 없음.
+
+## 2026-10-25 UX-HL-02-U1 — JS 미준비 시 오래된 정적 MOCK 예상 금액 숨김 로컬 완료
+
+- frontend/trade.html: 정적 Reference Price, Notional, Indicative margin은 초기에는 —; JS renderTicket 준비 후 검증된 DEMO 입력에만 수치를 표시.
+- frontend/order-interactions.test.mjs: no-script 추정치의 미초기화 표시와 정상 계산·수량 오류/복구 신규 2건(수정 전 static 1건 FAIL).
+- frontend/ux-hl-04-margin-status.test.mjs: 정적 참고 증거금은 미계산으로 표시되고 실제 Account Margin과 분리됨을 확인. 실제 계정값 미연결/네트워크 차단 검증 유지.
+- 관련 67/67, 전체 프런트 210/210 및 JS/TS/HTML/CSP/Git diff PASS. 실제 Chromium JS-off/모바일 검증 U2 미완료.
+- MOCK 전용·지갑/인증 API 미연결·실주문/실체인/운영 DB/원격 push·배포 정책 불변.

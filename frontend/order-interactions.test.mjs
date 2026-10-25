@@ -89,6 +89,32 @@ async function boot(){
   await import('./main.js?qa-b2-'+(++moduleCounter));
   return fixture;
 }
+test('UX-HL-02-U1 no-script order estimates never present stale precomputed numbers',()=>{
+  const summary=html.match(/<div class="summary-box">([\s\S]*?)<button id="preview-order"/)?.[1];
+  assert.ok(summary,'static order ticket cost summary exists');
+  for(const id of ['reference-price','notional','margin'])
+    assert.match(summary,new RegExp('id="'+id+'">—<\\/strong>'),
+      id+' must be unavailable until the JS preview estimator initializes');
+  assert.match(html,/id="preview-order"[^>]*disabled/);
+  assert.match(html,/<noscript>[\s\S]*?JavaScript[\s\S]*?미리보기[\s\S]*?<\/noscript>/);
+  assert.match(html,/form-action 'none'/);
+});
+
+test('UX-HL-02-U1 initialized preview populates estimates and invalid inputs clear them',async()=>{
+  const app=await boot(),id=app.id;
+  assert.equal(id('reference-price').textContent,'$65,240.50');
+  assert.equal(id('notional').textContent,'$3,262.03');
+  assert.equal(id('margin').textContent,'$1,087.34');
+  id('quantity').value='0';id('quantity').dispatch('input');
+  for(const field of ['reference-price','notional','margin'])
+    assert.equal(id(field).textContent,'—');
+  assert.equal(id('preview-order').disabled,true);
+  id('quantity').value='0.1';id('quantity').dispatch('input');
+  assert.equal(id('reference-price').textContent,'$65,240.50');
+  assert.equal(id('notional').textContent,'$6,524.05');
+  assert.equal(id('margin').textContent,'$2,174.68');
+  assert.equal(id('preview-order').disabled,false);
+});
 test('UX-HL-02-Q1 no-script preview submit cannot appear usable without handlers',()=>{
   const form=html.match(/<form id="order-form"[\s\S]*?<\/form>/)?.[0];
   assert.ok(form,'order form exists');

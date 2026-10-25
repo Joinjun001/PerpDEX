@@ -39,7 +39,10 @@ test('UX-HL-04-B1 margin section lists all three independently unavailable accou
 
 test('UX-HL-04-B1 no fetched or derived account margin and demo calculation stays separate',()=>{
   assert.match(html,/id="account-margin-help"/);
-  assert.match(html,/id="margin"[^>]*>\$1,087\.34/);
+  assert.match(html,/id="margin"[^>]*>—<\/strong>/,
+    'static cost preview is unavailable until the DEMO estimator initializes');
+  assert.match(main,/formatDemoUsdAmount\(result\.indicativeMargin\)/,
+    'validated demo estimator fills the separate indicative margin after initialization');
   assert.match(html,/id="reduce-only"[^>]*disabled/);
   assert.doesNotMatch(main,/account-margin-status|available-margin|reserved-margin|position-margin/);
   assert.doesNotMatch(model,/account-margin-status|available-margin|reserved-margin|position-margin/);

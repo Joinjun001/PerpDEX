@@ -125,3 +125,10 @@
 - [x] T1 패널 focus에서 preventScroll:true만 제거, 기존 포커스 및 9항목·닫기/Escape 동작 유지
 - [x] T1 신규 2건 포함 프런트 206/206, JS 문법·TypeScript build·HTML 구조/CSP 및 git diff 검사
 - [ ] T2 정상 Chromium 모바일/데스크톱에서 검토 패널 자동 노출·스크롤 위치·포커스/스크린리더 인수
+
+- [x] U1 정적 모의 Reference/Notional/Indicative Margin이 JS 비활성화 상태에서도 이전 입력으로 계산된 것처럼 보이는 문제를 실제 HTML에서 확인
+- [x] U1 초기 3개 금액은 —, 정상 JS 초기화 후 MOCK 추정치 갱신 및 무효 입력 시 다시 — 인 신규 회귀 2건 작성 (정적 검사 수정 전 FAIL 확인)
+- [x] U1 static trade.html 금액 출력만 — 로 교체, 기존 main.js 추정/검증 로직 불변
+- [x] U1 기존 UX-HL-04-B1 정적 참고 증거금 숫자 기대 테스트를 JS 준비 상태·입력 기반 출처 계약에 맞게 조정
+- [x] U1 프런트 전체 210/210, JS 문법·TypeScript 빌드·HTML 구조/CSP/Git diff 검사
+- [ ] U2 Chromium의 JS-off/로드 실패·모바일/키보드·스크린리더에서 정적 미준비 출력과 정상 추정값 갱신 인수

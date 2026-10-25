@@ -167,3 +167,10 @@
 - 재현된 사용자 흐름 결함: 제출 후 새로 표시되는 모의 주문 검토 패널은 submit 버튼 아래에 있는데 renderDemoOrderReview는 panel.focus({preventScroll:true})를 호출했다. 따라서 뷰포트 아래쪽에 생긴 검토 결과로 포커스만 이동하고 자동 스크롤은 금지되어, 좁은 모바일 화면에서 사용자가 결과를 발견하지 못할 수 있었다.
 - 결과 패널을 hidden=false로 만든 후 기존 tabindex=-1 및 role=status, 포커스 이동은 유지하면서 기본 panel.focus()를 사용해 네이티브 브라우저의 포커스 이동 스크롤을 허용한다. 자동 스크롤 여부의 실제 레이아웃별 인수는 T2에 보류한다.
 - 9개 검토 항목·닫기 버튼·Escape·제출 버튼 포커스 복귀, 모의 주문 검증, 오프라인/실거래 비활성 제약을 변경하지 않는다. 실제 브라우저 테스트에 보안 제한 우회는 금지한다.
+
+## UX-HL-02-U1 (2026-10-25) — JavaScript 미준비 시 정적 주문 금액의 허위 최신성 제거
+
+- 실제 사용자 흐름 결함: 초기 frontend/trade.html에 모의 Reference Price $65,240.50, Notional $3,262.03, Indicative margin $1,087.34를 계산 완료된 것처럼 고정했다. JavaScript 로드 실패/비활성화 상태에서도 수량 필드는 사용자가 바꿀 수 있어, 변경된 입력과 무관한 예전 계산값이 계속 표시됐다. UX-HL-02-Q1에서 Preview 버튼은 비활성화했지만 정적 계산 수치 노출 문제는 남아 있었다.
+- 초기 HTML의 세 출력은 모두 — 로 둔다. main.js의 정상 진입 updateMarket→renderTicket에서 유효한 입력에만 기존 previewOrderEstimate의 MOCK 값을 표시하고, 무효 입력일 때 다시 — 로 전환하는 기존 로직을 그대로 사용한다.
+- 실제 시장 차트·헤더의 고정 MOCK 참고 가격과 Fee/Funding Not configured, 실제 Account Margin UNAVAILABLE, 기존 주문 유형/방향/입력 검증·Review 및 CSP 제한은 변경하지 않는다.
+- 실제 JS-off·로드 실패·정상 초기화 브라우저 인수는 안전한 Chromium이 허용되는 환경에서 UX-HL-02-U2로 실시한다.
