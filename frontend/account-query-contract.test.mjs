@@ -78,6 +78,35 @@ test('B2-B1 atomic values must be canonical bounded strings, not implicit JS coe
       response(funding,[{...row('funding-history'),paymentSignedAtomic:invalid}]),funding),TypeError);
   }
 });
+test('UX-HL-03-I1 accepted positions preserve the exact numeric field that was validated',()=>{
+  const exp={...C,tab:'positions',requestId:71};
+  let reads=0;
+  const supplied=row('positions');
+  Object.defineProperty(supplied,'marginAtomic',{
+    enumerable:true,configurable:true,
+    get(){reads++;return reads===1?'1000':'-1';},
+  });
+  const accepted=validateAccountQueryResponse(response(exp,[supplied]),exp);
+  assert.equal(accepted.records[0].marginAtomic,'1000',
+    'never retain the different invalid value returned by a second getter read');
+  assert.equal(reads,1,'account atomic field read exactly once');
+  assert.equal(Object.isFrozen(accepted.records[0]),true);
+});
+
+test('UX-HL-03-I1 accepted record ID is the checked ID, not a later getter value',()=>{
+  const exp={...C,tab:'trade-history',requestId:72};
+  let reads=0;
+  const supplied=row('trade-history');
+  Object.defineProperty(supplied,'id',{
+    enumerable:true,configurable:true,
+    get(){reads++;return reads===1?'good-id':'unsafe id with spaces';},
+  });
+  const accepted=validateAccountQueryResponse(response(exp,[supplied]),exp);
+  assert.equal(accepted.records[0].id,'good-id',
+    'do not store an invalid ID that was never validated');
+  assert.equal(reads,1,'record ID must be captured and checked only once');
+  assert.equal(Object.isFrozen(accepted.records[0]),true);
+});
 test('B2-B1 detects duplicate IDs independent of capitalization',()=>{
   const exp={...C,tab:'trade-history',requestId:1};
   assert.throws(()=>validateAccountQueryResponse(

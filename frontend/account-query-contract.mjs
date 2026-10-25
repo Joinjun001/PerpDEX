@@ -54,6 +54,10 @@ function validateRecord(record,tab,context){
   if(Object.keys(record).length!==allowed.length||
      Object.keys(record).some(key=>!allowed.includes(key))||
      allowed.some(key=>!Object.hasOwn(record,key)))invalid('unexpected or missing record field');
+  // Capture each supplied field exactly once before validation. Validating a
+  // getter value and then re-reading it to store the record creates a TOCTOU
+  // gap: the frozen display snapshot could contain values never checked.
+  record=Object.fromEntries(allowed.map(key=>[key,record[key]]));
   if(typeof record.id!=='string'||!ID.test(record.id))invalid('invalid record identifier');
   if(record.chainId!==context.chainId||address(record.account)!==context.account)
     invalid('record account or chain does not match request');

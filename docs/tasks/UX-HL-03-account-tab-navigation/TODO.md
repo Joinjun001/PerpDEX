@@ -52,3 +52,9 @@
 - [x] H1 같은 revision·같은 records 재조회, 더 높은 revision 변화 허용, 세션 변경/stale 차단 유지
 - [x] H1 프런트 전체 180/180·JavaScript syntax·TypeScript build·HTML 구조/CSP/git diff 검증
 - [ ] H2 신뢰된 계정 read API 및 정상 Chromium/키보드·스크린리더에서 revision 오류 상태 인수
+
+- [x] I1 외부 레코드의 변경 getter를 통해 검증된 marginAtomic과 실제 저장 값이 달라지는 문제를 수정 전 실패 테스트로 재현
+- [x] I1 ID getter 변경이 레코드 검사 중 예외·불일치를 야기하는 별도 수정 전 실패 테스트 재현
+- [x] I1 허용 레코드 필드를 한 번씩만 읽어 snapshot을 만든 뒤 기존 엄격한 유효성 검사와 frozen 출력에 활용
+- [x] I1 frontend 계정 조회 계약 신규 2건 포함 182/182 PASS, JS 문법·TypeScript build·HTML 구조/CSP·git diff PASS
+- [ ] I2 정상적인 Chromium 샌드박스 및 신뢰 계정 API에서 조회 행 표시·오류/복구·접근성 실 인수

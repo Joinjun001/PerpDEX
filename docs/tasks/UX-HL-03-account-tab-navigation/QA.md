@@ -83,3 +83,13 @@
 - 전체 node --test frontend/*.test.mjs 180/180 PASS(기존 178+신규 2). 모든 frontend JS node --check 및 npm --prefix backend run build (tsc --noEmit) PASS.
 - Python HTMLParser index.html/trade.html 구조·고유 ID, CSP connect-src none, 정적 미연결 계정 tbody 5개와 DEMO/no execution 고지, git diff --check PASS.
 - 신뢰된 계정 API·실 브라우저 인수 미수행. 자격증명·Sepolia 트랜잭션·운영 DB·원격 push/배포·샌드박스 우회 없음.
+
+## 2026-10-25 UX-HL-03-I1 — 검증과 저장 값의 TOCTOU 불일치 방지
+
+- 시작 HEAD 64e9684, Git main clean, origin/main 대비 로컬 45커밋 ahead. PROJECT_STATE/ROADMAP/Hyperliquid UX reference, UX-HL-03 SPEC·TODO·QA·RESULT와 계정 query-contract·read flow·renderer·main.js·테스트 확인.
+- Chromium/Playwright 캐시 .local-browser-qa 약 643MB 존재. 비특권 runuser -u node -- unshare -Ur true는 Operation not permitted. 보안 제한 우회 없이 UX-HL-03-H2/I2 실제 브라우저/인증 계정 API 인수 미완료.
+- 수정 전 신규 회귀 2건 FAIL. marginAtomic getter는 첫 번째 읽기에서 1000, 두 번째에서 -1을 반환하여 검증은 통과하지만 frozen records에 잘못된 -1을 저장했다. id getter는 첫 번째 읽기와 두 번째 읽기의 차이로 올바른 ID가 있어도 예외 발생.
+- frontend/account-query-contract.mjs의 validateRecord에서 own field 목록 검사를 끝낸 뒤 허용된 필드를 각각 정확히 한 번 읽어 독립 객체로 고정하고 그 고정 값으로 기존 정합성 검사·출력 수행. 외부 속성 재읽기 제거.
+- 수정 후 node --test frontend/account-query-contract.test.mjs 대상 19/19 PASS, 전체 node --test frontend/*.test.mjs 182/182 PASS (180+신규 2). 모든 frontend JS node --check 및 npm --prefix backend run build (tsc --noEmit) PASS.
+- Python HTMLParser 정적 index.html/trade.html 구조·고유 ID, CSP connect-src none, 미연결 계정 테이블 tbody 5개·LOCAL PREVIEW/NO EXECUTION 및 git diff --check PASS.
+- 실제 Chromium/모바일/스크린리더 인수 및 신뢰된 서버 계정 조회 미수행. 실제 지갑·인증/주문/운영 DB·Sepolia 트랜잭션·원격 push·배포·보안 우회 없음.

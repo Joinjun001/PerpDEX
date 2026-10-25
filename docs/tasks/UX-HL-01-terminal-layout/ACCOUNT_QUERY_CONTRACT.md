@@ -14,7 +14,7 @@
 - order-history: side BUY/SELL, status CANCELED 또는 FILLED, quantityAtomic, filledQuantityAtomic.
 - trade-history: side BUY/SELL, fillPriceAtomic, fillQuantityAtomic.
 - funding-history: paymentSignedAtomic.
-- 모든 atomic 필드는 실수/JS Number가 아닌 canonical 10진수 문자열. unsigned uint256 범위 초과, 음수·비정상 소수·지수/선행 0 거부. 금액 부호는 funding 항목에만 허용.
+- 모든 atomic 필드는 실수/JS Number가 아닌 canonical 10진수 문자열. unsigned uint256 범위 초과, 음수·비정상 소수·지수/선행 0 거부. 금액 부호는 funding 항목에만 허용. 외부 record 필드를 각각 한 번만 읽은 고정된 복사본을 검증/보관하여 변경하는 getter의 값 재읽기 불일치를 방지한다(UX-HL-03-I1).
 - coordinator: connect(context) 이후 begin(tab)으로 token 발급, accept(token,response)/fail(token)/disconnect()가 per-tab 상태 관리.
 - 동일 탭에 새 요청이 발생하면 이전 요청의 응답 및 오류 폐기. account/source 교체·disconnect/reconnect 시 이전 세대 token 폐기. 더 낮은 server revision 거부. 동일 revision은 정규화된 records(순서 포함)가 같아야 멱등 조회로 수락하며, 상충되는 동버전 기록은 오류 처리(UX-HL-03-H1).
 - 상태: disconnected, loading, ready, empty, error. 잘못된 현재 응답은 error와 빈 기록 처리. 정상 0개는 empty.

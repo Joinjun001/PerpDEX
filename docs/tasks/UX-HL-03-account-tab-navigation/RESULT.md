@@ -61,3 +61,10 @@
 - frontend/account-query-contract.test.mjs: 같은 revision의 주문 ID 충돌, empty→nonempty 계정 기록 충돌 및 재조회 멱등·상위 revision 회복을 검증하는 신규 2건(수정 전 FAIL).
 - 전체 프런트 180/180 PASS, JS/TypeScript/HTML/CSP/Git diff PASS. 정적 데모·계정 미연결 정책 유지.
 - H2 신뢰된 서버 revision·실브라우저 인수 미완료. M5~M9 백엔드/지갑·실거래/DB·push/배포 제한 변경 없음.
+
+## 2026-10-25 UX-HL-03-I1 — 계정 레코드 필드 캡처 및 검증 원자성 로컬 완료
+
+- frontend/account-query-contract.mjs: validateRecord에서 제공 레코드 필드 각각을 한 번만 읽어 일반 객체로 복사한 후 검증 및 immutable normalized record 보관. 변경하는 getter로 유효성 검사와 저장 값이 달라지던 오류 제거.
+- frontend/account-query-contract.test.mjs: 수량 필드와 ID가 getter 재읽기에서 바뀌는 신규 2건 회귀(수정 전 FAIL). 출력이 검증된 값이며 원본 getter 호출이 1회임을 확인.
+- 프런트 전체 182/182 PASS, JS 문법·TypeScript build·HTML 구조/CSP/Git diff 검사 PASS. 인증된 계정 API/실거래/UI 연결은 하지 않음.
+- I2 인증 API 및 Chromium 모바일·키보드·스크린리더 실 인수 미완료. M5~M9 백엔드·실체인·운영 DB·원격 push·배포 승인 게이트 불변.
