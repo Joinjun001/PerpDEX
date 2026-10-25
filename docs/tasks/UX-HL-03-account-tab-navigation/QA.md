@@ -32,3 +32,13 @@
 - 수정 후 대상 node --test frontend/account-tabs-renderer.test.mjs 11/11 PASS, 전체 node --test frontend/*.test.mjs 170/170 PASS(기존 168+2). 전체 frontend JS node --check 및 npm --prefix backend run build(tsc --noEmit) PASS.
 - Python HTMLParser index.html/trade.html 태그 및 고유 ID, CSP connect-src none, trade.html 내 account tbody 5개 빈 상태 및 MOCK-only 고지, git diff --check PASS.
 - DOM 단위/모의 테스트만 수행. 실제 인증, 지갑·계정 API 조회, 운영 DB·Sepolia 트랜잭션·push/배포/권한 우회 미실행. 실브라우저·스크린리더 시각 인수 미완료.
+
+## 2026-10-25 UX-HL-03-D1 — 계정 조회 공급자 오류 시 모든 탭 비노출
+
+- 시작 로컬 main HEAD d1c87a8, Git clean, origin/main보다 40개 커밋 앞섬. PROJECT_STATE/ROADMAP/Hyperliquid UX reference, UX-HL-03 SPEC/TODO/QA/RESULT, 계정 UI/renderer/contract/read-flow와 기존 프런트 테스트 확인.
+- .local-browser-qa Playwright/Chromium 643MB 존재. 비특권 사용자 runuser -u node -- unshare -Ur true는 Operation not permitted. 안전 제한을 우회하지 않고 UX-HL-03-C2/D2 실브라우저 인수 미완료 유지.
+- 수정 전 frontend/account-tabs-renderer.test.mjs 신규 2건 FAIL: 이전 5개 ready 행 표시 뒤 coordinator.get('trade-history')가 예외를 던지면 렌더러가 그대로 예외 종료하여 남은 기록 삭제 및 명시적 오류 전환 실패. 정적 미연결 진입에서도 공급자 오류를 처리하지 못함.
+- 수정: renderer에서 먼저 전체 스냅샷을 수집하고 그 다음 UI를 순서대로 갱신. get 예외 시 부분 스냅샷 무시, 5개 탭 모두 renderAccountTabSnapshot의 기존 clearRows/상태 처리를 사용하여 검증된 조회는 error, 미검증 기본 경로는 disconnected로 전환.
+- 수정 후 대상 node --test frontend/account-tabs-renderer.test.mjs 13/13 PASS, 전체 node --test frontend/*.test.mjs 172/172 PASS(기존 170+2). 모든 frontend JS node --check, npm --prefix backend run build(tsc --noEmit) PASS.
+- Python HTMLParser frontend/index.html 및 trade.html 태그/중복 ID, CSP connect-src none, 정적 5개 빈 tbody 및 LOCAL PREVIEW · NO EXECUTION, git diff --check PASS.
+- 실제 Chromium/모바일/스크린리더 렌더링 인수 미수행. 인증/지갑 연결·운영 DB 변경·원격 push·배포·Sepolia 트랜잭션·실거래 및 보안 제한 우회 미실행.

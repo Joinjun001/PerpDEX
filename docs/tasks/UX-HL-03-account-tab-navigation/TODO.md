@@ -20,3 +20,10 @@
 - [x] C1 기존 allowValidatedRecords=false·validator/coordinator·정적 미연결 상태 및 5개 계정 탭 보존
 - [x] C1 프런트 전체 170/170·JS syntax·TypeScript build·HTML/CSP/git diff 검증
 - [ ] C2 안전한 실제 Chromium/스크린리더/모바일 환경에서 오류 및 회복의 시각적·보조공학 인수
+
+- [x] D1 중간 계정 탭의 coordinator.get 조회 예외로 기존 ready 행과 화면 갱신이 불일치하는 문제를 실제 renderer 통합 테스트 2건 수정 전 FAIL로 재현
+- [x] D1 5개 탭 모두 스냅샷 수집 성공 시에만 DOM 렌더 시작하도록 두 단계 처리
+- [x] D1 조회 예외 시 전체 행 제거·검증된 조회 경로 error/기본 정적 경로 disconnected 상태로 안전 전환
+- [x] D1 기존 단일 탭 ready/empty/loading/error 표시 및 실제 계정 API/지갑 미연결 경계 보존
+- [x] D1 전체 프런트 172/172, JS syntax·TypeScript build·HTML/CSP/git diff 검사
+- [ ] D2 실제 브라우저/모바일·키보드·스크린리더에서 계정 제공자 오류와 정상 복구의 상태 피드백 인수 (Chromium 샌드박스 환경 필요)

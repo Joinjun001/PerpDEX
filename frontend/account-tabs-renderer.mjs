@@ -114,8 +114,21 @@ export function renderAccountTabsFromCoordinator(
 ){
   if(!coordinator||typeof coordinator.get!=='function')
     throw new TypeError('Account coordinator required');
-  return Object.freeze(Object.fromEntries(ACCOUNT_TABS.map(t=>[
-    t.id,renderAccountTabSnapshot(root,t.id,coordinator.get(t.id),
-      {allowValidatedRecords}),
+  // Read every tab before touching the DOM. A provider read failure midway
+  // through a refresh must not leave earlier authenticated rows on screen.
+  let snapshots;
+  try{
+    snapshots=ACCOUNT_TABS.map(({id})=>coordinator.get(id));
+  }catch{
+    // A broken account provider can no longer establish the current session.
+    // Without the validated-record gate, stay disconnected rather than showing
+    // an authenticated-session error on the static offline demo.
+    const unavailable={state:allowValidatedRecords===true?'error':'disconnected'};
+    return Object.freeze(Object.fromEntries(ACCOUNT_TABS.map(({id})=>[
+      id,renderAccountTabSnapshot(root,id,unavailable,{allowValidatedRecords}),
+    ])));
+  }
+  return Object.freeze(Object.fromEntries(ACCOUNT_TABS.map(({id},i)=>[
+    id,renderAccountTabSnapshot(root,id,snapshots[i],{allowValidatedRecords}),
   ])));
 }

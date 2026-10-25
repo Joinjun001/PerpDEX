@@ -200,6 +200,40 @@ test('B2-B2-A invalid duplicate or wrong-chain responses must never appear',()=>
  renderAccountTabsFromCoordinator(f.root,gate,{allowValidatedRecords:true});
  assert.equal(f.read('trade-history','body').children.length,0);
 });
+test('UX-HL-03-D1 coordinator read failure clears all previously visible account rows',()=>{
+ const f=fixture(),gate=createAccountQueryCoordinator();
+ gate.connect(ctx);
+ for(const {id} of ACCOUNT_TABS){
+  const token=gate.begin(id);
+  assert.equal(gate.accept(token,response(token,[dataRow(id)])),true);
+ }
+ renderAccountTabsFromCoordinator(f.root,gate,{allowValidatedRecords:true});
+ for(const {id} of ACCOUNT_TABS)assert.equal(f.read(id,'body').children.length,1);
+ const unstable={get(tab){
+  if(tab==='trade-history')throw Error('account provider session lost');
+  return gate.get(tab);
+ }};
+ const results=renderAccountTabsFromCoordinator(f.root,unstable,{allowValidatedRecords:true});
+ for(const {id} of ACCOUNT_TABS){
+  assert.equal(results[id],'error',id);
+  assert.equal(f.read(id,'body').children.length,0,id+' stale rows deleted');
+  assert.equal(f.read(id,'table').hidden,true);
+  assert.equal(f.read(id,'view').dataset.accountState,'error');
+  assert.match(f.read(id,'title').textContent,/가져오지 못했습니다/);
+ }
+});
+
+test('UX-HL-03-D1 without validated-record permission provider errors stay disconnected',()=>{
+ const f=fixture();
+ const unreadable={get(){throw Error('no trusted account session');}};
+ const statuses=renderAccountTabsFromCoordinator(f.root,unreadable);
+ for(const {id} of ACCOUNT_TABS){
+  assert.equal(statuses[id],'disconnected',id);
+  assert.equal(f.read(id,'body').children.length,0);
+  assert.equal(f.read(id,'table').hidden,true);
+  assert.equal(f.read(id,'view').dataset.accountState,'disconnected');
+ }
+});
 test('B2-B2-A visible UI never enables authenticated adapter or real account data',()=>{
  const html=readFileSync(fileURLToPath(new URL('./trade.html',import.meta.url)),'utf8');
  const tabs=readFileSync(fileURLToPath(new URL('./account-tabs.js',import.meta.url)),'utf8');

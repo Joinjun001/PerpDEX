@@ -26,3 +26,10 @@
 - frontend/account-tabs-renderer.test.mjs: null/primitive 및 예외를 던지는 계정 행의 오류 상태/행 삭제·복구 회귀 2건 추가, 수정 전 실패 확인.
 - 전체 프런트 170/170 PASS 및 JS 문법·TypeScript 빌드·HTML/CSP·git diff PASS. 실제 Chromium C2 시각/접근성 인수 미완료.
 - 정적 미연결 계정 탭과 검증된 조회 계약/인증 선행 요구, 실거래·지갑·실체인·운영 DB·원격 push/배포 차단은 변경 없음.
+
+## 2026-10-25 UX-HL-03-D1 — 계정 조회 예외 시 전체 상태 정합성 로컬 완료
+
+- frontend/account-tabs-renderer.mjs: 5개 계정 탭에 대해 우선 조회 결과를 모두 확보한 다음 DOM 렌더. 탭별 조회 도중 예외가 나면 이전 행을 전부 지우고 허용된 조회 경로는 error, 미연결 기본 경로는 disconnected 표시.
+- frontend/account-tabs-renderer.test.mjs: 전체 이전 ready 행 표시 후 중간 get 예외, 기본 정적 경로의 get 예외라는 신규 2건 검증(수정 전 FAIL). 기존 C1 비정상 행/정상 회복 테스트 유지.
+- 전체 프런트 172/172 및 JavaScript 문법, backend TypeScript 빌드, HTML 구조/CSP/Git diff PASS.
+- 실제 브라우저 D2 인수는 미완료. 공개 정적 데모에서는 계정 조회 비활성·실계정 미연결, M5~M9 선행 요구 및 원격 Push·배포·실거래 제한 불변.
