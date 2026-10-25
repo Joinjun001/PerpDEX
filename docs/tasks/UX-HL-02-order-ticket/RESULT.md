@@ -152,3 +152,10 @@
 - frontend/order-interactions.test.mjs: change-only 수량/Limit/레버리지 값 변경·미리보기 제거, 참고 가격/금액, 무효 입력의 차단 및 복구 신규 2건. 두 신규 회귀는 수정 전 FAIL 확인.
 - 전체 프런트 204/204 PASS, JS 문법/TS build/HTML/CSP/Git diff PASS. 실제 거래·지갑·API 요청 및 계정 데이터는 계속 미연결.
 - S2 실제 Chromium/모바일 보조입력·스크린리더 인수 미완료. M5~M9 서버·DB·Sepolia·원격 push/배포 관련 기존 승인 게이트 유지.
+
+## 2026-10-25 UX-HL-02-T1 — 주문 검토 포커스 스크롤 허용 로컬 완료
+
+- frontend/order-review.mjs: 모의 검토 패널 노출 시 포커스는 유지하되 preventScroll:true 제거, 기본 브라우저 포커스 스크롤을 허용.
+- frontend/order-review.test.mjs, frontend/order-interactions.test.mjs: 새 검토 결과 표시·DOM 포커스 옵션·9개 항목/닫기 및 기존 호출 경로 신규 2건, 수정 전 FAIL 재현.
+- 관련 72/72, 전체 프런트 206/206, JavaScript/TypeScript/HTML/CSP/git diff PASS. 실제 Chromium 레이아웃 스크롤 인수는 T2 Pending.
+- 실계정/API/서명·실거래 및 M5~M9·운영 DB·원격 push/배포 안전 제한 변경 없음.

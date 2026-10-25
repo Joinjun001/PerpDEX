@@ -210,3 +210,14 @@
 - 수정 후 신규 frontend/order-interactions.test.mjs 2건 PASS: change-only 수정·잘못된 값/수정 복구 및 참고 USD 금액·리뷰 감춤 확인. 대상 node --test frontend/order-interactions.test.mjs 61/61 PASS, 전체 node --test frontend/*.test.mjs 204/204 PASS(기존 202+신규2).
 - 전체 frontend JS node --check, npm --prefix backend run build(tsc --noEmit), Python HTMLParser index.html/trade.html 구조·고유 ID, CSP connect-src none/form-action none, 계정 미연결/비실거래 고지, git diff --check PASS.
 - 실 Chrome/스크린리더/모바일 인수 미실행. 실제 API·실주문·Sepolia 트랜잭션·운영 DB·자격증명·원격 push·배포·보안 우회 없음.
+
+## 2026-10-25 UX-HL-02-T1 — 주문 검토 결과 패널 포커스 스크롤
+
+- 시작 main 로컬 HEAD 07244d9, Git clean, origin/main 대비 57커밋 ahead. PROJECT_STATE/ROADMAP/Hyperliquid UX reference, UX-HL-01-U1·UX-HL-02-S1 TASK SPEC/TODO/QA/RESULT, frontend/main.js·order-review.mjs·trade.html·trade.css 및 관련 DOM/렌더러/모바일 테스트 재점검.
+- 브라우저: .local-browser-qa 약 643MB Playwright Chromium 캐시 존재. 비특권 runuser -u node -- unshare -Ur true → Operation not permitted. 제한 우회 없이 UX-HL-02-S2/T2·UX-HL-01-U2/T2·UX-HL-02-R2 실제 브라우저 인수 미완료.
+- 사용자 흐름 결함: 주문 결과는 버튼 아래 새로 드러나는 role=status / tabindex=-1 패널이며 렌더러가 focus({preventScroll:true})를 호출했다. 좁은 모바일 뷰포트에서 focus 대상이 화면 아래에 남을 수 있으므로 검토 확인 흐름 방해.
+- 신규 렌더러 unit과 실제 주문 폼 submit DOM 통합 회귀 2건 모두 수정 전 FAIL(패널 focus 인자에 preventScroll:true 확인). DOM fixture가 실제 스크롤/페인트는 모의 실행하지 않는 한계를 명시.
+- 수정: frontend/order-review.mjs의 패널 hidden=false 이후 panel.focus()로 변경, 기존 검토 9개 행·Esc/닫기/포커스 복귀 및 DEMO-only 정책 유지.
+- 수정 후 node --test frontend/order-review.test.mjs frontend/order-interactions.test.mjs 72/72 PASS, 전체 node --test frontend/*.test.mjs 206/206 PASS(기존 204 +2). 전체 프런트 JS node --check, npm --prefix backend run build(tsc --noEmit) PASS.
+- Python HTMLParser 두 HTML 구조/고유 ID, CSP connect-src none/form-action none, Preview 버튼 초기 disabled, 계정 tbody 5개 및 DEMO 고지, git diff --check PASS.
+- 실제 모바일 자동 스크롤·포커스·키보드/스크린리더 시각 인수는 미수행. 지갑/실계정 API·실거래·Sepolia 트랜잭션·운영 DB·원격 push/배포·자격증명/샌드박스 우회 없음.

@@ -53,6 +53,8 @@ export function renderDemoOrderReview(panel,document,review,{onClose}={}){
   const unavailable=make('p','preview-review-unsupported',review.unavailable);
   panel.replaceChildren(heading,details,notice,unavailable);
   panel.hidden=false;
-  panel.focus({preventScroll:true});
+  // On narrow screens the new review sits below the submit button. Allow
+  // native focus scrolling so its details become visible after submission.
+  panel.focus();
   return close;
 }

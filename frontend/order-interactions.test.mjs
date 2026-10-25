@@ -33,7 +33,7 @@ class FakeElement{
   addEventListener(name,fn){(this.listeners[name]??=[]).push(fn);}
   replaceChildren(...children){this.children=children;}
   append(...children){this.children.push(...children);}
-  focus(){this.didFocus=true;}
+  focus(options){this.didFocus=true;this.focusOptions=options;}
   dispatch(name,extras={}){
     const event={type:name,key:extras.key,defaultPrevented:false,
       preventDefault(){this.defaultPrevented=true;}};
@@ -335,6 +335,20 @@ test('B2-A actual form submit only renders review; Escape and close return focus
   assert.equal(close.tag,'button');
   close.dispatch('click');
   assert.equal(id('order-result').hidden,true);
+});
+test('UX-HL-02-T1 form submit reveals and focuses review without suppressing viewport movement',async()=>{
+  const app=await boot(),id=app.id;
+  const result=id('order-form').dispatch('submit');
+  assert.equal(result.defaultPrevented,true);
+  assert.equal(id('order-result').hidden,false);
+  assert.equal(id('order-result').didFocus,true);
+  assert.equal(id('order-result').focusOptions,undefined,
+    'auto-scrolling focus is required for the review located below the submit button');
+  assert.equal(id('order-result').children[1].children.length,9);
+  const close=id('order-result').children[0].children[1];
+  close.dispatch('click');
+  assert.equal(id('order-result').hidden,true);
+  assert.equal(id('preview-order').didFocus,true);
 });
 test('UX-HL-02-E1 clicking current market preserves edited Limit price and valid review',async()=>{
   const app=await boot(),id=app.id;

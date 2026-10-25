@@ -15,7 +15,7 @@ class FakeElement{
   addEventListener(name,handler){this.listeners[name]=handler;}
   append(...children){this.children.push(...children);}
   replaceChildren(...children){this.children=[...children];}
-  focus(){this.didFocus=true;}
+  focus(options){this.didFocus=true;this.focusOptions=options;}
   set innerHTML(value){throw new Error('unsafe innerHTML used: '+value);}
 }
 const dom={createElement:tag=>new FakeElement(tag)};
@@ -90,6 +90,17 @@ test('UX-HL-02-B1 renderer creates safe text nodes, fixed row count and accessib
  close.listeners.click();
  assert.equal(closed,1);
  assert.match(notice.textContent,/서버 전송 0건/);
+});
+test('UX-HL-02-T1 generated demo review focuses without preventing viewport scrolling',()=>{
+  const panel=new FakeElement('div');
+  const review=createDemoOrderReview(input);
+  renderDemoOrderReview(panel,dom,review);
+  assert.equal(panel.hidden,false);
+  assert.equal(panel.didFocus,true);
+  assert.equal(panel.focusOptions,undefined,
+    'native focus should allow the newly revealed review below the submit button to scroll into view');
+  assert.equal(panel.children[1].children.length,9);
+  assert.equal(panel.children[2].textContent,review.notice);
 });
 test('UX-HL-02-B1 renderer never injects HTML from freeform contents',()=>{
  const panel=new FakeElement('div');

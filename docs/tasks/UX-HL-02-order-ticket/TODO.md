@@ -119,3 +119,9 @@
 - [x] S1 변경 후 무효/복구 수량 및 무효 Limit 가격의 미리보기 차단·오류 표시, 레버리지 변경 검증
 - [x] S1 프런트 전체 204/204·JS 문법·TypeScript 빌드·HTML 구조/CSP/git diff 검사
 - [ ] S2 정상 Chromium/모바일·키보드/스크린리더에서 자동 완성/복원·change-only 입력과 input+change 중복의 검토 동기화 인수
+
+- [x] T1 검토 결과가 제출 버튼 아래에 있는데 focus(preventScroll:true)가 브라우저 자동 노출을 억제하는 구현 문제 확인
+- [x] T1 렌더러 및 실제 submit DOM 호출의 focus options를 관찰하는 신규 회귀 2건 수정 전 FAIL 재현
+- [x] T1 패널 focus에서 preventScroll:true만 제거, 기존 포커스 및 9항목·닫기/Escape 동작 유지
+- [x] T1 신규 2건 포함 프런트 206/206, JS 문법·TypeScript build·HTML 구조/CSP 및 git diff 검사
+- [ ] T2 정상 Chromium 모바일/데스크톱에서 검토 패널 자동 노출·스크롤 위치·포커스/스크린리더 인수
