@@ -103,3 +103,9 @@
 - [x] R1 초기 정적 output은 값 —와 함께 미계산·비실호가 이름 제공, 기존 MOCK 거래·CSP 유지
 - [x] R1 frontend 전체 190/190 및 JS 문법·TypeScript build·HTML/CSP·git diff 검증
 - [ ] R2 안전한 실제 Chromium에서 스크린리더의 수치/단위 읽기 및 모바일 표시 인수
+
+- [x] S1 650px 이하에서 숨겨진 데스크톱 포트폴리오 앵커의 모바일 대체 링크 누락을 실제 HTML/CSS로 확인
+- [x] S1 정적 DOM 목적지, 모바일 조건/44px 탭 타깃 신규 회귀 2건을 구현 전 FAIL로 재현
+- [x] S1 모바일 거래 제목 영역에 #portfolio 바로가기 추가, 데스크톱 숨김·모바일만 표시·키보드 focus 강조
+- [x] S1 프런트 194/194, JS 문법·TypeScript 빌드·HTML 구조/CSP/Git diff 검사
+- [ ] S2 실제 Chromium/모바일·키보드/스크린리더에서 터치 영역·앵커 이동·시각적 줄바꿈 인수

@@ -167,3 +167,11 @@
 - frontend/order-interactions.test.mjs: BTC/ETH/SOL/BTC 접근성 수치·USD 단위/출처, no-script 미계산 안내 신규 회귀 2건(수정 전 FAIL).
 - 전체 프런트 190/190 PASS, JS 문법·TypeScript build·HTML/CSP·git diff 검사 PASS. 실제 Chromium/스크린리더 R2 인수 미완료.
 - 백엔드 M5~M9·지갑/API·실주문·운영 DB·원격 push/배포 제한 변경 없음.
+
+## 2026-10-25 UX-HL-01-S1 — 모바일 포트폴리오 바로가기 로컬 완료
+
+- frontend/trade.html: 제목 영역에 기존 #portfolio 계정 섹션으로 이동하는 '계정 현황 ↓' 링크 추가.
+- frontend/trade.css: 데스크톱에서는 숨기고 650px 이하 모바일에서 표시. 44px 높이의 터치 영역과 포커스 외곽선 정의.
+- frontend/mobile-portfolio-link.test.mjs: desktop nav 숨김 조건, 존재하는 계정 앵커 목적지, 초기 JS 불필요 정적 링크/모바일 표시·44px 접근성 신규 2건 (수정 전 FAIL).
+- 프런트 전체 194/194 PASS, JS/TS/HTML/CSP/Git diff PASS. 실제 Chromium/모바일/스크린리더 S2 인수는 미완료.
+- M5~M9 backend, 실계정/지갑, 주문·자금·Sepolia 트랜잭션, 운영 DB, 원격 Push·배포 제한 유지.

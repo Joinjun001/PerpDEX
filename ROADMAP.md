@@ -82,6 +82,8 @@ PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성�
 - **UX-HL-01-Q2 (Pending browser)**: 실제 안전한 Chromium 환경에서 탭 제목·모바일/접근성 확인 미완료.
 - **UX-HL-01-R1 (Local Completed)**: MOCK Order Book의 보이는 USD 스프레드와 달리 aria-label에 수치가 없어 보조공학이 핵심 값을 놓칠 수 있던 문제 수정. BTC/ETH/SOL 시장별 값/단위/비실호가 안내 동기화, no-script 미계산 안내 추가. 신규 2건 포함 프런트 190/190 PASS.
 - **UX-HL-01-R2 (Pending browser)**: 정상 Chromium/모바일·키보드/스크린리더에서 실제 스프레드 금액 안내와 시각 대비 인수 미완료.
+- **UX-HL-01-S1 (Local Completed)**: 650px 이하 모바일에서 상단 nav 전체 숨김으로 계정 현황 바로가기가 사라지던 탐색 결함 수정. 제목 영역의 모바일 전용 #portfolio 앵커·44px 터치 타깃·키보드 포커스, 신규 2건 포함 프런트 194/194 PASS.
+- **UX-HL-01-S2 (Pending browser)**: 정상 Chromium/실모바일에서 계정 현황 바로가기의 시각적 배치·탭 탐색·앵커 이동·스크린리더 인수 미완료.
 
 ### Hyperliquid 계정 탭 탐색 UX 진행
 

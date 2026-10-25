@@ -210,3 +210,13 @@
 - 수정 후 대상 node --test frontend/order-interactions.test.mjs 50/50 PASS, 전체 node --test frontend/*.test.mjs 190/190 PASS (기존 188+2). 모든 frontend JS node --check, npm --prefix backend run build (tsc --noEmit) PASS.
 - Python HTMLParser frontend/index.html·frontend/trade.html 구조/고유 ID, CSP connect-src none, 계정 미연결 tbody 5개·DEMO-only 고지 및 git diff --check PASS.
 - 실제 Chrome·스크린리더·모바일 시각/스크린리더 인수는 미실행. 지갑/API 연결·실거래·Sepolia 트랜잭션·운영 DB·자격증명·원격 push/배포/권한 우회 없음.
+
+## 2026-10-25 UX-HL-01-S1 — 모바일 계정 현황 진입점
+
+- 시작 로컬 main HEAD 91a0ef6, Git clean, origin/main 대비 51커밋 ahead. PROJECT_STATE/ROADMAP/Hyperliquid UX reference, UX-HL-01-R1/UX-HL-02-P1 관련 SPEC/TODO/QA/RESULT 및 실제 trade.html, trade.css, styles.css, 모바일/계정/거래 코드와 테스트 확인.
+- .local-browser-qa 내 Playwright/Chromium 약 643MB 확인. 비특권 runuser -u node -- unshare -Ur true 는 Operation not permitted. 샌드박스·권한 우회하지 않고 R2/P2/S2 실제 브라우저 인수 미실행.
+- 실제 원인: 데스크톱 nav의 href=#portfolio가 650px 이하에서 CSS display:none으로 숨겨지며 모바일 거래 workspace에 동등한 링크가 없음. 신규 frontend/mobile-portfolio-link.test.mjs 2건 수정 전 FAIL(앵커 누락/CSS 노출 없음).
+- 수정: frontend/trade.html 거래 제목 묶음에 #portfolio 링크 추가. frontend/trade.css에서 데스크톱 display:none, 650px 이하 inline-flex/min-height:44px/키보드 focus-visible CSS 적용. JavaScript, 계정 탭/주문 계산/API 경로 변경 없음.
+- 수정 후 node --test frontend/mobile-portfolio-link.test.mjs 2/2 PASS, node --test frontend/*.test.mjs 194/194 PASS(기존 192+신규 2). 전체 프런트 JS node --check, npm --prefix backend run build (tsc --noEmit) PASS.
+- Python HTMLParser index.html/trade.html 태그 구조·고유 ID, CSP connect-src none, 5개 계정 빈 tbody·NO EXECUTION/MOCK 고지 및 git diff --check PASS.
+- 실제 Chrome 화면 크기별 픽셀 배치, 터치, 앵커 스크롤 및 스크린리더 인수는 제한으로 미수행. 자격증명·지갑/API 연결·실거래·Sepolia 트랜잭션·운영 DB·원격 Push/배포/보안 제한 우회 없음.

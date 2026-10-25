@@ -324,3 +324,19 @@
 .trade-shell .leverage-ticks span:nth-child(2){left:22.22%}
 .trade-shell .leverage-ticks span:nth-child(3){left:44.44%}
 .trade-shell .leverage-ticks span:last-child{right:0;left:auto;transform:none}
+
+/* UX-HL-01-S1 — keep account-section navigation discoverable on small
+ * screens, where the desktop topbar's Portfolio anchor is hidden. */
+.workspace-portfolio-link{display:none}
+@media(max-width:650px){
+  .trade-shell .workspace-portfolio-link{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-height:44px;padding:8px 12px;
+    color:#a5f0d3;background:#1c3530;
+    border:1px solid #376957;border-radius:8px;
+    font-size:11px;font-weight:750;text-decoration:none;
+  }
+  .trade-shell .workspace-portfolio-link:focus-visible{
+    outline:2px solid var(--blue);outline-offset:2px;
+  }
+}
