@@ -122,3 +122,11 @@
 - frontend/leverage-ticks.test.mjs: range 1~10/1단계와 4개 표시 눈금이 변경되지 않았는지, 중간 눈금 위치가 임의 등간격이 아닌 실제 정수 단계 비율인지 회귀 검증. 수정 전 배치 검증 1건 FAIL.
 - 전체 프런트 188/188 PASS, JS/TS/HTML/CSP/Git diff PASS. 실제 브라우저 O2 시각 및 스크린리더 인수 보류.
 - 실계정/지갑·서명 주문, Sepolia·운영 DB·배포/원격 Push 금지 유지.
+
+## 2026-10-25 UX-HL-02-P1 — 빠른 수량 단위 접근성 로컬 완료
+
+- frontend/main.js: 4개 빠른 수량 버튼에 현재 BTC/ETH/SOL 자산 단위와 MOCK 설명이 포함된 aria-label 적용.
+- frontend/trade.html: no-script 초기 BTC 네 버튼의 정적 접근성 이름 추가.
+- frontend/order-interactions.test.mjs: BTC/ETH/SOL/BTC 시장 변경, 기본 HTML의 BTC 단위 및 미연결 CSP 신규 회귀 2건(수정 전 FAIL).
+- 프런트 192/192, JS·TS·HTML/CSP/git diff PASS. 버튼 숫자·선택/DEMO 미리보기 로직 그대로.
+- 실제 브라우저 P2 접근성 인수 보류. 지갑/실주문·실체인·DB·원격 push/배포 정책 유지.

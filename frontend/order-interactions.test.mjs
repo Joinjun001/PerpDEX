@@ -575,6 +575,30 @@ test('UX-HL-02-J1 quick selection uses valid numeric equality for scientific and
     }
   }
 });
+test('UX-HL-02-P1 quick quantity buttons announce current market asset and demo amount',async()=>{
+  const app=await boot();
+  for(const market of ['BTC','ETH','SOL','BTC']){
+    app.market(market).dispatch('click');
+    for(const quantity of ['0.01','0.05','0.1','0.25']){
+      const button=app.qty(quantity);
+      assert.equal(button.getAttribute('aria-label'),
+        '모의 빠른 수량 '+quantity+' '+market,
+        'a naked amount is ambiguous after a market switch');
+    }
+  }
+  assert.match(html,/aria-label="빠른 수량 선택"/);
+});
+
+test('UX-HL-02-P1 no-script BTC quantity presets include accessible unit without enabling trades',()=>{
+  const group=html.match(/<div class="quick-amounts"[^>]*>(.*?)<\/div>/)?.[1];
+  assert.ok(group,'quick quantity presets must exist');
+  for(const quantity of ['0.01','0.05','0.1','0.25']){
+    const escaped=quantity.replace('.','\\.');
+    const regex=new RegExp('data-qty="'+escaped+'"[^>]*aria-label="모의 빠른 수량 '+escaped+' BTC"');
+    assert.match(group,regex,'initial visible BTC quantity must identify units');
+  }
+  assert.match(html,/connect-src 'none'/);
+});
 test('UX-HL-02-I1 quick quantity buttons expose selected state through aria-pressed',async()=>{
   const app=await boot(),id=app.id;
   const buttons=['0.01','0.05','0.1','0.25'];

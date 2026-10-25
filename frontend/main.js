@@ -205,6 +205,9 @@ function renderTicket(){
     const selected=matchesQuickQuantity(quantity,b.dataset.qty);
     b.classList.toggle('active',selected);
     b.setAttribute('aria-pressed',String(selected));
+    // Each preset represents an amount of the currently selected asset;
+    // its visible numeric label alone is ambiguous to screen readers.
+    b.setAttribute('aria-label','모의 빠른 수량 '+b.dataset.qty+' '+view.market);
   });
 }
 function dismissDemoReview(){

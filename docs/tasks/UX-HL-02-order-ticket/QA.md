@@ -169,3 +169,13 @@
 - 수정 후 node --test frontend/leverage-ticks.test.mjs 2/2 PASS; 전체 node --test frontend/*.test.mjs 188/188 PASS(기존 186+2). 모든 frontend JS node --check, npm --prefix backend run build(tsc --noEmit) PASS.
 - Python HTMLParser index.html/trade.html 구조·중복 ID, CSP connect-src none·빈 계정 tbody 5개·실거래 미실행 안내 및 Git diff --check PASS.
 - 실제 Chromium 픽셀/모바일 터치/키보드/스크린리더 인수는 미수행. 지갑·실주문·Sepolia 트랜잭션·운영 DB·자격증명·원격 Push/배포/샌드박스 우회 없음.
+
+## 2026-10-25 UX-HL-02-P1 — 빠른 수량 버튼의 단위 접근성
+
+- 시작 HEAD c9d2704, main clean, origin/main보다 로컬 50커밋 앞섬. PROJECT_STATE/ROADMAP/Hyperliquid UX reference/UX-HL-01-R1·UX-HL-02-O1 문서 및 실제 main.js, trade.html, preview model/모바일·계정 관련 코드 확인.
+- 브라우저: Playwright/Chromium .local-browser-qa 약 643 MB 존재, 비특권 runuser -u node -- unshare -Ur true 는 Operation not permitted. 권한 우회 없이 실제 Chromium R2/O2/P2 인수 미완료.
+- 수정 전 신규 frontend/order-interactions.test.mjs 2건 모두 FAIL: 동적 BTC preset aria-label null, 정적 기본 BTC preset ARIA에 자산 단위 없음.
+- 수정: renderTicket에서 각 data-qty 버튼의 ARIA 이름에 모의 수량 및 현재 view.market 단위 동기화. 정적 trade.html에도 BTC 기본 이름 추가. visible 숫자, aria-pressed, 계산/리뷰 불변.
+- 수정 후 node --test frontend/order-interactions.test.mjs 52/52 PASS, node --test frontend/*.test.mjs 192/192 PASS(기존 190+2). 전체 frontend JS node --check 및 npm --prefix backend run build(tsc --noEmit) PASS.
+- Python HTMLParser 두 HTML 구조·고유 ID, CSP connect-src none, 미연결 계정 tbody 5개 및 DEMO-only, git diff --check PASS.
+- 실제 Chrome/모바일/스크린리더 인수·지갑/API·실거래·Sepolia 트랜잭션·운영 DB·원격 push/배포·자격증명 및 보안 제한 우회 없음.

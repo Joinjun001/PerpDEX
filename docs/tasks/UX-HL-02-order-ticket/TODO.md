@@ -93,3 +93,9 @@
 - [x] O1 거래 CSS에서 3× 22.22%, 5× 44.44%로 정렬·양 끝 정렬, 기존 leverage 입력·DEMO 계산/리뷰 유지
 - [x] O1 전체 프런트 188/188, JS 문법·TypeScript 빌드·HTML 구조/CSP/Git diff 검사
 - [ ] O2 실제 안전한 Chromium 모바일/데스크톱에서 눈금·thumb 위치 및 키보드/스크린리더 동작 시각 인수
+
+- [x] P1 BTC/ETH/SOL 단위 없는 빠른 수량 접근성 문제를 신규 DOM/정적 테스트 2건 수정 전 FAIL 재현
+- [x] P1 BTC/ETH/SOL/BTC 변경 시 모의 버튼 수량·단위를 ARIA 이름으로 동기화, aria-pressed 유지
+- [x] P1 기본 no-script BTC 4개 버튼 정적 접근성 이름 반영
+- [x] P1 프런트 192/192, JS 문법, TypeScript build, HTML/CSP 및 git diff 검증
+- [ ] P2 Chromium 모바일/키보드/스크린리더에서 접근성 이름·선택 상태 실제 인수
