@@ -68,11 +68,16 @@ function validateRecord(record,tab,context){
        BigInt(record.filledQuantityAtomic)>BigInt(record.quantityAtomic))
       invalid('invalid order quantity');
     if(tab==='open-orders'){
-      if(record.status!=='OPEN'||!uintAtomic(record.remainingQuantityAtomic)||
+      if(record.status!=='OPEN'||!uintAtomic(record.remainingQuantityAtomic,true)||
          BigInt(record.quantityAtomic)!==BigInt(record.filledQuantityAtomic)+
            BigInt(record.remainingQuantityAtomic))invalid('invalid open order or residual');
-    }else if(!['CANCELED','FILLED'].includes(record.status)){
-      invalid('invalid terminal order status');
+    }else{
+      if(!['CANCELED','FILLED'].includes(record.status))
+        invalid('invalid terminal order status');
+      // A terminal FILLED label cannot describe a partially executed order.
+      if(record.status==='FILLED'&&
+         BigInt(record.filledQuantityAtomic)!==BigInt(record.quantityAtomic))
+        invalid('FILLED order quantity mismatch');
     }
   }else if(tab==='trade-history'){
     if(!['BUY','SELL'].includes(record.side)||

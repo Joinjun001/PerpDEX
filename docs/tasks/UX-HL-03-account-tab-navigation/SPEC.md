@@ -58,3 +58,11 @@
 - 향후 실제 인증/계정 조회 어댑터에서는 별도의 지갑·체인·세션 검증을 완료하고 호출자가 명시적으로 허용해야 스냅샷을 읽는다. 본 모듈 자체가 인증을 보장하는 것은 아니다.
 - 검증된 경로는 D1 전체 스냅샷 선조회 및 실패 시 전체 오류 전환, E1/C1 부정확한 스냅샷·행 검증 등 기존 처리와 동일하다.
 - 실제 브라우저·스크린리더/모바일은 F2 별도 인수이며 Chromium 샌드박스 제한을 우회하지 않는다.
+
+## UX-HL-03-G1 (2026-10-25) — 주문 상태와 잔여 수량의 계정 조회 정합성
+
+- 실제 검증 결함: account-query-contract.mjs는 Order History 레코드가 FILLED인데 filledQuantityAtomic<quantityAtomic인 경우, Open Orders가 OPEN인데 remainingQuantityAtomic=0인 경우도 수용했다. 정적 데모에서 직접 거래되지는 않지만 향후 인증된 계정 조회가 연결되면 상태 텍스트가 실제 수량과 모순될 수 있다.
+- Order History의 FILLED 상태는 체결 원자 수량이 전체 주문 원자 수량과 정확히 같은 때만 유효하다. CANCELED 상태는 유효한 부분 체결/0 체결을 허용하며 기존 상한 검증(체결량<=전체량)을 유지한다.
+- Open Orders의 OPEN 상태는 remainingQuantityAtomic>0이면서 기존 원장 보존식 quantityAtomic=filledQuantityAtomic+remainingQuantityAtomic 및 정수형/소유 계정/체인 검증을 충족해야 한다.
+- 상태/원자 단위 문자열 검증만 개선한다. 실서버·검증되지 않은 API·지갑·오더북·스마트컨트랙트/운영 DB·실거래를 연결하지 않는다. 로컬 인증 경계나 모델의 status 값을 실제 서버 사실로 해석하지 않는다.
+- UX-HL-03-G2 실제 인증된 계정 UI/브라우저 인수는 신뢰 가능한 서버 및 Chromium 샌드박스 환경이 마련된 후 별도 진행한다.

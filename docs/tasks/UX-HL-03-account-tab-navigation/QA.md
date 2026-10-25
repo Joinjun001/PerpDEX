@@ -62,3 +62,13 @@
 - 수정 후 대상 node --test frontend/account-tabs-renderer.test.mjs 17/17 PASS, 전체 node --test frontend/*.test.mjs 176/176 PASS(기존 174+신규 2). 모든 frontend JS node --check, npm --prefix backend run build (tsc --noEmit) PASS.
 - Python HTMLParser frontend/index.html/trade.html 태그 중첩·고유 ID, CSP connect-src none, 계정 빈 tbody 5개·DEMO-only 고지 및 git diff --check PASS.
 - 실제 Chromium/모바일/스크린리더 UI 인수 미실행. 인증/실계정 API·지갑/실거래·Sepolia 트랜잭션·운영 DB·원격 Push/배포·안전 권한 우회 없음.
+
+## 2026-10-25 UX-HL-03-G1 — 조회된 주문 상태와 원자 단위 수량 일치
+
+- 시작 HEAD 97a458e, 로컬 main 작업 트리 clean, origin/main 대비 43개 ahead. PROJECT_STATE.md, ROADMAP.md, Hyperliquid UX reference, UX-HL-03 SPEC/TODO/QA/RESULT 및 실제 account-query-contract.mjs, model, 테스트, 읽기 흐름과 프런트 주문 UI 확인.
+- Playwright/Chromium 캐시 .local-browser-qa 약 643MB. 비특권 runuser -u node -- unshare -Ur true → Operation not permitted. 제한 우회 없이 UX-HL-03-F2/G2 실브라우저 인수 보류.
+- 수정 전 node --test frontend/account-query-contract.test.mjs 신규 2건 모두 FAIL: Order History FILLED 7/10 또는 0/10, Open Orders OPEN 10/10 채움·0 잔량도 수용되는 사실 확인.
+- 수정: account-query-contract.mjs의 validateRecord에서 OPEN remainingQuantityAtomic 양수 검증, FILLED filledQuantityAtomic===quantityAtomic 검증을 추가. CANCELED 부분 체결 7/10과 정상 OPEN 부분 체결 9/10·잔량1은 허용.
+- 수정 후 대상 node --test frontend/account-query-contract.test.mjs 15/15 PASS, 전체 node --test frontend/*.test.mjs 178/178 PASS(176+2). 모든 frontend JS node --check, npm --prefix backend run build(tsc --noEmit) PASS.
+- HTMLParser frontend/index.html, frontend/trade.html 중첩 태그·고유 ID 확인, CSP connect-src none, 정적 미연결 계정 테이블 tbody 5개와 DEMO-only/no execution 계약, git diff --check PASS.
+- 실제 모바일·스크린리더·인증된 계정 조회·실체인 인수는 미실행. 자격증명·Sepolia 트랜잭션·원격 push/배포·운영 DB·샌드박스 우회 없음.

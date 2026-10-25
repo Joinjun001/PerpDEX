@@ -47,3 +47,10 @@
 - frontend/account-tabs-renderer.test.mjs: 공급자 호출이 금지된 기본 경로와 이전 verified ready 기록 뒤 허용 철회 시 조회 0회·전 탭 비노출을 검증하는 신규 회귀 2건(수정 전 FAIL).
 - 프런트 전체 176/176 PASS 및 JS/TS/HTML/CSP/git diff PASS. 기존 검증된 스냅샷 표시·오류/복구 경로 보존.
 - 실제 브라우저 F2 인수 미완료. 인증·지갑·실거래·운영 DB 및 Push/배포/안전 우회 변경 없음.
+
+## 2026-10-25 UX-HL-03-G1 — 주문 상태·수량 계약 로컬 완료
+
+- frontend/account-query-contract.mjs: FILLED 전체 체결 필수, OPEN 잔량 양수 필수. 기존 원자 수량·소유 계정/요청·체인·revision 검증 및 CANCELED 부분 체결 허용 유지.
+- frontend/account-query-contract.test.mjs: 수정 전 FAIL이었던 상태-잔량 모순 2건을 회귀로 추가. 완전 FILLED, 부분 CANCELED, 잔량이 남은 OPEN을 정상 수락하는 대조군 포함.
+- 전체 프런트 178/178 PASS, JS 문법·TypeScript build·HTML 구조·CSP·git diff 검사 PASS. UI는 여전히 정적 account unavailable; 실제 서버 연결·주문 상태 동기화 미수행.
+- UX-HL-03-G2는 신뢰 가능한 계정 API 및 안전한 브라우저 환경 인수 필요. M5~M9 백엔드 상태·Push/배포·실거래/권한 게이트 불변.

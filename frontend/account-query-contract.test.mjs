@@ -96,6 +96,29 @@ test('B2-B1 open order quantity integrity and canonical numeric fields',()=>{
     {...good,status:'FILLED'},
   ])assert.throws(()=>validateAccountQueryResponse(response(exp,[corrupted]),exp),TypeError);
 });
+test('UX-HL-03-G1 order-history FILLED must represent a completely filled order',()=>{
+  const exp={...C,tab:'order-history',requestId:11};
+  const complete={...row('order-history'),status:'FILLED',quantityAtomic:'10',filledQuantityAtomic:'10'};
+  const partial={...complete,filledQuantityAtomic:'7'};
+  const zero={...complete,filledQuantityAtomic:'0'};
+  assert.equal(validateAccountQueryResponse(response(exp,[complete]),exp).records[0].status,'FILLED');
+  for(const invalid of [partial,zero]){
+    assert.throws(()=>validateAccountQueryResponse(response(exp,[invalid]),exp),TypeError,
+      'FILLED with unfilled units must never appear as completed history');
+  }
+  // Partial fills are still allowed for a canceled terminal order.
+  const canceled={...complete,status:'CANCELED',filledQuantityAtomic:'7'};
+  assert.equal(validateAccountQueryResponse(response(exp,[canceled]),exp).records[0].status,'CANCELED');
+});
+
+test('UX-HL-03-G1 open-orders OPEN must always retain positive remaining quantity',()=>{
+  const exp={...C,tab:'open-orders',requestId:12};
+  const complete={...row('open-orders'),quantityAtomic:'10',filledQuantityAtomic:'10',remainingQuantityAtomic:'0'};
+  assert.throws(()=>validateAccountQueryResponse(response(exp,[complete]),exp),TypeError,
+    'OPEN with zero remaining must not be presented as an active order');
+  const partial={...complete,filledQuantityAtomic:'9',remainingQuantityAtomic:'1'};
+  assert.equal(validateAccountQueryResponse(response(exp,[partial]),exp).records[0].status,'OPEN');
+});
 test('B2-B1 rejects invalid fill prices, statuses, funding amounts',()=>{
   for(const [tab,change] of [
     ['trade-history',{fillPriceAtomic:'0'}],
