@@ -27,3 +27,9 @@
 - [x] D1 기존 단일 탭 ready/empty/loading/error 표시 및 실제 계정 API/지갑 미연결 경계 보존
 - [x] D1 전체 프런트 172/172, JS syntax·TypeScript build·HTML/CSP/git diff 검사
 - [ ] D2 실제 브라우저/모바일·키보드·스크린리더에서 계정 제공자 오류와 정상 복구의 상태 피드백 인수 (Chromium 샌드박스 환경 필요)
+
+- [x] E1 snapshot.state getter와 snapshot.records getter가 예외를 던져 이전 ready 계정 행이 남는 독립 결함을 수정 전 실패 테스트 신규 2건으로 재현
+- [x] E1 상태 읽기 실패는 error로 안전 전환·기존 행 제거 및 가시 테이블 숨김; records 읽기 실패도 off-DOM ready 처리에서 포착
+- [x] E1 기존 계정 상태/행 검증, get 예외 전 탭 처리, 정적 disconnected 기본 상태 및 정상 후속 스냅샷 회복 유지
+- [x] E1 프런트 전체 174/174·JS syntax·TypeScript build·HTML/CSP/git diff 검사
+- [ ] E2 정상적인 Chromium 샌드박스/모바일/키보드·스크린리더에서 오류·복구의 실제 UI 인수

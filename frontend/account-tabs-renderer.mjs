@@ -67,22 +67,30 @@ export function renderAccountTabSnapshot(
   const els=elementsFor(root,tabId);
   // A disabled adapter cannot make this renderer display records. Explicitly
   // resolve all non-verified data to disconnected, not a misleading zero count.
-  const accepted=allowValidatedRecords===true&&
-    snapshot&&typeof snapshot==='object'&&STATES.has(snapshot.state);
-  const state=accepted?snapshot.state:'disconnected';
+  let state='disconnected';
+  if(allowValidatedRecords===true){
+    try{
+      const reported=snapshot&&typeof snapshot==='object'?snapshot.state:null;
+      if(STATES.has(reported))state=reported;
+    }catch{
+      // A broken snapshot must not leave the previously rendered account rows.
+      state='error';
+    }
+  }
   clearRows(els.tbody);
   els.empty.hidden=false;
   els.table.hidden=true;
   els.empty.dataset.accountState=state;
   if(state==='ready'){
-    if(!Array.isArray(snapshot.records)||snapshot.records.length===0)
-      return failReadySnapshot(els,tabId);
-    const doc=root.ownerDocument??root;
     // Column keys are module-owned only; never use raw server-provided column names.
     // Build off-DOM so a malformed record cannot leave partial or stale account rows.
     try{
+      const records=snapshot.records;
+      if(!Array.isArray(records)||records.length===0)
+        return failReadySnapshot(els,tabId);
+      const doc=root.ownerDocument??root;
       const fragment=doc.createDocumentFragment();
-      for(const record of snapshot.records){
+      for(const record of records){
         if(record===null||typeof record!=='object'||Array.isArray(record))
           return failReadySnapshot(els,tabId);
         const tr=doc.createElement('tr');

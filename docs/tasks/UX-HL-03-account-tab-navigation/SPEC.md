@@ -42,3 +42,11 @@
 - 실제 DOM 변경 전에 5개 탭의 스냅샷을 먼저 수집한다. 조회 중 예외가 발생하면 조회 결과를 일부라도 사용하지 않고 모든 탭의 기존 행을 삭제한 다음 인증된 조회 표시 허용(allowValidatedRecords=true)에서는 error를, 정적 미연결 기본값에서는 disconnected를 보여 준다.
 - 상위 인증/계정/체인/요청 토큰 검증·M5~M9 선행 게이트는 별개로 유지한다. 인증 확인 없는 현재 정적 페이지의 실제 계정 표시·지갑/네트워크/거래 기능을 활성화하지 않는다.
 - 모든 조회가 성공한 경우 각 탭의 기존 독립 상태(loading/empty/error/ready)와 행 렌더링은 변경하지 않는다. 브라우저/스크린리더 실제 오류 피드백 인수는 D2로 보류한다.
+
+## UX-HL-03-E1 (2026-10-25) — 계정 스냅샷 속성 조회 예외의 안전한 상태 처리
+
+- 확인된 실제 결함: 기존 C1은 ready 행의 내부 값 읽기, D1은 coordinator.get 조회 예외를 안전하게 처리했지만, renderAccountTabSnapshot 초기의 snapshot.state 또는 ready 진입 직후 snapshot.records 접근이 예외를 던지면 기존 계정 행을 삭제하기 전에 UI 갱신이 중단될 수 있었다.
+- allowValidatedRecords=true인 미래 인증 조회 경로에서 속성 접근이 실패하면 즉시 이전 행을 지우고 account error 피드백/숨긴 테이블을 제공한다. 기본 allowValidatedRecords=false 정적 UI는 snapshot 접근 없이 disconnected를 유지한다.
+- 성공한 snapshot.state는 한 번 읽어 고정하고 허용된 상태 중 하나인 경우에만 사용한다. ready records 확인도 try/catch에 포함하여 일부 행 표시·오래된 기록 잔존을 막는다.
+- 오류 이후 새로 검증된 정상 ready 스냅샷은 기존대로 다시 렌더링 가능. 지갑, 인증, 검증되지 않은 API, 실제 거래·체인/운영 DB는 연결하지 않는다.
+- 실제 Chromium/모바일/스크린리더 인수는 UX-HL-03-E2에서 수행하며 샌드박스 제한을 우회하지 않는다.

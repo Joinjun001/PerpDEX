@@ -42,3 +42,13 @@
 - 수정 후 대상 node --test frontend/account-tabs-renderer.test.mjs 13/13 PASS, 전체 node --test frontend/*.test.mjs 172/172 PASS(기존 170+2). 모든 frontend JS node --check, npm --prefix backend run build(tsc --noEmit) PASS.
 - Python HTMLParser frontend/index.html 및 trade.html 태그/중복 ID, CSP connect-src none, 정적 5개 빈 tbody 및 LOCAL PREVIEW · NO EXECUTION, git diff --check PASS.
 - 실제 Chromium/모바일/스크린리더 렌더링 인수 미수행. 인증/지갑 연결·운영 DB 변경·원격 push·배포·Sepolia 트랜잭션·실거래 및 보안 제한 우회 미실행.
+
+## 2026-10-25 UX-HL-03-E1 — 계정 스냅샷 속성 접근 오류
+
+- 시작 HEAD 53ed014, 작업 트리 clean, origin/main 대비 로컬 41커밋 ahead. PROJECT_STATE/ROADMAP/UX reference, UX-HL-03 SPEC/TODO/QA/RESULT 및 실제 계정 renderer/model/contract와 주문/시장 코드 확인.
+- .local-browser-qa Playwright/Chromium 약 643MB 존재. 비특권 runuser -u node -- unshare -Ur true는 Operation not permitted. Chromium 샌드박스 우회 없이 UX-HL-03-D2/E2 브라우저 인수 미완료.
+- 수정 전 신규 frontend/account-tabs-renderer.test.mjs 2건 FAIL. 이전 ready 행 표시 이후 state getter 또는 records getter가 예외를 던지면 렌더러 함수가 throw하며 UI 오류 피드백/이전 계정 행 제거 불가.
+- 수정: 렌더 시작 시 검증 경로에 한하여 snapshot.state를 try/catch로 정확히 한 번 읽고 예외 시 error 설정 후 이전 행 삭제, 테이블 숨김, 오류 상태 설명 적용. ready records 접근을 이미 존재한 try/catch 내부로 이동. 정상 ready 기록은 변경 없음.
+- 수정 후 대상 node --test frontend/account-tabs-renderer.test.mjs 15/15 PASS, 전체 node --test frontend/*.test.mjs 174/174 PASS (기존 172+신규 2). 전체 JS node --check 및 npm --prefix backend run build (tsc --noEmit) PASS.
+- Python HTMLParser frontend/index.html/trade.html 태그·고유 ID 검사, 정적 CSP connect-src none 및 빈 계정 tbody 5개/DEMO-only 고지, git diff --check PASS.
+- 실브라우저 렌더/스크린리더 인수 미실행. 인증·계정 API·지갑, Sepolia 트랜잭션·운영 DB·원격 push/배포·권한 우회 없음.

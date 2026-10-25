@@ -200,6 +200,32 @@ test('B2-B2-A invalid duplicate or wrong-chain responses must never appear',()=>
  renderAccountTabsFromCoordinator(f.root,gate,{allowValidatedRecords:true});
  assert.equal(f.read('trade-history','body').children.length,0);
 });
+test('UX-HL-03-E1 unreadable ready state fails closed and removes stale account rows',()=>{
+ const f=fixture();
+ assert.equal(renderAccountTabSnapshot(f.root,'positions',
+   {state:'ready',records:[dataRow('positions')]},{allowValidatedRecords:true}),'ready');
+ const broken={get state(){throw Error('snapshot state unavailable');}};
+ assert.equal(renderAccountTabSnapshot(f.root,'positions',broken,
+   {allowValidatedRecords:true}),'error');
+ assert.equal(f.read('positions','body').children.length,0);
+ assert.equal(f.read('positions','table').hidden,true);
+ assert.equal(f.read('positions','view').dataset.accountState,'error');
+ assert.match(f.read('positions','title').textContent,/가져오지 못했습니다/);
+});
+test('UX-HL-03-E1 unreadable record collection clears stale rows and can recover',()=>{
+ const f=fixture();
+ assert.equal(renderAccountTabSnapshot(f.root,'open-orders',
+   {state:'ready',records:[dataRow('open-orders')]},{allowValidatedRecords:true}),'ready');
+ const broken={state:'ready',get records(){throw Error('record collection unavailable');}};
+ assert.equal(renderAccountTabSnapshot(f.root,'open-orders',broken,
+   {allowValidatedRecords:true}),'error');
+ assert.equal(f.read('open-orders','body').children.length,0);
+ assert.equal(f.read('open-orders','table').hidden,true);
+ assert.equal(f.read('open-orders','view').dataset.accountState,'error');
+ assert.equal(renderAccountTabSnapshot(f.root,'open-orders',
+   {state:'ready',records:[dataRow('open-orders')]},{allowValidatedRecords:true}),'ready');
+ assert.equal(f.read('open-orders','body').children.length,1);
+});
 test('UX-HL-03-D1 coordinator read failure clears all previously visible account rows',()=>{
  const f=fixture(),gate=createAccountQueryCoordinator();
  gate.connect(ctx);

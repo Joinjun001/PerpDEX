@@ -33,3 +33,10 @@
 - frontend/account-tabs-renderer.test.mjs: 전체 이전 ready 행 표시 후 중간 get 예외, 기본 정적 경로의 get 예외라는 신규 2건 검증(수정 전 FAIL). 기존 C1 비정상 행/정상 회복 테스트 유지.
 - 전체 프런트 172/172 및 JavaScript 문법, backend TypeScript 빌드, HTML 구조/CSP/Git diff PASS.
 - 실제 브라우저 D2 인수는 미완료. 공개 정적 데모에서는 계정 조회 비활성·실계정 미연결, M5~M9 선행 요구 및 원격 Push·배포·실거래 제한 불변.
+
+## 2026-10-25 UX-HL-03-E1 — 계정 스냅샷 getter 오류 안전 처리 로컬 완료
+
+- frontend/account-tabs-renderer.mjs: snapshot.state/records 읽기 자체가 예외를 던져도 UI 중단 대신 오류 표시, 이전 계정 행 삭제, 테이블 숨김. 정상 스냅샷은 후속 재렌더링 가능.
+- frontend/account-tabs-renderer.test.mjs: 상태 getter 예외·records getter 예외와 오류 후 회복을 신규 회귀 2건으로 검증(수정 전 FAIL).
+- 프런트 전체 174/174 PASS, JavaScript 문법·TypeScript 빌드·HTML/CSP/git diff PASS. 인증된 조회와 정적 미연결 UI 안전 경계 유지.
+- 실브라우저 E2 인수 미완료. 원격 push·배포, 실제 주문/실체인, 지갑·운영 DB/권한 우회 미실행.
