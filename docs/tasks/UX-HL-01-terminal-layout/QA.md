@@ -243,3 +243,14 @@
 - 수정 후 관련 node --test frontend/order-interactions.test.mjs frontend/hyperliquid-terminal.test.mjs 65/65 PASS, 전체 node --test frontend/*.test.mjs 202/202 PASS (기존 200+2). 전체 frontend JS node --check 및 npm --prefix backend run build(tsc --noEmit) PASS.
 - Python HTMLParser index.html/trade.html 태그 구조·고유 ID, CSP connect-src none/form-action none, 미연결 계정 tbody 5개·LOCAL PREVIEW/NO EXECUTION·초기 market aria-label 및 git diff --check PASS.
 - 실제 Chromium/모바일/스크린리더 음성·시각 인수는 미실행. 지갑/API·실거래·Sepolia 트랜잭션·운영 DB·자격증명 사용·원격 push/배포·보안 우회 없음.
+
+## 2026-10-25 UX-HL-01-V1 — 가상 샘플 축의 실제 CSS 대비 검증
+
+- 시작 HEAD aa6b6c4, main clean, origin/main 대비 58커밋 ahead. PROJECT_STATE/ROADMAP/Hyperliquid UX reference, UX-HL-01-U1 및 UX-HL-02-T1 SPEC/TODO/QA/RESULT, 실제 frontend/styles.css·trade.css·trade.html·chart model/DOM 접근성/모바일·계정 테스트 확인.
+- 브라우저: .local-browser-qa 캐시 643MB 존재. 비특권 runuser -u node -- unshare -Ur true → Operation not permitted. 권한·샌드박스 우회 없이 UX-HL-01-U2/T2/V2 및 UX-HL-02-S2/T2 실 Chromium 인수 미완료.
+- 재현된 정량 결함: base styles.css의 chart-axis {color:#647789;font-size:10px}와 panel {background:var(--panel)} 및 :root --panel:#111923 실제 선언을 기준으로 sRGB WCAG 상대휘도 대비율 3.83:1. 일반 텍스트 AA 4.5:1 미달.
+- 신규 frontend/chart-axis-contrast.test.mjs 2건 중 대비 7:1 확보 검사 수정 전 FAIL(3.83:1), 나머지 6개 synthetic sample 순번/실시간 아님 고지·CSP 보존 검사는 PASS. 둘 다 수정 후 PASS.
+- 변경: styles.css에서 차트 축 색상만 #8ca8b7로 교체. 기존 .chart-sample-range 텍스트와 동일하며 panel 배경 대비 약 7.08:1. 64개 샘플 생성, 데이터, 시각 레이아웃, 주문 처리, ARIA 기능 수정 없음.
+- 검증: node --test frontend/chart-axis-contrast.test.mjs 2/2 PASS, node --test frontend/*.test.mjs 208/208 PASS(기존 206+2), 전체 JS node --check PASS, npm --prefix backend run build (tsc --noEmit) PASS.
+- Python HTMLParser index.html/trade.html 구조·고유 ID, CSP connect-src none/form-action none, 5개 미연결 계정 tbody, MOCK-only/Review 초기 disabled, git diff --check PASS.
+- 실제 Chromium/스크린리더/화면 확대 렌더링 인수 미실행. 지갑/실계정 API·실거래·Sepolia 트랜잭션·운영 DB·자격증명·원격 push/배포·보안 제한 우회 없음.

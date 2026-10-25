@@ -191,3 +191,10 @@
 - frontend/order-interactions.test.mjs: 시장 선택/재선택 전반의 가격 출처 라벨·aria-pressed 및 정적 no-script 라벨 신규 2건(수정 전 FAIL).
 - frontend/hyperliquid-terminal.test.mjs: 기존 BTC/ETH 속성 순서에 의존한 테스트를 보완하여 기존 aria-pressed 계약 보존.
 - 관련 65/65, 전체 202/202, JS/TS/HTML/CSP/Git diff PASS. 정상 Chromium/키보드/스크린리더 U2 인수 미완료; M5~M9·실계정·실주문·원격 push/배포 제한 유지.
+
+## 2026-10-25 UX-HL-01-V1 — 가상 차트 순번 가독성 색상 로컬 개선 완료
+
+- frontend/styles.css: 10px 샘플 순번 축의 글자색 #647789 → #8ca8b7. 실제 패널 배경과 대비 3.83:1 → 7.08:1로 상향.
+- frontend/chart-axis-contrast.test.mjs: 실제 CSS의 패널 색상 변수/글자색으로 WCAG 명도 대비율 계산, 기존 6개 샘플 축 인덱스·비실시간 안내/CSP 보존. 수정 전 대비 테스트 FAIL.
+- 프런트 전체 208/208, JS 문법/TS build/HTML/CSP/Git diff PASS. 실제 브라우저/모바일/확대 V2 인수는 미완료.
+- MOCK-only·계정/지갑 미연결·실거래/실체인·M5~M9·원격 push/배포 안전 정책 불변.
