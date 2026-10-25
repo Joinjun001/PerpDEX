@@ -122,6 +122,13 @@ export function renderAccountTabsFromCoordinator(
 ){
   if(!coordinator||typeof coordinator.get!=='function')
     throw new TypeError('Account coordinator required');
+  // The static/unverified view must not even invoke a provider read. Keep the
+  // authenticated adapter opt-in; revoke display and clear any stale rows.
+  if(allowValidatedRecords!==true){
+    return Object.freeze(Object.fromEntries(ACCOUNT_TABS.map(({id})=>[
+      id,renderAccountTabSnapshot(root,id,{state:'disconnected'}),
+    ])));
+  }
   // Read every tab before touching the DOM. A provider read failure midway
   // through a refresh must not leave earlier authenticated rows on screen.
   let snapshots;

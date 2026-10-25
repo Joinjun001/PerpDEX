@@ -200,6 +200,40 @@ test('B2-B2-A invalid duplicate or wrong-chain responses must never appear',()=>
  renderAccountTabsFromCoordinator(f.root,gate,{allowValidatedRecords:true});
  assert.equal(f.read('trade-history','body').children.length,0);
 });
+test('UX-HL-03-F1 disabled validation gate never invokes account coordinator get',()=>{
+ const f=fixture();
+ let reads=0;
+ const guarded={get(){reads++; throw Error('unverified read must not execute');}};
+ const statuses=renderAccountTabsFromCoordinator(f.root,guarded);
+ assert.equal(reads,0,'disabled renderer must not access account provider');
+ for(const {id} of ACCOUNT_TABS){
+  assert.equal(statuses[id],'disconnected');
+  assert.equal(f.read(id,'body').children.length,0);
+  assert.equal(f.read(id,'table').hidden,true);
+  assert.equal(f.read(id,'view').dataset.accountState,'disconnected');
+ }
+});
+
+test('UX-HL-03-F1 revoking validated-record display clears prior rows without provider reads',()=>{
+ const f=fixture(),gate=createAccountQueryCoordinator();
+ gate.connect(ctx);
+ for(const {id} of ACCOUNT_TABS){
+  const token=gate.begin(id);
+  assert.equal(gate.accept(token,response(token,[dataRow(id)])),true);
+ }
+ renderAccountTabsFromCoordinator(f.root,gate,{allowValidatedRecords:true});
+ for(const {id} of ACCOUNT_TABS)assert.equal(f.read(id,'body').children.length,1);
+ let reads=0;
+ const unavailable={get(){reads++;return {state:'ready',records:[dataRow('positions')]};}};
+ const statuses=renderAccountTabsFromCoordinator(f.root,unavailable,{allowValidatedRecords:false});
+ assert.equal(reads,0,'revoked gate must not fetch provider data');
+ for(const {id} of ACCOUNT_TABS){
+  assert.equal(statuses[id],'disconnected');
+  assert.equal(f.read(id,'body').children.length,0,'old account rows are removed');
+  assert.equal(f.read(id,'table').hidden,true);
+  assert.equal(f.read(id,'view').dataset.accountState,'disconnected');
+ }
+});
 test('UX-HL-03-E1 unreadable ready state fails closed and removes stale account rows',()=>{
  const f=fixture();
  assert.equal(renderAccountTabSnapshot(f.root,'positions',

@@ -33,3 +33,9 @@
 - [x] E1 기존 계정 상태/행 검증, get 예외 전 탭 처리, 정적 disconnected 기본 상태 및 정상 후속 스냅샷 회복 유지
 - [x] E1 프런트 전체 174/174·JS syntax·TypeScript build·HTML/CSP/git diff 검사
 - [ ] E2 정상적인 Chromium 샌드박스/모바일/키보드·스크린리더에서 오류·복구의 실제 UI 인수
+
+- [x] F1 기본 미검증 경로에서 coordinator.get이 실제 호출되는 문제를 새로운 통합 회귀 2건으로 수정 전 FAIL 확인
+- [x] F1 allowValidatedRecords!==true인 경우 공급자 데이터 조회 없이 5개 미연결 상태 렌더·이전 ready 행 삭제
+- [x] F1 기존 인증된 스냅샷 전 탭 수집, 오류/복구, C1~E1 안전 검증 및 정적 미연결 화면 보존
+- [x] F1 프런트 176/176·JS syntax·TypeScript 빌드·HTML 구조/CSP/git diff 검사
+- [ ] F2 실제 Chromium 모바일·키보드·스크린리더에서 계정 데이터 미연결/상태 전환 인수 (정상 샌드박스 환경 필요)

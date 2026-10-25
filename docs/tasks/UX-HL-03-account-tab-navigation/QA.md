@@ -52,3 +52,13 @@
 - 수정 후 대상 node --test frontend/account-tabs-renderer.test.mjs 15/15 PASS, 전체 node --test frontend/*.test.mjs 174/174 PASS (기존 172+신규 2). 전체 JS node --check 및 npm --prefix backend run build (tsc --noEmit) PASS.
 - Python HTMLParser frontend/index.html/trade.html 태그·고유 ID 검사, 정적 CSP connect-src none 및 빈 계정 tbody 5개/DEMO-only 고지, git diff --check PASS.
 - 실브라우저 렌더/스크린리더 인수 미실행. 인증·계정 API·지갑, Sepolia 트랜잭션·운영 DB·원격 push/배포·권한 우회 없음.
+
+## 2026-10-25 UX-HL-03-F1 — 미검증 계정 공급자 호출 차단
+
+- 시작 HEAD 671a4ec, Git 작업 트리 clean, origin/main 대비 로컬 42커밋 ahead. PROJECT_STATE.md, ROADMAP.md, Hyperliquid UX reference, UX-HL-03 SPEC/TODO/QA/RESULT 및 account-tabs.js/model/renderer/contract/test와 main.js, 주문 검증 코드 확인.
+- 브라우저 확인: .local-browser-qa 내부 Playwright/Chromium 약 643MB 존재. 비특권 사용자 runuser -u node -- unshare -Ur true는 Operation not permitted. 권한/샌드박스 우회 없이 E2/F2 실브라우저 인수 미완료.
+- 수정 전 재현: 신규 renderer 회귀 2건 모두 FAIL. 공급자 get이 오류를 던지는 미검증 기본 경로에서 1회 호출되었고, 과거 verified ready 행 뒤 allowValidatedRecords=false로 취소해도 get이 5회 호출됨.
+- 수정: renderAccountTabsFromCoordinator에서 coordinator 형식 확인 후 allowValidatedRecords!==true면 coordinator.get을 실행하지 않고 기존 renderAccountTabSnapshot(root,id,{state:'disconnected'})로 전 탭 이전 행을 지우고 미연결로 표시. 명시적 true의 기존 스냅샷 수집/검증·fail-closed 동작은 수정 없음.
+- 수정 후 대상 node --test frontend/account-tabs-renderer.test.mjs 17/17 PASS, 전체 node --test frontend/*.test.mjs 176/176 PASS(기존 174+신규 2). 모든 frontend JS node --check, npm --prefix backend run build (tsc --noEmit) PASS.
+- Python HTMLParser frontend/index.html/trade.html 태그 중첩·고유 ID, CSP connect-src none, 계정 빈 tbody 5개·DEMO-only 고지 및 git diff --check PASS.
+- 실제 Chromium/모바일/스크린리더 UI 인수 미실행. 인증/실계정 API·지갑/실거래·Sepolia 트랜잭션·운영 DB·원격 Push/배포·안전 권한 우회 없음.

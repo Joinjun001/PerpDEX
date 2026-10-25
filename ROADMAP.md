@@ -93,6 +93,8 @@ PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성�
 - **UX-HL-03-D2 (Pending browser)**: 계정 공급자 조회 실패/복구의 실제 모바일·키보드·스크린리더 인수 미완료.
 - **UX-HL-03-E1 (Local Completed)**: snapshot.state 및 snapshot.records 접근 자체가 예외를 던질 때 계정 renderer가 이전 ready 행을 남기던 결함 수정. 이전 행 제거·error 표시/정상 복구, 신규 2건 포함 프런트 174/174 PASS.
 - **UX-HL-03-E2 (Pending browser)**: 스냅샷 속성 오류·회복의 모바일/키보드/스크린리더 실제 브라우저 인수 미완료.
+- **UX-HL-03-F1 (Local Completed)**: 인증된 표시가 명시적으로 허용되지 않은 기본/철회 경로에서 coordinator.get 조회가 발생하던 문제 수정. 공급자 조회 0회·5개 탭 disconnected·기존 ready 행 삭제, 신규 2건 포함 프런트 176/176 PASS.
+- **UX-HL-03-F2 (Pending browser)**: 미검증 조회 게이트/상태 전환의 실제 브라우저·모바일/스크린리더 인수는 안전한 Chromium 샌드박스 환경 의존.
 - 실계정 조회/지갑 API 미준비로 계정 데이터 연결 게이트 계속 보류.
 
 ### Hyperliquid 거래 편의 기능 UX 진행

@@ -40,3 +40,10 @@
 - frontend/account-tabs-renderer.test.mjs: 상태 getter 예외·records getter 예외와 오류 후 회복을 신규 회귀 2건으로 검증(수정 전 FAIL).
 - 프런트 전체 174/174 PASS, JavaScript 문법·TypeScript 빌드·HTML/CSP/git diff PASS. 인증된 조회와 정적 미연결 UI 안전 경계 유지.
 - 실브라우저 E2 인수 미완료. 원격 push·배포, 실제 주문/실체인, 지갑·운영 DB/권한 우회 미실행.
+
+## 2026-10-25 UX-HL-03-F1 — 미검증 공급자 조회 차단 로컬 완료
+
+- frontend/account-tabs-renderer.mjs: allowValidatedRecords 미허용 시 coordinator.get 호출을 전혀 하지 않고 전 탭 disconnected 표시·이전 계정 행 삭제.
+- frontend/account-tabs-renderer.test.mjs: 공급자 호출이 금지된 기본 경로와 이전 verified ready 기록 뒤 허용 철회 시 조회 0회·전 탭 비노출을 검증하는 신규 회귀 2건(수정 전 FAIL).
+- 프런트 전체 176/176 PASS 및 JS/TS/HTML/CSP/git diff PASS. 기존 검증된 스냅샷 표시·오류/복구 경로 보존.
+- 실제 브라우저 F2 인수 미완료. 인증·지갑·실거래·운영 DB 및 Push/배포/안전 우회 변경 없음.
