@@ -105,3 +105,10 @@
 - [x] Q1 초기화 후 유효→무효→유효 수량 변화가 미리보기 활성 상태를 올바르게 전환하는 DOM 회귀 검증
 - [x] Q1 프런트 전체 196/196, JS syntax, TypeScript build, HTML 구조·CSP/Git diff 검사
 - [ ] Q2 실제 Chromium에서 JS 미실행·정상 실행 및 키보드/스크린리더 버튼 발표·모바일 터치 인수
+
+- [x] R1 유효한 입력에도 hidden 오류 노드를 aria-describedby로 참조하는 정적/동적 접근성 문제 신규 회귀 2건 작성, 변경 전 두 건 모두 FAIL
+- [x] R1 초기 정적 HTML에 수량·레버리지 중립 안내 및 Limit 기존 안내만 연결
+- [x] R1 renderTicket의 오류 판정에 맞춰 오류 설명 ID를 비정상일 때만 추가하고 정상 복구 때 제거
+- [x] R1 기존 정적 aria-describedby를 단일 오류 연결로 기대한 회귀 2건을 새 안내/조건부 오류 계약에 맞게 갱신
+- [x] R1 프런트 전체 198/198·JS syntax·TypeScript build·HTML 구조/CSP/git diff 검사
+- [ ] R2 실제 Chromium 모바일·키보드/스크린리더에서 정상/오류/복구 설명 음성 안내 인수

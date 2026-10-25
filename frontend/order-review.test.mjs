@@ -109,12 +109,13 @@ test('UX-HL-02-B1 missing/malformed renderer arguments fail without DOM work',()
  assert.throws(()=>renderDemoOrderReview(new FakeElement('div'),dom,{rows:null}),TypeError);
 });
 test('UX-HL-02-B1 inline quantity error is accessible, status review is focusable and dismissible',()=>{
- assert.match(html,/id="quantity"[^>]+aria-describedby="quantity-error"/);
+ assert.match(html,/id="quantity"[^>]+aria-describedby="quantity-help"/);
  assert.match(html,/id="quantity-error"[^>]+role="alert" hidden/);
- assert.match(html,/id="limit-price"[^>]+aria-describedby="limit-price-help limit-price-error"/);
+ assert.match(html,/id="limit-price"[^>]+aria-describedby="limit-price-help"/);
  assert.match(html,/id="order-result"[^>]+role="status"[^>]+tabindex="-1"/);
  assert.match(js,/byId\('quantity'\)\.setAttribute\('aria-invalid'/);
  assert.match(js,/byId\('quantity-error'\)\.hidden=!badQuantity/);
+ assert.match(js,/byId\('quantity'\)\.setAttribute\('aria-describedby'/);
  assert.match(js,/byId\('order-result'\)\.addEventListener\('keydown'/);
  assert.match(js,/event\.key==='Escape'/);
  assert.match(js,/dismissDemoReview/);

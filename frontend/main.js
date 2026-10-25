@@ -168,9 +168,15 @@ function renderTicket(){
   const badLimit=isLimit&&!validPreviewLimitPrice(byId('limit-price').value);
   byId('limit-price-error').hidden=!badLimit;
   byId('limit-price').setAttribute('aria-invalid',String(badLimit));
+  byId('limit-price').setAttribute('aria-describedby',
+    'limit-price-help'+(badLimit?' limit-price-error':''));
   const badQuantity=!validPreviewQuantity(byId('quantity').value);
   byId('quantity').setAttribute('aria-invalid',String(badQuantity));
   byId('quantity-error').hidden=!badQuantity;
+  // A hidden error referenced by aria-describedby may still be announced by
+  // assistive technology. Attach it only while validation actually fails.
+  byId('quantity').setAttribute('aria-describedby',
+    'quantity-help'+(badQuantity?' quantity-error':''));
   byId('preview-price-label').textContent=isLimit?'Limit Price (user input)':'Reference price (MOCK)';
 
   const button=byId('preview-order');
@@ -181,6 +187,8 @@ function renderTicket(){
   const lever=Number(leverageInput);
   byId('leverage').setAttribute('aria-invalid',String(!leverageValid));
   byId('leverage-error').hidden=leverageValid;
+  byId('leverage').setAttribute('aria-describedby',
+    'leverage-help'+(leverageValid?'':' leverage-error'));
   byId('leverage-output').textContent=leverageValid?lever+'×':'—';
   byId('leverage').style.background=leverageValid
     ?'linear-gradient(90deg,#43e1b4 '+((lever-1)/9*100)+'%,#3b4856 '+((lever-1)/9*100)+'%)'

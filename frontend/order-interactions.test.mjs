@@ -172,6 +172,48 @@ test('B2-A Market/Limit and Long/Short simulated button clicks update ARIA and q
   assert.equal(id('reference-price').textContent,'$65,240.50');
   assert.equal(id('sell-tab').getAttribute('aria-pressed'),'true');
 });
+test('UX-HL-02-R1 initially valid inputs do not reference hidden error announcements',async()=>{
+  const app=await boot(),id=app.id;
+  assert.equal(id('quantity').getAttribute('aria-invalid'),'false');
+  assert.equal(id('quantity-error').hidden,true);
+  assert.equal(id('quantity').getAttribute('aria-describedby'),'quantity-help',
+    'valid quantity should be described by guidance, not a hidden error');
+  assert.match(html,/id="quantity-help"/);
+  assert.match(html,/0\.0001~100/);
+  assert.equal(id('leverage').getAttribute('aria-invalid'),'false');
+  assert.equal(id('leverage-error').hidden,true);
+  assert.equal(id('leverage').getAttribute('aria-describedby'),'leverage-help',
+    'valid leverage should not reference a hidden validation error');
+  assert.match(html,/id="leverage-help"/);
+  id('limit-type').dispatch('click');
+  assert.equal(id('limit-price-error').hidden,true);
+  assert.equal(id('limit-price').getAttribute('aria-describedby'),'limit-price-help',
+    'valid limit price should only reference the existing neutral guidance');
+});
+
+test('UX-HL-02-R1 error descriptions join only while invalid and disappear after correction',async()=>{
+  const app=await boot(),id=app.id;
+  id('quantity').value='0';id('quantity').dispatch('input');
+  assert.equal(id('quantity-error').hidden,false);
+  assert.equal(id('quantity').getAttribute('aria-describedby'),'quantity-help quantity-error');
+  id('quantity').value='0.05';id('quantity').dispatch('input');
+  assert.equal(id('quantity-error').hidden,true);
+  assert.equal(id('quantity').getAttribute('aria-describedby'),'quantity-help');
+  id('limit-type').dispatch('click');
+  id('limit-price').value='-1';id('limit-price').dispatch('input');
+  assert.equal(id('limit-price-error').hidden,false);
+  assert.equal(id('limit-price').getAttribute('aria-describedby'),'limit-price-help limit-price-error');
+  id('limit-price').value='99.50';id('limit-price').dispatch('input');
+  assert.equal(id('limit-price-error').hidden,true);
+  assert.equal(id('limit-price').getAttribute('aria-describedby'),'limit-price-help');
+  id('leverage').value='bad';id('leverage').dispatch('input');
+  assert.equal(id('leverage-error').hidden,false);
+  assert.equal(id('leverage').getAttribute('aria-describedby'),'leverage-help leverage-error');
+  id('leverage').value='3';id('leverage').dispatch('input');
+  assert.equal(id('leverage-error').hidden,true);
+  assert.equal(id('leverage').getAttribute('aria-describedby'),'leverage-help');
+  assert.equal(id('preview-order').disabled,false);
+});
 test('B2-A user input validation changes aria-invalid, error visibility and submit availability',async()=>{
   const app=await boot(),id=app.id;
   id('limit-type').dispatch('click');

@@ -137,3 +137,11 @@
 - frontend/order-interactions.test.mjs: 스크립트 없이 정적 submit이 활성 상태가 아님을 검증하는 fail-first 회귀와 모의 초기화 시 유효/무효/유효 입력의 활성 상태를 검증하는 테스트 추가.
 - 프런트 전체 196/196 PASS 및 JS·TS·HTML/CSP/Git diff PASS. 실제 주문/지갑·계정 API·서버 전송 없음.
 - 실제 브라우저 UX-HL-02-Q2 인수는 안전한 Chromium 실행 환경에 의존하며 미완료; M5~M9·실거래/실체인·운영 DB·push/배포 제한 보존.
+
+## 2026-10-25 UX-HL-02-R1 — 입력 안내와 오류 접근성 연결 동기화 로컬 완료
+
+- frontend/trade.html: quantity-help와 leverage-help를 상시 표시, limit-price-help 유지, 정상 상태의 세 입력에서 hidden 오류 연결을 제거. 모의 값 범위와 비실거래를 명시.
+- frontend/main.js: 세 필드의 aria-describedby를 해당 input 검증 결과와 함께 갱신. 오류는 invalid 때만 연결하고 정상화 시 즉시 해제; aria-invalid/오류 표시/기존 미리보기 로직 불변.
+- frontend/order-interactions.test.mjs: 정상→오류→복구에서 수량/Limit 가격/레버리지의 접근성 설명 ID 정확성 2건 신규 수정 전 FAIL. frontend/order-review.test.mjs, frontend/order-ticket.test.mjs는 이전 정적 오류 ID 검사를 새 계약에 맞게 갱신.
+- 전체 프런트 198/198 PASS 및 JS/TS/HTML/CSP/Git diff PASS. 실제 스크린리더 인수는 UX-HL-02-R2 미완료.
+- M5~M9·실계정/지갑·실주문·실체인·운영 DB·원격 push/배포 제한 유지.

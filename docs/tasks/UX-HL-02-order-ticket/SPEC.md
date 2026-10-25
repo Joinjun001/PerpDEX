@@ -148,3 +148,10 @@
 - HTML 초기 상태에서 주문 미리보기 submit 버튼을 disabled로 선언한다. 기존 main.js는 초기화가 완료된 후 renderTicket에서 유효한 DEMO 입력만 button.disabled=false로 바꾸므로 JavaScript 실행 환경에서 기존 미리보기/입력 유효성 검사 동작이 유지된다.
 - noscript로 'JavaScript가 비활성화되어 미리보기 불가능, 실제 주문 전송 없음' 안내를 추가한다. 서버/지갑·체인·API는 연결하지 않으며 form-action none/모의 리뷰/금액 계산은 변경하지 않는다.
 - 실 브라우저에서 JS-off / 모듈 로딩 지연 / 정상 초기화 / 모바일 접근성의 상태를 확인하는 Q2 인수는 샌드박스가 허용된 환경에서 별도 수행한다.
+
+## UX-HL-02-R1 (2026-10-25) — 수량·Limit 가격·레버리지의 조건부 오류 접근성 설명
+
+- 확인한 접근성 결함: 정상적인 입력에서도 quantity/limit-price/leverage의 aria-describedby가 hidden인 오류 메시지를 계속 참조했다. 명시적으로 참조된 숨김 텍스트가 접근성 설명에 포함될 수 있어, 정상 입력에도 오류/실패 문구가 전달될 위험이 있었다. 수량·레버리지의 입력 가능 범위도 상시 표시되는 사용자 안내로 제공되지 않았다.
+- 정적 거래 폼은 정상 상태에서 중립적인 안내(quantity-help, limit-price-help, leverage-help)만 참조한다. 수량은 0.0001~100(현재 자산 기준), 레버리지는 1~10×의 모의 입력 범위를 명시하며 진짜 위험엔진/실거래와 구분한다.
+- 기존 renderTicket 검증 결과에 맞춰 aria-invalid/오류 hidden과 동일한 분기로 오류 ID를 aria-describedby에 조건부 추가하거나 제거한다. 즉 수량은 quantity-help[ quantity-error], 가격은 limit-price-help[ limit-price-error], 레버리지는 leverage-help[ leverage-error]가 된다.
+- 기존 Market/Limit 상태, 유효성 범위, review 활성 조건, 값·주문 미리보기, CSP/미연결 및 승인 제약은 변경하지 않는다. R2 실제 브라우저·스크린리더 인수는 보안 제한을 우회하지 않고 보류한다.

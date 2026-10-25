@@ -85,11 +85,12 @@ test('UX-HL-02-D1 Market and Limit both reject coerced leverage',()=>{
  }
 });
 test('UX-HL-02-D1 range input exposes validation help via ARIA',()=>{
- assert.match(html,/id="leverage"[^>]*aria-describedby="leverage-error"/);
+ assert.match(html,/id="leverage"[^>]*aria-describedby="leverage-help"/);
  assert.match(html,/id="leverage-error"[^>]*role="alert" hidden/);
  assert.match(js,/validPreviewLeverage\(leverageInput\)/);
  assert.match(js,/leverage:leverageInput/);
  assert.match(js,/byId\('leverage-error'\)\.hidden=leverageValid/);
+ assert.match(js,/byId\('leverage'\)\.setAttribute\('aria-describedby'/);
 });
 test('UX-HL-02-I1 static quick quantity buttons declare exactly one selected toggle',()=>{
   const buttons=[...html.matchAll(/<button[^>]+data-qty="([^"]+)"[^>]*>/g)];

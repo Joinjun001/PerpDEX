@@ -189,3 +189,14 @@
 - 변경 후 대상 node --test frontend/order-interactions.test.mjs 54/54 PASS, 전체 node --test frontend/*.test.mjs 196/196 PASS(기존 194+2). 모든 frontend JS node --check, npm --prefix backend run build (tsc --noEmit) PASS.
 - HTMLParser frontend/index.html/trade.html 태그 중첩·중복 ID, CSP connect-src none 및 form-action none, 계정 tbody 5개 비연결과 LOCAL PREVIEW·NO EXECUTION, git diff --check PASS.
 - 실제 JS-off/JS-on Chromium 시각·키보드·스크린리더 인수는 미실행. 지갑/계정 API·실거래·Sepolia 트랜잭션·운영 DB·원격 push/배포·자격증명·보안 우회 없음.
+
+## 2026-10-25 UX-HL-02-R1 — 조건부 ARIA 오류 연결과 영구 입력 안내
+
+- 시작 로컬 main HEAD 8e6f9a4, Git clean, origin/main 대비 53커밋 ahead. PROJECT_STATE, ROADMAP, Hyperliquid UX reference, UX-HL-02-Q1/UX-HL-01-S1 TASK SPEC/TODO/QA/RESULT 및 실제 main.js/trade.html, 주문 모델/리뷰, 모바일/계정 탭 테스트 코드 확인.
+- Chromium Playwright 캐시 .local-browser-qa 약 643MB 존재하나 비특권 runuser -u node -- unshare -Ur true → Operation not permitted. 권한/샌드박스 우회 없이 UX-HL-02-Q2/UX-HL-01-S2/UX-HL-02-P2 및 R2 실제 브라우저 인수 보류.
+- 결함: 양호한 quantity/limit-price/leverage도 명시적인 aria-describedby에서 hidden 오류 문구를 참조했다. 수량·레버리지의 입력 가능 범위에 관한 상시 비오류 설명도 없었다.
+- 신규 프런트 DOM 회귀 2건 모두 수정 전 FAIL: 정상 입력에서 중립 help ID만 연결해야 하며, 비정상 입력에서 error ID 추가·정상 복귀 시 제거해야 한다는 조건. 원래 정적 aria-describedby 기대값을 가진 기존 테스트 2건은 새 동작에 맞게 기대값 갱신.
+- 수정: HTML 수량/레버리지 중립 help 추가, Limit 기존 help 유지; 정적 속성에서 오류 ID 분리. main.js renderTicket에서 세 입력의 aria-describedby를 유효성 검사 결과와 동기화. 주문 계산·버튼/리뷰 정책 불변.
+- 수정 후 핵심 3파일 node --test frontend/order-interactions.test.mjs frontend/order-review.test.mjs frontend/order-ticket.test.mjs 78/78 PASS, 전체 node --test frontend/*.test.mjs 198/198 PASS (기존 196+2). 전체 frontend JS node --check 및 npm --prefix backend run build(tsc --noEmit) PASS.
+- Python HTMLParser frontend/index.html·frontend/trade.html 태그 중첩·고유 ID, CSP connect-src none/form-action none, 미연결 계정 tbody 5개, 초기 정적 aria-describedby/도움말/비활성 Preview 및 git diff --check PASS.
+- 실제 Chromium/스크린리더/모바일 음성·시각 인수 미실행. 실거래·지갑/계정 API·Sepolia 트랜잭션·운영 DB·원격 Push/배포·자격증명/샌드박스 우회 없음.

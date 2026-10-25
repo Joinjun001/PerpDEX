@@ -84,15 +84,17 @@
           <form id="order-form" novalidate>
             <div id="limit-price-field" class="limit-price-field" hidden>
               <label for="limit-price">Limit Price <span>USD · DEMO</span></label>
-              <div class="input-shell"><input id="limit-price" name="limitPrice" type="text" inputmode="decimal" value="65240.50" autocomplete="off" spellcheck="false" aria-describedby="limit-price-help limit-price-error" maxlength="13" disabled><span>USD</span></div>
+              <div class="input-shell"><input id="limit-price" name="limitPrice" type="text" inputmode="decimal" value="65240.50" autocomplete="off" spellcheck="false" aria-describedby="limit-price-help" maxlength="13" disabled><span>USD</span></div>
               <p id="limit-price-help" class="price-help">주문 체결에 사용되지 않는 입력 가격입니다. 소수점 2자리까지 입력할 수 있습니다.</p>
               <p id="limit-price-error" class="price-error" role="alert" hidden>0.01~1,000,000,000 USD 사이의 올바른 Limit Price를 입력하세요.</p>
             </div>
             <label for="quantity">Quantity <span id="quantity-unit">BTC</span></label>
-            <div class="input-shell"><input id="quantity" name="quantity" type="number" min="0.0001" max="100" step="any" value="0.05" inputmode="decimal" aria-describedby="quantity-error" required><span id="input-unit">BTC</span></div>
+            <div class="input-shell"><input id="quantity" name="quantity" type="number" min="0.0001" max="100" step="any" value="0.05" inputmode="decimal" aria-describedby="quantity-help" required><span id="input-unit">BTC</span></div>
+            <p id="quantity-help" class="price-help">모의 수량 범위: 0.0001~100 (현재 선택한 자산 단위). 실제 주문 아님.</p>
             <p id="quantity-error" class="price-error" role="alert" hidden>수량은 0.0001~100 범위의 유효한 숫자로 입력하세요.</p>
             <div class="quick-amounts" role="group" aria-label="빠른 수량 선택"><button type="button" data-qty="0.01" aria-label="모의 빠른 수량 0.01 BTC" aria-pressed="false">0.01</button><button type="button" data-qty="0.05" aria-label="모의 빠른 수량 0.05 BTC" aria-pressed="true" class="active">0.05</button><button type="button" data-qty="0.1" aria-label="모의 빠른 수량 0.1 BTC" aria-pressed="false">0.1</button><button type="button" data-qty="0.25" aria-label="모의 빠른 수량 0.25 BTC" aria-pressed="false">0.25</button></div>
-            <div class="leverage-label"><label for="leverage">Leverage</label><output id="leverage-output">3×</output></div><input class="leverage-input" id="leverage" type="range" min="1" max="10" step="1" value="3" aria-label="모의 레버리지" aria-describedby="leverage-error"><p id="leverage-error" class="price-error" role="alert" hidden>모의 레버리지는 1~10 사이의 정수만 허용됩니다.</p><div class="leverage-ticks"><span>1×</span><span>3×</span><span>5×</span><span>10×</span></div>
+            <div class="leverage-label"><label for="leverage">Leverage</label><output id="leverage-output">3×</output></div><input class="leverage-input" id="leverage" type="range" min="1" max="10" step="1" value="3" aria-label="모의 레버리지" aria-describedby="leverage-help"><p id="leverage-error" class="price-error" role="alert" hidden>모의 레버리지는 1~10 사이의 정수만 허용됩니다.</p><div class="leverage-ticks"><span>1×</span><span>3×</span><span>5×</span><span>10×</span></div>
+            <p id="leverage-help" class="price-help">모의 레버리지 1~10×. 실제 위험 엔진과 연결되지 않습니다.</p>
             <section class="account-margin-status" aria-labelledby="account-margin-title" aria-describedby="account-margin-help" data-source="UNAVAILABLE">
               <div class="account-margin-heading">
                 <h3 id="account-margin-title">Account Margin</h3>
