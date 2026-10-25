@@ -220,3 +220,14 @@
 - 수정 후 node --test frontend/mobile-portfolio-link.test.mjs 2/2 PASS, node --test frontend/*.test.mjs 194/194 PASS(기존 192+신규 2). 전체 프런트 JS node --check, npm --prefix backend run build (tsc --noEmit) PASS.
 - Python HTMLParser index.html/trade.html 태그 구조·고유 ID, CSP connect-src none, 5개 계정 빈 tbody·NO EXECUTION/MOCK 고지 및 git diff --check PASS.
 - 실제 Chrome 화면 크기별 픽셀 배치, 터치, 앵커 스크롤 및 스크린리더 인수는 제한으로 미수행. 자격증명·지갑/API 연결·실거래·Sepolia 트랜잭션·운영 DB·원격 Push/배포/보안 제한 우회 없음.
+
+## 2026-10-25 UX-HL-01-T1 — 차트 마지막 가격 배지 상승/하락 일관성
+
+- 시작 로컬 main HEAD 77037e8, Git clean, origin/main 대비 로컬 54커밋 ahead. PROJECT_STATE/ROADMAP/Hyperliquid UX reference, UX-HL-01-S1 및 UX-HL-02-R1 SPEC·TODO·QA·RESULT와 실제 frontend/main.js·preview-model.mjs·trade.html·trade.css·주문/차트/모바일/계정 접근성 테스트 확인.
+- 정상 Chromium 실행 상태: .local-browser-qa 약 643 MB 존재, 비특권 runuser -u node -- unshare -Ur true → Operation not permitted. 샌드박스 우회 없이 UX-HL-02-R2/Q2 및 UX-HL-01-S2/T2 실제 브라우저 인수 미완료.
+- 차트 실제 MOCK 변화율 BTC 약 +1.33%, ETH 약 +1.34%, SOL 약 −1.28%이며 UX-HL-01-P1의 차트 선·끝점·그라데이션은 하락 SOL에서 빨강, 마지막 가격 배지는 공통 chart-value-label 녹색 스타일 그대로였다.
+- 수정 전 신규 회귀 2건 모두 FAIL: BTC/SOL/ETH/SOL 시장 전환 시 chart-value-label data-trend 부재, 하락 차트 배지 CSS 변형/기본 BTC 속성 부재.
+- 수정: main.js renderChart에서 기존 summary.changePercent로 data-trend up/down 설정, trade.html 기본 배지는 up, trade.css down 선택자에서 border/background/color를 하락 계열로 표시. 수치·마켓 변경·리뷰·MOCK 로직 변경 없음.
+- 수정 후 node --test frontend/order-interactions.test.mjs frontend/chart-sample-accessibility.test.mjs 65/65 PASS, node --test frontend/*.test.mjs 200/200 PASS (이전 198+신규 2). frontend JS 모두 node --check, npm --prefix backend run build(tsc --noEmit) PASS.
+- HTMLParser frontend/index.html·frontend/trade.html 구조/고유 ID, CSP connect-src none/form-action none, MOCK-only·계정 미연결·비활성 Reduce Only, git diff --check PASS.
+- 실제 Chromium/스크린리더/모바일 인수 미실행. 실계정 API·실거래·Sepolia 트랜잭션·운영 DB·원격 push/배포·자격증명·권한 우회 없음.

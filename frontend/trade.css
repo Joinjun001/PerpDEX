@@ -340,3 +340,8 @@
     outline:2px solid var(--blue);outline-offset:2px;
   }
 }
+
+/* UX-HL-01-T1 — a falling MOCK series must not retain a green endpoint badge. */
+.trade-shell .chart-value-label[data-trend="down"]{
+  border-color:#84434e;background:#40252d;color:#ff9ba6;
+}

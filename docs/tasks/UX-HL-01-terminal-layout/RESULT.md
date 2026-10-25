@@ -175,3 +175,11 @@
 - frontend/mobile-portfolio-link.test.mjs: desktop nav 숨김 조건, 존재하는 계정 앵커 목적지, 초기 JS 불필요 정적 링크/모바일 표시·44px 접근성 신규 2건 (수정 전 FAIL).
 - 프런트 전체 194/194 PASS, JS/TS/HTML/CSP/Git diff PASS. 실제 Chromium/모바일/스크린리더 S2 인수는 미완료.
 - M5~M9 backend, 실계정/지갑, 주문·자금·Sepolia 트랜잭션, 운영 DB, 원격 Push·배포 제한 유지.
+
+## 2026-10-25 UX-HL-01-T1 — MOCK 하락 차트 가격 배지 일치 로컬 완료
+
+- frontend/main.js: 시장 차트의 마지막 가격 배지에 계산된 합성 변화율 기반 up/down 상태 기록.
+- frontend/trade.css: 하락 배지에 붉은 계열 테두리/배경/텍스트 적용. 상승 배지에는 기존 녹색 유지.
+- frontend/trade.html: 기본 BTC 상승 샘플의 배지 상태를 명시.
+- frontend/order-interactions.test.mjs, frontend/chart-sample-accessibility.test.mjs: BTC/SOL/ETH/SOL 전환 후 차트 색상과 배지 상태 동기화, 하락 색상 CSS 및 기본 HTML을 검증하는 신규 2건(수정 전 FAIL).
+- 전체 프런트 200/200, JS/TS/HTML/CSP/git diff PASS. 실제 브라우저 T2 인수 미완료. 계정 미연결, MOCK 전용·실거래·M5~M9·원격 push/배포 제한 보존.

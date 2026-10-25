@@ -70,6 +70,13 @@ test('E1 chart explicitly identifies fake sample indices instead of clock ticks'
   assert.match(html,/class="chart-sample-description" aria-live="polite"/);
   assert.match(css,/\.chart-sample-description\{/);
 });
+test('UX-HL-01-T1 chart last-price badge has an explicit bearish CSS treatment',()=>{
+  assert.match(css,/\.trade-shell \.chart-value-label\[data-trend="down"\]\s*\{[^}]*border-color:/);
+  assert.match(css,/\.trade-shell \.chart-value-label\[data-trend="down"\]\s*\{[^}]*background:/);
+  assert.match(css,/\.trade-shell \.chart-value-label\[data-trend="down"\]\s*\{[^}]*color:/);
+  assert.match(html,/id="chart-value-label"[^>]*data-trend="up"/,
+    'pre-initialization BTC badge must agree with bullish static sample');
+});
 test('E1 market switching updates visible mock range and screen-reader description',()=>{
   assert.match(js,/const summary=describeSampleChart\(view\.market,points\)/);
   assert.match(js,/byId\('chart-sample-low'\)\.textContent=FORMAT_USD\.format\(summary.low\)/);

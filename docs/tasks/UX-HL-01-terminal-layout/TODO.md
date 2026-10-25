@@ -109,3 +109,9 @@
 - [x] S1 모바일 거래 제목 영역에 #portfolio 바로가기 추가, 데스크톱 숨김·모바일만 표시·키보드 focus 강조
 - [x] S1 프런트 194/194, JS 문법·TypeScript 빌드·HTML 구조/CSP/Git diff 검사
 - [ ] S2 실제 Chromium/모바일·키보드/스크린리더에서 터치 영역·앵커 이동·시각적 줄바꿈 인수
+
+- [x] T1 SOL 하락 샘플에서 선/끝점과 달리 마지막 가격 배지의 테두리/배경/글자색이 고정 녹색인 결함 확인
+- [x] T1 DOM 시장 전환 및 CSS 하락 색상 회귀 2건을 수정 전 FAIL 확인
+- [x] T1 renderChart의 기존 샘플 변화율로 badge data-trend를 갱신하고 하락 색상 CSS·기본 BTC 상승 속성 추가
+- [x] T1 MOCK/주문·계정 연결 안전 정책 유지, 프런트 전체 200/200·JS/TypeScript·HTML/CSP/git diff 검사
+- [ ] T2 정상 Chromium 데스크톱/모바일에서 가격 배지의 시각 대비·색각 접근성·스크린리더 인수

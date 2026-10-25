@@ -73,6 +73,10 @@ function renderChart(){
   byId('chart-point').setAttribute('fill',trendColor);
   byId('chart-gradient-start').setAttribute('stop-color',trendColor);
   byId('chart-gradient-end').setAttribute('stop-color',trendColor);
+  // Keep the floating last-price badge consistent with the sample's actual
+  // direction, just like the stroke, endpoint and filled chart area.
+  byId('chart-value-label').setAttribute('data-trend',
+    summary.changePercent>=0?'up':'down');
   byId('chart-value-label').textContent=FORMAT_USD.format(MARKETS[view.market].price);
   byId('chart-value-label').style.top=Math.max(4,Math.min(84,last[1]/284*100-4))+'%';
 }

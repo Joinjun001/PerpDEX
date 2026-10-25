@@ -863,6 +863,18 @@ test('UX-HL-01-L1 recent trade container has non-live accessible list fallback',
   assert.match(html,/id="recent-trades"[^>]*role="list"[^>]*aria-label="BTC 합성 최근 체결 예시 목록/);
   assert.match(html,/실제 체결 시각·블록체인 기록 아님/);
 });
+test('UX-HL-01-T1 chart endpoint price badge reflects the calculated sample trend',async()=>{
+  const app=await boot(),id=app.id;
+  for(const [market,trend] of [['BTC','up'],['SOL','down'],['ETH','up'],['SOL','down']]){
+    app.market(market).dispatch('click');
+    const badge=id('chart-value-label');
+    assert.equal(badge.getAttribute('data-trend'),trend,
+      'the floating last-price badge must match the market chart stroke direction');
+    const trendColor=trend==='up'?'#43e1b4':'#ff6c7b';
+    assert.equal(id('chart-line').getAttribute('stroke'),trendColor);
+    assert.equal(id('chart-point').getAttribute('fill'),trendColor);
+  }
+});
 test('UX-HL-01-P1 synthetic chart stroke, point and area gradient reflect calculated sample trend',async()=>{
   const app=await boot(),id=app.id;
   const {sampleChart,describeSampleChart}=await import('./preview-model.mjs');
