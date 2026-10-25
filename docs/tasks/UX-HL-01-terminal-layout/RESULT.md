@@ -151,3 +151,11 @@
 - frontend/order-interactions.test.mjs: BTC/ETH/SOL/BTC 전환과 초기 BTC SVG 색/ID 회귀 2건 신규, 수정 전 실패 확인.
 - 프런트 158/158 PASS, JS/TS/HTML/CSP/git diff PASS. 실제 Chromium·보조공학 P2/O2 인수 보류.
 - 데이터 모델/호가·주문 미리보기/계정/지갑/체인/DB·원격 Push·배포 변경 없음.
+
+## 2026-10-25 UX-HL-01-Q1 — 로컬 완료
+
+- frontend/trade.html: JS 미실행 초기 기본 선택 BTC 계약과 거래 데모 출처를 나타내는 브라우저 탭 제목 추가.
+- frontend/main.js: 이미 선택한 BTC/ETH/SOL 시장 ID로 브라우저 탭의 document.title을 동기화. 숫자/주문/화면 조작 로직 불변.
+- frontend/order-interactions.test.mjs: DOM 모의 초기 제목을 실제 HTML에서 읽고 BTC/ETH/SOL/BTC 선택 및 비실거래 표시를 검증하는 두 회귀 신규, 수정 전 FAIL.
+- 전체 프런트 166/166 PASS, JS/TS/HTML/CSP/Git diff PASS. 실제 브라우저 인수 Q2는 안전한 샌드박스 환경에서만 진행.
+- M5~M9 backend/계정/지갑/실거래/원격 push·배포 권한 제한은 변경 없음.

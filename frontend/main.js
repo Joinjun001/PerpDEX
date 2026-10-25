@@ -35,6 +35,7 @@ function updateMarket(){
   byId('pair-icon').textContent=tickets[view.market];
   byId('pair-icon').className='pair-icon '+(view.market==='BTC'?'coin-btc':view.market==='ETH'?'coin-eth':'coin-sol');
   byId('market-stats-symbol').textContent=m.symbol+'-USD-PERP';
+  document.title=m.symbol+'-USD-PERP · 거래 데모 · PerpDEX';
   byId('market-stats-reference').textContent=FORMAT_USD.format(m.price);
   const sampleChange=byId('market-stats-change');
   sampleChange.textContent=(change>=0?'+':'−')+Math.abs(change).toFixed(2)+'%';

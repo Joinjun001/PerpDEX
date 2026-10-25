@@ -78,6 +78,8 @@ PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성�
 - **UX-HL-01-O2 (Pending browser)**: 스프레드 출력의 실제 모바일 레이아웃·키보드/스크린리더 인수는 Chromium 샌드박스 환경 의존.
 - **UX-HL-01-P1 (Local Completed)**: SOL 하락 MOCK 시계열에도 상승형 초록으로 고정되던 SVG 차트 선/끝점/면적 그라데이션 색을 실제 64개 샘플 추세와 일치하도록 수정. 신규 회귀 2건 포함 전체 프런트 158/158 PASS.
 - **UX-HL-01-P2 (Pending browser)**: 실제 모바일·키보드·스크린리더/픽셀에서 상승·하락 차트 색상 및 텍스트 대비 검증 미완료.
+- **UX-HL-01-Q1 (Local Completed)**: 거래 페이지 브라우저 탭 제목이 시장 전환에도 고정되던 문제를 수정. 초기 BTC 및 동적 ETH/SOL 포함 선택 계약과 DEMO 고지를 동기화, 신규 2건 포함 프런트 166/166 PASS.
+- **UX-HL-01-Q2 (Pending browser)**: 실제 안전한 Chromium 환경에서 탭 제목·모바일/접근성 확인 미완료.
 
 ### Hyperliquid 계정 탭 탐색 UX 진행
 

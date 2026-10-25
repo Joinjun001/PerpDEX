@@ -62,6 +62,7 @@ function buildFixture(){
     }
   }
   const document={
+    title:html.match(/<title>([^<]+)<\/title>/)?.[1]??'',
     getElementById:id=>{
       const el=nodes.get(id);
       if(!el)throw Error('main.js references unknown id '+id);
@@ -99,6 +100,19 @@ test('B2-A main.js actually initializes MOCK chart, orderbook, ticket and blocke
   assert.equal(id('limit-price-field').hidden,true);
   assert.equal(id('limit-price').disabled,true);
   assert.equal(id('order-result').hidden,true);
+});
+test('UX-HL-01-Q1 selected market is reflected in the browser tab title with explicit DEMO context',async()=>{
+  const app=await boot();
+  for(const market of ['BTC','ETH','SOL','BTC']){
+    app.market(market).dispatch('click');
+    assert.equal(app.document.title,market+'-USD-PERP · 거래 데모 · PerpDEX');
+  }
+  assert.equal(app.market('BTC').getAttribute('aria-pressed'),'true');
+});
+test('UX-HL-01-Q1 static no-script title identifies the default BTC mock contract',()=>{
+  assert.match(html,/<title>BTC-USD-PERP · 거래 데모 · PerpDEX<\/title>/);
+  assert.match(html,/SIMULATION PREVIEW/);
+  assert.match(html,/connect-src 'none'/);
 });
 test('UX-HL-01-I1 market picker, metric and chart use the same computed mock sample change',async()=>{
   const app=await boot(),id=app.id;

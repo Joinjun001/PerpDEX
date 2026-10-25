@@ -91,3 +91,9 @@
 - [x] P1 BTC→ETH→SOL→BTC 시장 변경의 SVG 선/끝점/gradient 색상 및 Sample change 일치 회귀
 - [x] P1 전체 프런트 158/158, 모든 JS 문법·TypeScript 빌드·HTML/CSP/git diff 검사
 - [ ] P2 실제 모바일·키보드·스크린리더·픽셀 렌더링 인수 (안전한 Chromium 샌드박스 환경 필요)
+
+- [x] Q1 선택 자산 변경에도 브라우저 제목이 고정되는 UX를 HTML 기본값과 실제 main.js DOM 전환 회귀 2건에서 수정 전 FAIL로 재현
+- [x] Q1 정적 BTC 제목 및 BTC/ETH/SOL 선택에 따른 document.title 갱신 구현
+- [x] Q1 재선택 및 비실거래 DEMO 출처 유지, 기존 차트/호가/주문 미리보기/계정 동작 보존
+- [x] Q1 전체 프런트 166/166, JS 문법·TS 빌드·HTML 구조·고유 ID/CSP/git diff 검증
+- [ ] Q2 실제 Chromium 브라우저에서 탭 제목·모바일/접근성 인수 (샌드박스 실행 환경 필요)

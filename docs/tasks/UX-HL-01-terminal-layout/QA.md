@@ -190,3 +190,13 @@
 - 수정 후 대상 order-interactions.test.mjs 38/38 PASS, 전체 node --test frontend/*.test.mjs 158/158 PASS (기존 156+2). 모든 frontend JavaScript node --check 및 npm --prefix backend run build (tsc --noEmit) PASS.
 - Python HTMLParser index.html/trade.html의 태그/중복 ID, CSP connect-src none·빈 계정 테이블 tbody 5개, git diff --check PASS.
 - 실제 브라우저/스크린리더/모바일 인수 미수행. 원격 Push·배포·운영 DB·지갑·실거래·Sepolia 트랜잭션 미실행.
+
+## 2026-10-25 UX-HL-01-Q1 — 선택 시장과 탭 제목 동기화
+
+- 시작 main HEAD a0a5c93, Git clean, origin/main 대비 37개 로컬 커밋 ahead. PROJECT_STATE.md, ROADMAP.md, Hyperliquid UX reference, UX-HL-02 기존 TASK SPEC/TODO/QA/RESULT, 실제 frontend/trade.html/main.js 및 프런트 통합 테스트 확인.
+- 브라우저: 프로젝트 .local-browser-qa에 Chromium/Playwright 약 643MB 존재. 비특권 사용자 runuser -u node -- unshare -Ur true 실행이 Operation not permitted로 실패. 안전 제한 우회 없이 실제 Chromium 브라우저 인수 미실행.
+- 실제 결함: 거래 페이지 title은 거래 데모 · PerpDEX로 고정되어 시장 BTC/ETH/SOL를 클릭해도 브라우저 탭에 선택 시장이 드러나지 않음. 신규 테스트 2건(실제 HTML 초기 값 및 실제 main.js 이벤트) 수정 전 2건 FAIL.
+- 변경: trade.html 초기 BTC-USD-PERP · 거래 데모 · PerpDEX. main.js updateMarket에서 이미 검증된 m.symbol을 재사용하여 document.title을 갱신. 가격·모의 차트/체결/호가·주문 모의·계정 API/권한 경계 변경 없음.
+- 신규 테스트를 포함한 대상 order-interactions.test.mjs 46/46 PASS, frontend 전체 node --test frontend/*.test.mjs 166/166 PASS (기존 164+2). 모든 frontend JS node --check, npm --prefix backend run build (tsc --noEmit) PASS.
+- Python HTMLParser 정적 index.html/trade.html 태그/고유 ID 확인, CSP connect-src none·가짜 계정 테이블 빈 tbody 5개·NO EXECUTION 고지·git diff --check PASS.
+- 실제 Chrome 픽셀·탭/스크린리더 수동 인수는 미실행. 원격 push·배포, 운영 DB, 지갑/비밀키, 실체인 거래/승인 우회 없음.
