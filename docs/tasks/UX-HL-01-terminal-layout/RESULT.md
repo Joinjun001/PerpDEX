@@ -159,3 +159,11 @@
 - frontend/order-interactions.test.mjs: DOM 모의 초기 제목을 실제 HTML에서 읽고 BTC/ETH/SOL/BTC 선택 및 비실거래 표시를 검증하는 두 회귀 신규, 수정 전 FAIL.
 - 전체 프런트 166/166 PASS, JS/TS/HTML/CSP/Git diff PASS. 실제 브라우저 인수 Q2는 안전한 샌드박스 환경에서만 진행.
 - M5~M9 backend/계정/지갑/실거래/원격 push·배포 권한 제한은 변경 없음.
+
+## 2026-10-25 UX-HL-01-R1 — MOCK 스프레드 접근성 수치 동기화 로컬 완료
+
+- frontend/main.js: 스프레드의 동일한 USD 형식 금액을 가시 output과 aria-label 양쪽에 제공하며 BTC/ETH/SOL 전환 후 시장 단위·실제 호가 아님 고지 보존.
+- frontend/trade.html: 정적 JS 미실행 output의 미계산 상태를 명시적으로 안내.
+- frontend/order-interactions.test.mjs: BTC/ETH/SOL/BTC 접근성 수치·USD 단위/출처, no-script 미계산 안내 신규 회귀 2건(수정 전 FAIL).
+- 전체 프런트 190/190 PASS, JS 문법·TypeScript build·HTML/CSP·git diff 검사 PASS. 실제 Chromium/스크린리더 R2 인수 미완료.
+- 백엔드 M5~M9·지갑/API·실주문·운영 DB·원격 push/배포 제한 변경 없음.

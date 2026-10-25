@@ -809,6 +809,25 @@ test('UX-HL-01-O1 visible mock spread matches best displayed ask minus best disp
   }
 });
 
+test('UX-HL-01-R1 accessible mock spread label includes displayed USD amount on every market switch',async()=>{
+  const app=await boot(),id=app.id;
+  for(const market of ['BTC','ETH','SOL','BTC']){
+    app.market(market).dispatch('click');
+    const spread=id('book-spread');
+    const shown=spread.textContent;
+    assert.match(shown,/^\$[0-9,.]+$/,'spread amount must be visibly formatted');
+    assert.equal(spread.getAttribute('aria-label'),
+      market+' 합성 호가 스프레드 '+shown+' USD · 실제 호가 아님',
+      'screen-reader label must expose the same numeric MOCK USD spread that is visible');
+  }
+});
+
+test('UX-HL-01-R1 no-script spread accessible name explicitly says calculation unavailable',()=>{
+  const tag=html.match(/<output id="book-spread"[^>]*>—<\/output>/)?.[0];
+  assert.ok(tag,'static synthetic spread output exists');
+  assert.match(tag,/aria-label="[^"]*미계산[^"]*실제 호가 아님"/);
+  assert.match(html,/connect-src 'none'/);
+});
 test('UX-HL-01-O1 static spread defaults to unavailable until synthetic levels render',()=>{
   const book=html.match(/<section id="market-depth-book"[\s\S]*?<\/section>/)?.[0]??'';
   assert.match(book,/id="book-spread"[^>]*>—<\/output>/);

@@ -200,3 +200,13 @@
 - 신규 테스트를 포함한 대상 order-interactions.test.mjs 46/46 PASS, frontend 전체 node --test frontend/*.test.mjs 166/166 PASS (기존 164+2). 모든 frontend JS node --check, npm --prefix backend run build (tsc --noEmit) PASS.
 - Python HTMLParser 정적 index.html/trade.html 태그/고유 ID 확인, CSP connect-src none·가짜 계정 테이블 빈 tbody 5개·NO EXECUTION 고지·git diff --check PASS.
 - 실제 Chrome 픽셀·탭/스크린리더 수동 인수는 미실행. 원격 push·배포, 운영 DB, 지갑/비밀키, 실체인 거래/승인 우회 없음.
+
+## 2026-10-25 UX-HL-01-R1 — 호가 스프레드 수치 접근성
+
+- 시작 main HEAD b9bb533, Git clean, origin/main 대비 로컬 49커밋 ahead. PROJECT_STATE/ROADMAP/Hyperliquid UX reference, UX-HL-02-O1 및 UX-HL-01-Q1 TASK SPEC·TODO·QA·RESULT, trade.html/main.js/preview-model/order-interactions 관련 실제 코드 점검.
+- Chromium .local-browser-qa 약 643MB 존재, 비특권 runuser -u node -- unshare -Ur true → Operation not permitted. 권한·샌드박스 우회 없이 UX-HL-02-O2 및 UX-HL-01-R2 실제 브라우저 인수 미완료 유지.
+- 수정 전 신규 frontend/order-interactions.test.mjs 2건 FAIL. 가시 BTC 스프레드 $31.00와 달리 aria-label은 'BTC 합성 호가 스프레드 · 실제 호가 아님'으로 수치/단위 누락. 초기 no-script output(—)에도 '미계산' 정보 없음.
+- 수정: frontend/main.js renderBook의 USD 형식 금액을 displayedSpread로 고정해 output textContent와 시장명/금액/USD·비실제 호가 안내를 포함한 aria-label 동기화. 정적 frontend/trade.html은 계산 전 output —/미계산 상태 명확화.
+- 수정 후 대상 node --test frontend/order-interactions.test.mjs 50/50 PASS, 전체 node --test frontend/*.test.mjs 190/190 PASS (기존 188+2). 모든 frontend JS node --check, npm --prefix backend run build (tsc --noEmit) PASS.
+- Python HTMLParser frontend/index.html·frontend/trade.html 구조/고유 ID, CSP connect-src none, 계정 미연결 tbody 5개·DEMO-only 고지 및 git diff --check PASS.
+- 실제 Chrome·스크린리더·모바일 시각/스크린리더 인수는 미실행. 지갑/API 연결·실거래·Sepolia 트랜잭션·운영 DB·자격증명·원격 push/배포/권한 우회 없음.

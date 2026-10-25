@@ -97,3 +97,9 @@
 - [x] Q1 재선택 및 비실거래 DEMO 출처 유지, 기존 차트/호가/주문 미리보기/계정 동작 보존
 - [x] Q1 전체 프런트 166/166, JS 문법·TS 빌드·HTML 구조·고유 ID/CSP/git diff 검증
 - [ ] Q2 실제 Chromium 브라우저에서 탭 제목·모바일/접근성 인수 (샌드박스 실행 환경 필요)
+
+- [x] R1 생성된 가시 스프레드 값이 output의 aria-label에서 누락되는 결함 및 비생성 시 미계산 안내 누락을 수정 전 통합 회귀 2건 FAIL로 재현
+- [x] R1 BTC/ETH/SOL/BTC 전환 시 합성 스프레드 표시 USD 금액을 접근성 이름에 그대로 포함
+- [x] R1 초기 정적 output은 값 —와 함께 미계산·비실호가 이름 제공, 기존 MOCK 거래·CSP 유지
+- [x] R1 frontend 전체 190/190 및 JS 문법·TypeScript build·HTML/CSP·git diff 검증
+- [ ] R2 안전한 실제 Chromium에서 스크린리더의 수치/단위 읽기 및 모바일 표시 인수

@@ -115,8 +115,12 @@ function renderBook(){
   byId('book-mid').textContent=FORMAT_USD.format(m.price);
   // The nearest synthetic ask/bid are reference +/- one depthStep.
   // This is only a generated example, never a live order-book spread.
-  byId('book-spread').textContent=FORMAT_USD.format(2*m.depthStep);
-  byId('book-spread').setAttribute('aria-label',view.market+' 합성 호가 스프레드 · 실제 호가 아님');
+  const displayedSpread=FORMAT_USD.format(2*m.depthStep);
+  byId('book-spread').textContent=displayedSpread;
+  // An aria-label overrides the output's visible text as its accessible name.
+  // Include the same generated USD value so it is not lost to screen readers.
+  byId('book-spread').setAttribute('aria-label',
+    view.market+' 합성 호가 스프레드 '+displayedSpread+' USD · 실제 호가 아님');
 }
 function renderTrades(){
   const container=byId('recent-trades');container.replaceChildren();
