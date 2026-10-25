@@ -103,3 +103,14 @@
 - 수정 후 대상 node --test frontend/account-query-contract.test.mjs 21/21 PASS, 전체 node --test frontend/*.test.mjs 184/184 PASS(기존 182+2). 모든 frontend JS node --check, npm --prefix backend run build(tsc --noEmit) PASS.
 - Python HTMLParser index.html/trade.html HTML 구조·고유 ID, CSP connect-src none 및 빈 계정 tbody 5개/DEMO no execution·Reduce Only disabled 고지, git diff --check PASS.
 - 실 브라우저/모바일·스크린리더·인증된 API 인수 미실행. 실거래·Sepolia 트랜잭션·지갑/운영 DB·원격 push/배포·자격증명·보안 제한 우회 없음.
+
+## 2026-10-25 UX-HL-03-K1 — 세션 출처 필드 재읽기 방지
+
+- 시작 local main HEAD dd04de2, Git clean, origin/main 대비 47 커밋 ahead. PROJECT_STATE.md/ROADMAP.md/Hyperliquid UX reference, UX-HL-03-J1 및 UX-HL-01-Q1 SPEC/TODO/QA/RESULT, 실제 frontend main.js·preview-model·account-query-contract/read-flow·모바일·계정 탭·테스트 점검.
+- UX-HL-03-J2 실제 브라우저/신뢰 API: .local-browser-qa Playwright/Chromium 약 643MB, 비특권 runuser -u node -- unshare -Ur true → Operation not permitted. 보안 제한 우회 없이 브라우저·인증 읽기 인수 보류.
+- 독립 UX 후보 검증: BTC/ETH/SOL 차트 끝점과 MOCK 기준 가격을 직접 비교하여 세 시장에서 수치 일치 확인, 결함으로 오인하지 않음.
+- 수정 전 계정 계약 신규 테스트 2건 모두 FAIL: getter가 첫 읽기 VERIFIED_TESTNET/다음 읽기 MOCK_SAMPLE일 때 connect 결과에 미승인 source가 저장되고, 직접 validateAccountQueryResponse도 forged MOCK_SAMPLE 응답을 승인.
+- 수정: validateContext에서 source와 chainId를 각각 지역 상수에 보관한 뒤 승인·정규화한 같은 값을 frozen identity에 기록. 실제 계정 소유 인증 기능이나 거래/API 연결을 추가하지 않음.
+- 수정 후 node --test frontend/account-query-contract.test.mjs 23/23 PASS, node --test frontend/*.test.mjs 186/186 PASS (이전 184+2). 모든 frontend JS node --check 및 npm --prefix backend run build (tsc --noEmit) PASS.
+- Python HTMLParser index.html/trade.html 구조·고유 ID, CSP connect-src none, 빈 계정 tbody 5개·LOCAL PREVIEW/NO EXECUTION 고지, git diff --check PASS.
+- 실제 브라우저/스크린리더·신뢰 서버 인수 미실행. 지갑/실거래·Sepolia 트랜잭션·운영 DB·자격증명·원격 push/배포·보안 제한 우회 없음.

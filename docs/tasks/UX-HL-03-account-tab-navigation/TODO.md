@@ -64,3 +64,9 @@
 - [x] J1 response envelope 7개 허용 필드를 한 번씩 캡처 후 검증·저장하도록 수정, 기존 계정/체인/ID/revision/수량 규칙 유지
 - [x] J1 전체 프런트 184/184, JS 문법·TypeScript build·HTML 구조·CSP·Git diff 검증
 - [ ] J2 정상적인 Chromium 및 신뢰된 계정 API 환경에서 조회량 제한과 오류/접근성 인수
+
+- [x] K1 changing source getter로 검증된 VERIFIED_TESTNET 대신 MOCK_SAMPLE이 연결 세션에 보관되는 결함 수정 전 FAIL 재현
+- [x] K1 같은 getter로 forged MOCK_SAMPLE 응답을 직접 검증할 때 잘못 수용되는 결함 수정 전 FAIL 재현
+- [x] K1 세션 source를 1회 읽어 검사 값 그대로 보관. chainId도 지역 변수에 고정하고 계정 정규화 유지
+- [x] K1 프런트 186/186, JS syntax·TypeScript build·HTML/CSP/git diff 검증
+- [ ] K2 신뢰된 서버 출처/브라우저·모바일/키보드/스크린리더 인수

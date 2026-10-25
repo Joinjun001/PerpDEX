@@ -103,6 +103,8 @@ PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성�
 - **UX-HL-03-I2 (Pending trusted API/browser)**: 신뢰된 계정 데이터·실제 Chromium/모바일·키보드·스크린리더에서 조회 일관성 인수 미완료.
 - **UX-HL-03-J1 (Local Completed)**: 조회 envelope revision/records를 검사 후 다시 읽어, 검증되지 않은 revision이 저장되거나 100행 상한을 우회하는 결함 차단. 속성 1회 캡처 후 검증, 신규 2건 포함 프런트 184/184 PASS.
 - **UX-HL-03-J2 (Pending trusted API/browser)**: 신뢰된 계정 조회 계약·실제 Chromium/모바일·키보드/스크린리더의 오류/제한 인수 보류.
+- **UX-HL-03-K1 (Local Completed)**: 계정 세션 source를 검사 후 재읽어 허용하지 않은 출처로 바뀔 수 있던 검증/저장 불일치 수정. 신규 2건 포함 프런트 186/186 PASS.
+- **UX-HL-03-K2 (Pending trusted API/browser)**: 인증된 계정 세션 출처·실제 브라우저/접근성 연동 인수 미완료.
 - 실계정 조회/지갑 API 미준비로 계정 데이터 연결 게이트 계속 보류.
 
 ### Hyperliquid 거래 편의 기능 UX 진행

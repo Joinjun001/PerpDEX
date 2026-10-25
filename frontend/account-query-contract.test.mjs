@@ -187,6 +187,32 @@ test('B2-B1 rejects invalid fill prices, statuses, funding amounts',()=>{
     assert.throws(()=>validateAccountQueryResponse(response(exp,[{...row(tab),...change}]),exp),TypeError);
   }
 });
+test('UX-HL-03-K1 account coordinator stores only the validated session source',()=>{
+  const gate=createAccountQueryCoordinator();
+  let reads=0;
+  const altered={...C};
+  Object.defineProperty(altered,'source',{enumerable:true,get(){
+    reads++;
+    return reads===1?'VERIFIED_TESTNET':'MOCK_SAMPLE';
+  }});
+  const connected=gate.connect(altered);
+  assert.equal(connected.source,'VERIFIED_TESTNET','only the checked source may be saved');
+  assert.equal(reads,1,'source must be read only once');
+  const token=gate.begin('positions');
+  assert.equal(token.source,'VERIFIED_TESTNET');
+  assert.equal(gate.connected,true);
+});
+
+test('UX-HL-03-K1 changing source getter cannot authorize a forged direct response',()=>{
+  const expected={...C,tab:'positions',requestId:1};
+  let reads=0;
+  Object.defineProperty(expected,'source',{enumerable:true,get(){
+    reads++;
+    return reads===1?'VERIFIED_TESTNET':'MOCK_SAMPLE';
+  }});
+  const forged={...response({...C,tab:'positions',requestId:1},[row('positions')]),source:'MOCK_SAMPLE'};
+  assert.throws(()=>validateAccountQueryResponse(forged,expected),TypeError);
+});
 test('B2-B1 coordinator stays disconnected until a caller supplies valid bound context',()=>{
   const gate=createAccountQueryCoordinator();
   for(const {id} of ACCOUNT_TABS){

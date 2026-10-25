@@ -87,3 +87,10 @@
 - 응답의 own field 구성이 정확한지 확인한 후 chainId/account/source/tab/requestId/revision/records의 허용된 7개 필드를 각각 정확히 한 번만 읽어 일반 객체에 캡처한다. 캡처한 값만 기존 ID/세션/체인/revision/최대 100행 및 각 레코드 유효성 검증과 normalized 응답 구성에 사용한다.
 - 이전 I1의 개별 레코드 1회 캡처, H1 동일 revision 충돌 방지, stale token, C1~G1 오류 처리 및 5개 탭 disconnected 기본값 유지. 실제 인증·지갑·테스트넷 트랜잭션/운영 API를 연결하지 않는다.
 - J2 실제 브라우저 및 신뢰된 인증 조회 계약 인수는 외부 환경에 의존하며 제한을 우회하지 않는다.
+
+## UX-HL-03-K1 (2026-10-25) — 세션 출처 검증·보관 일치
+
+- 실제 독립 결함: 계정 조회 계약의 validateContext는 context.source를 유효한 출처인지 검사한 뒤 다시 읽어 반환했다. 외부 context의 getter가 첫 읽기에서 VERIFIED_TESTNET, 두 번째에서 MOCK_SAMPLE을 반환하면, 정상 출처 검사 후 검증하지 않은 MOCK_SAMPLE이 coordinator 세션에 저장되거나 직접 조회 응답이 승인될 수 있었다.
+- 세션 연결 입력에서는 account·chainId·source 각각 검증할 값을 1회 읽어 고정하고, source의 허용 집합 확인과 반환에 정확히 같은 primitive 값을 사용한다. 인증된 서버/지갑 소유권의 증명은 여전히 외부 신뢰된 어댑터의 별도 의무다.
+- 기존 계정 API 미연결, 기본 disconnected 상태, 필드 I1/J1 단일 캡처, 동일 revision H1 충돌 검증, 기타 모델·백엔드 위험 제한 보존.
+- 정상적인 Chromium과 신뢰된 인증 계정 API 인수가 가능한 환경에서 K2 검증을 수행한다. 샌드박스 우회·실거래·테스트넷 트랜잭션 금지.

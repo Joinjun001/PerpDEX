@@ -44,9 +44,13 @@ function tabCheck(tab){if(!TAB_IDS.has(tab))invalid('unknown tab');}
 function validateContext(context){
   if(!isObject(context))invalid('missing account connection context');
   const normalized=address(context.account);
-  if(context.chainId!==11155111)invalid('unexpected chain');
-  if(!SOURCES.has(context.source))invalid('untrusted declared source');
-  return Object.freeze({account:normalized,chainId:11155111,source:context.source});
+  const chainId=context.chainId;
+  const source=context.source;
+  if(chainId!==11155111)invalid('unexpected chain');
+  if(!SOURCES.has(source))invalid('untrusted declared source');
+  // Store the exact identity fields that passed validation. Accessor-backed
+  // input must not substitute an untrusted source on a later read.
+  return Object.freeze({account:normalized,chainId:11155111,source});
 }
 function validateRecord(record,tab,context){
   if(!isObject(record))invalid('record is not an object');

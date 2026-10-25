@@ -75,3 +75,10 @@
 - frontend/account-query-contract.test.mjs: 변하는 revision getter의 -1 저장 문제와 변하는 records getter의 101행 제한 우회 문제를 수정 전 FAIL 회귀 2건으로 확인하고 차단.
 - frontend 전체 184/184 PASS, JavaScript 문법·TypeScript 빌드·HTML/CSP·Git diff 검사 PASS. 오프라인 MOCK·계정 데이터 unavailable 상태 유지.
 - 실 브라우저 J2 및 신뢰된 계정 API 인수는 미완료. M5~M9 backend/지갑·실체인·운영 DB·push/배포 게이트 불변.
+
+## 2026-10-25 UX-HL-03-K1 — 계정 조회 세션 출처 단일 캡처 로컬 완료
+
+- frontend/account-query-contract.mjs: context.source를 검사하고 재읽어서 다른 출처로 바뀔 수 있던 검증값/보관값 불일치를 제거. 세션 출처를 1회 캡처 후 그 값만 허용 목록 검사 및 보관에 사용.
+- frontend/account-query-contract.test.mjs: 변경 getter의 검증 후 미승인 출처 보관·forged 응답 수용을 재현한 회귀 2건(수정 전 FAIL). 확인된 승인 source의 보존 및 1회 읽기 검사.
+- 프런트 전체 186/186 PASS 및 JS/TS/HTML/CSP/git diff 검증. 실계정/지갑/API 및 주문 실행은 여전히 비활성.
+- 브라우저 K2/인증 계정 API 실 인수 미완료. M5~M9·DB/실거래·Sepolia 트랜잭션·원격 push/배포 제한 불변.
