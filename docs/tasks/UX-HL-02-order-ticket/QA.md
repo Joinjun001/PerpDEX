@@ -179,3 +179,13 @@
 - 수정 후 node --test frontend/order-interactions.test.mjs 52/52 PASS, node --test frontend/*.test.mjs 192/192 PASS(기존 190+2). 전체 frontend JS node --check 및 npm --prefix backend run build(tsc --noEmit) PASS.
 - Python HTMLParser 두 HTML 구조·고유 ID, CSP connect-src none, 미연결 계정 tbody 5개 및 DEMO-only, git diff --check PASS.
 - 실제 Chrome/모바일/스크린리더 인수·지갑/API·실거래·Sepolia 트랜잭션·운영 DB·원격 push/배포·자격증명 및 보안 제한 우회 없음.
+
+## 2026-10-25 UX-HL-02-Q1 — JavaScript 부재 시 주문 미리보기 가짜 활성 상태 제거
+
+- 시작 main HEAD adfc6dd, 작업 트리 clean, origin/main 대비 로컬 52커밋 ahead. PROJECT_STATE/ROADMAP/Hyperliquid UX reference, UX-HL-01-S1/UX-HL-02-P1 TASK SPEC·TODO·QA·RESULT 및 실제 main.js, trade.html, 반응형/모바일/접근성 코드, preview-model·order-review/test 검토.
+- Chromium 상태: .local-browser-qa Playwright 캐시 약 643MB, 비특권 runuser -u node -- unshare -Ur true → Operation not permitted. 보안 제한 우회 없이 S2/R2/P2 및 Q2의 실 브라우저 인수 미완료.
+- 결함 재현: 기존 정적 Preview Long Order submit 버튼은 enabled, 이벤트 listener는 main.js 후반부에서만 등록. JS-off 또는 로딩 오류 시 클릭해도 미리보기 동작이 없으며 form-action none으로 서버 전송도 불가. 신규 static regression은 수정 전 FAIL, 동적 유효/무효/복구 검사 1건은 기존 동작 PASS.
+- 수정: frontend/trade.html의 preview-order에 disabled 속성 추가, noscript에 JavaScript 미실행 안내문 배치. frontend/main.js 수정 없음: updateMarket → renderTicket에서 입력 유효성에 따라 버튼을 활성화하는 기존 로직으로 정상 초기화 시 기능 회복.
+- 변경 후 대상 node --test frontend/order-interactions.test.mjs 54/54 PASS, 전체 node --test frontend/*.test.mjs 196/196 PASS(기존 194+2). 모든 frontend JS node --check, npm --prefix backend run build (tsc --noEmit) PASS.
+- HTMLParser frontend/index.html/trade.html 태그 중첩·중복 ID, CSP connect-src none 및 form-action none, 계정 tbody 5개 비연결과 LOCAL PREVIEW·NO EXECUTION, git diff --check PASS.
+- 실제 JS-off/JS-on Chromium 시각·키보드·스크린리더 인수는 미실행. 지갑/계정 API·실거래·Sepolia 트랜잭션·운영 DB·원격 push/배포·자격증명·보안 우회 없음.

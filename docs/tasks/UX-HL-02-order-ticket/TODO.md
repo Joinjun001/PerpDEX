@@ -99,3 +99,9 @@
 - [x] P1 기본 no-script BTC 4개 버튼 정적 접근성 이름 반영
 - [x] P1 프런트 192/192, JS 문법, TypeScript build, HTML/CSP 및 git diff 검증
 - [ ] P2 Chromium 모바일/키보드/스크린리더에서 접근성 이름·선택 상태 실제 인수
+
+- [x] Q1 JS 미실행 시 작동하지 않는 submit이 정적 HTML에서 활성화되는 문제를 신규 테스트로 수정 전 FAIL 확인
+- [x] Q1 정적 미리보기 버튼 disabled 및 noscript 설명문을 추가하고 초기화 후 유효 입력에서만 다시 활성화
+- [x] Q1 초기화 후 유효→무효→유효 수량 변화가 미리보기 활성 상태를 올바르게 전환하는 DOM 회귀 검증
+- [x] Q1 프런트 전체 196/196, JS syntax, TypeScript build, HTML 구조·CSP/Git diff 검사
+- [ ] Q2 실제 Chromium에서 JS 미실행·정상 실행 및 키보드/스크린리더 버튼 발표·모바일 터치 인수

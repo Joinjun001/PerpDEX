@@ -130,3 +130,10 @@
 - frontend/order-interactions.test.mjs: BTC/ETH/SOL/BTC 시장 변경, 기본 HTML의 BTC 단위 및 미연결 CSP 신규 회귀 2건(수정 전 FAIL).
 - 프런트 192/192, JS·TS·HTML/CSP/git diff PASS. 버튼 숫자·선택/DEMO 미리보기 로직 그대로.
 - 실제 브라우저 P2 접근성 인수 보류. 지갑/실주문·실체인·DB·원격 push/배포 정책 유지.
+
+## 2026-10-25 UX-HL-02-Q1 — 주문 미리보기의 스크립트 준비 상태 정합성 로컬 완료
+
+- frontend/trade.html: JavaScript 초기화 전 Preview Long Order 버튼 disabled, noscript 안내를 추가해 미실행 시 빈 클릭을 방지. 기존 DEMO 고지 및 CSP form-action none 유지.
+- frontend/order-interactions.test.mjs: 스크립트 없이 정적 submit이 활성 상태가 아님을 검증하는 fail-first 회귀와 모의 초기화 시 유효/무효/유효 입력의 활성 상태를 검증하는 테스트 추가.
+- 프런트 전체 196/196 PASS 및 JS·TS·HTML/CSP/Git diff PASS. 실제 주문/지갑·계정 API·서버 전송 없음.
+- 실제 브라우저 UX-HL-02-Q2 인수는 안전한 Chromium 실행 환경에 의존하며 미완료; M5~M9·실거래/실체인·운영 DB·push/배포 제한 보존.

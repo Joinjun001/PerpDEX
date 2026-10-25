@@ -88,6 +88,27 @@ async function boot(){
   await import('./main.js?qa-b2-'+(++moduleCounter));
   return fixture;
 }
+test('UX-HL-02-Q1 no-script preview submit cannot appear usable without handlers',()=>{
+  const form=html.match(/<form id="order-form"[\s\S]*?<\/form>/)?.[0];
+  assert.ok(form,'order form exists');
+  assert.match(form,/<button id="preview-order"[^>]*type="submit"[^>]*disabled(?:\s|>)/,
+    'server/static markup must disable a preview action before JS is ready');
+  assert.match(form,/<noscript>[\s\S]*?JavaScript[\s\S]*?미리보기[\s\S]*?<\/noscript>/,
+    'explain why the inactive action is unavailable when scripts are disabled');
+  assert.match(html,/form-action 'none'/);
+});
+
+test('UX-HL-02-Q1 boot activates only validated demo preview; invalid input disables it',async()=>{
+  const app=await boot(),id=app.id;
+  assert.equal(id('preview-order').disabled,false,'initialized valid demo has preview action');
+  id('quantity').value='0';
+  id('quantity').dispatch('input');
+  assert.equal(id('preview-order').disabled,true,'invalid demo quantity cannot preview');
+  id('quantity').value='0.05';
+  id('quantity').dispatch('input');
+  assert.equal(id('preview-order').disabled,false,'valid input recovers demo action');
+  assert.equal(id('order-result').hidden,true,'no order is executed by initialization');
+});
 test('B2-A main.js actually initializes MOCK chart, orderbook, ticket and blocked real execution',async()=>{
   const app=await boot(),id=app.id;
   assert.equal(app.markets.length,3);

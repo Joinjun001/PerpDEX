@@ -136,6 +136,8 @@ PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성�
 - **UX-HL-02-O2 (Pending browser)**: 모바일/데스크톱 실제 브라우저에서 눈금과 슬라이더 thumb 정렬·키보드/스크린리더 인수 미완료.
 - **UX-HL-02-P1 (Local Completed)**: 수량 preset 4개 버튼에 BTC/ETH/SOL 단위가 없어 시장 전환 뒤 숫자 의미가 불명확하던 접근성 결함 수정. 동적·정적 ARIA 이름에 자산 단위 포함, 신규 2건 포함 프런트 192/192 PASS.
 - **UX-HL-02-P2 (Pending browser)**: 실제 Chromium/모바일·키보드/스크린리더의 빠른 수량 단위·선택 피드백 인수 미완료.
+- **UX-HL-02-Q1 (Local Completed)**: JS 미실행/모듈 초기화 실패 시 작동하지 않는 Preview 버튼이 정적 화면에서 활성화되던 결함 수정. 초기 disabled 및 noscript 안내, 정상 초기화 때 유효 입력에만 활성화. 신규 2건 포함 프런트 196/196 PASS.
+- **UX-HL-02-Q2 (Pending browser)**: 정상 샌드박스 Chromium/모바일·키보드/스크린리더에서 JS-off 및 정상 초기화 버튼 상태를 실제 인수 미완료.
 
 ### Hyperliquid 주문 티켓 UX 진행
 

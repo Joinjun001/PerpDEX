@@ -141,3 +141,10 @@
 - 네 버튼의 aria-label에 모의 수량·preset 숫자·현재 시장 자산 단위를 제공한다. 초기 정적 기본 BTC에서도 단위를 명시하고 기존 renderTicket에서 전환 때 갱신한다.
 - 숫자 자체, 선택 상태 aria-pressed, 주문 계산·검토, 미연결 계정/비실거래 고지는 그대로 둔다.
 - 실제 Chromium/모바일·스크린리더 인수는 P2 미완료, 샌드박스 우회·실거래 금지.
+
+## UX-HL-02-Q1 (2026-10-25) — JavaScript 미실행 시 작동하지 않는 Preview 버튼 비활성화
+
+- 실제 사용자 UX 결함: 기존 정적 frontend/trade.html은 Preview Long Order 버튼을 활성화해 두지만 미리보기를 생성하는 이벤트 연결은 main.js 모듈 성공 실행이 전제였다. 스크립트가 꺼졌거나 로드에 실패하면 버튼을 눌러도 아무 결과가 없어 작동하지 않는 가짜 실행 가능 상태가 된다.
+- HTML 초기 상태에서 주문 미리보기 submit 버튼을 disabled로 선언한다. 기존 main.js는 초기화가 완료된 후 renderTicket에서 유효한 DEMO 입력만 button.disabled=false로 바꾸므로 JavaScript 실행 환경에서 기존 미리보기/입력 유효성 검사 동작이 유지된다.
+- noscript로 'JavaScript가 비활성화되어 미리보기 불가능, 실제 주문 전송 없음' 안내를 추가한다. 서버/지갑·체인·API는 연결하지 않으며 form-action none/모의 리뷰/금액 계산은 변경하지 않는다.
+- 실 브라우저에서 JS-off / 모듈 로딩 지연 / 정상 초기화 / 모바일 접근성의 상태를 확인하는 Q2 인수는 샌드박스가 허용된 환경에서 별도 수행한다.
