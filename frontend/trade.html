@@ -51,14 +51,30 @@
       <div class="dashboard-grid terminal-grid">
         <div class="chart-column">
           <section class="panel chart-panel" aria-labelledby="chart-title">
-            <div class="panel-heading chart-heading"><div class="pair-identity"><span class="pair-icon" id="pair-icon">₿</span><div><h2 id="chart-title">BTC / USD <span>Perpetual</span></h2><div class="pair-subline">가격 데이터: 고정 데모 샘플</div></div></div><div class="chart-actions" aria-label="예시 차트 시간단위 (변경 미지원)"><span class="pill pill-selected" title="고정 샘플 차트">SAMPLE</span></div></div>
+            <div class="panel-heading chart-heading"><div class="pair-identity"><span class="pair-icon" id="pair-icon">₿</span><div><h2 id="chart-title">BTC / USD <span>Perpetual</span></h2><div class="pair-subline">가격 데이터: 고정 데모 샘플</div></div></div><div class="chart-actions" aria-label="합성 샘플 차트 도구">
+              <span class="pill pill-selected" title="MOCK_SAMPLE 고정 샘플 · 실시간 아님">SAMPLE</span>
+              <div class="chart-mode-controls" role="group" aria-label="가상 가격 차트 표시 방식">
+                <button type="button" id="chart-line-mode" class="chart-tool active" aria-pressed="true">Line</button>
+                <button type="button" id="chart-candle-mode" class="chart-tool" aria-pressed="false">Sample OHLC</button>
+              </div>
+              <div class="chart-group-controls" role="group" aria-label="OHLC 1개당 합칠 샘플 개수">
+                <button type="button" id="chart-group-4" class="chart-tool active" aria-pressed="true" disabled title="Sample OHLC에서 활성화되는 4샘플 묶음">4 samples</button>
+                <button type="button" id="chart-group-8" class="chart-tool" aria-pressed="false" disabled title="Sample OHLC에서 활성화되는 8샘플 묶음">8 samples</button>
+              </div>
+              <span class="chart-tool-unavailable" aria-label="실제 시간간격 및 지표는 미연결">
+                <button type="button" class="chart-tool" disabled title="실제 시각·캔들 데이터 미연결">1m / 5m / 1h</button>
+                <button type="button" class="chart-tool" disabled title="실제 거래량·지표 데이터 미연결">Volume / Indicators</button>
+                <small class="chart-unavailable-note">시각·거래량 미연결</small>
+              </span>
+            </div></div>
             <div class="quote-summary"><strong id="chart-price">$65,240.50</strong><span id="chart-change" class="positive">↗ +1.33%</span><span class="quote-label">REFERENCE PRICE · MOCK</span></div>
-            <div class="chart-wrap"><svg id="market-chart" viewBox="0 0 800 284" preserveAspectRatio="none" role="img" aria-label="시장별 고정 모의 가격 선 차트" aria-describedby="chart-sample-description"><defs><linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1"><stop id="chart-gradient-start" offset="0%" stop-color="#43e1b4" stop-opacity=".22"/><stop id="chart-gradient-end" offset="100%" stop-color="#43e1b4" stop-opacity="0"/></linearGradient></defs><g class="gridlines"><path d="M0 35 H800 M0 95 H800 M0 155 H800 M0 215 H800"/></g><path id="chart-area" fill="url(#chartFill)"/><path id="chart-line" fill="none" stroke="#43e1b4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle id="chart-point" r="5" fill="#43e1b4" stroke="#0e141d" stroke-width="3"/></svg><div class="chart-value-label" id="chart-value-label" data-trend="up">$65,240.50</div></div>
+            <div class="chart-wrap"><svg id="market-chart" viewBox="0 0 800 284" preserveAspectRatio="none" role="img" aria-label="시장별 고정 모의 가격 선 차트" aria-describedby="chart-sample-description"><defs><linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1"><stop id="chart-gradient-start" offset="0%" stop-color="#43e1b4" stop-opacity=".22"/><stop id="chart-gradient-end" offset="100%" stop-color="#43e1b4" stop-opacity="0"/></linearGradient></defs><g class="gridlines"><path d="M0 35 H800 M0 95 H800 M0 155 H800 M0 215 H800"/></g><g id="chart-line-layer"><path id="chart-area" fill="url(#chartFill)"/><path id="chart-line" fill="none" stroke="#43e1b4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle id="chart-point" r="5" fill="#43e1b4" stroke="#0e141d" stroke-width="3"/></g><g id="chart-candle-layer" display="none"><path id="chart-candle-up-wicks" stroke="#43e1b4" fill="none" stroke-width="2"/><path id="chart-candle-down-wicks" stroke="#ff6c7b" fill="none" stroke-width="2"/><path id="chart-candle-up-bodies" stroke="#43e1b4" fill="none"/><path id="chart-candle-down-bodies" stroke="#ff6c7b" fill="none"/></g></svg><div class="chart-value-label" id="chart-value-label" data-trend="up">$65,240.50</div></div>
             <div class="chart-axis" aria-label="가상 샘플 순서, 실제 시간 아님"><span>#01</span><span>#13</span><span>#26</span><span>#39</span><span>#52</span><span>#64</span></div>
             <div class="chart-sample-range" aria-label="가상 샘플 가격 범위">
               <span>MOCK LOW <strong id="chart-sample-low">—</strong></span>
               <span>MOCK HIGH <strong id="chart-sample-high">—</strong></span>
             </div>
+            <p id="chart-mode-description" class="chart-mode-description" aria-live="polite">Line: 64개의 고정 MOCK_SAMPLE 가격을 연결한 선입니다. 실제 시간봉·거래량 없음.</p>
             <p id="chart-sample-description" class="chart-sample-description" aria-live="polite">이 차트는 64개의 생성된 가상 가격 샘플입니다. 실제 시간축·시세 데이터가 아닙니다.</p>
             <div class="chart-foot"><span>Illustrative data — not a live oracle feed</span><span>◈ No price feeds connected</span></div>
           </section>

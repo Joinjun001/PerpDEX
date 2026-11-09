@@ -1129,3 +1129,51 @@ test('B2-A no network or wallet connection side effects in simulated event execu
   const script=readFileSync(fileURLToPath(new URL('./main.js',import.meta.url)),'utf8');
   assert.doesNotMatch(script,/\bfetch\s*\(|\bWebSocket\s*\(|eth_sendTransaction|eth_requestAccounts/);
 });
+
+
+test('UX-HL-06-B synthetic chart toggle changes only the chart and preserves order preview',async()=>{
+  const {id,market}=await boot();
+  const get=idName=>id(idName);
+  get('order-form').dispatch('submit');
+  assert.equal(get('order-result').hidden,false);
+  const firstReview=get('order-result').children;
+  const originalLine=get('chart-line').getAttribute('d');
+  assert.equal(get('chart-line-layer').getAttribute('display'),'inline');
+  assert.equal(get('chart-candle-layer').getAttribute('display'),'none');
+  assert.equal(get('chart-group-4').disabled,true);
+
+  get('chart-candle-mode').dispatch('click');
+  assert.equal(get('chart-line-layer').getAttribute('display'),'none');
+  assert.equal(get('chart-candle-layer').getAttribute('display'),'inline');
+  assert.equal(get('chart-candle-mode').getAttribute('aria-pressed'),'true');
+  assert.match(get('market-chart').getAttribute('aria-label'),/Sample OHLC 차트/);
+  assert.equal(get('chart-line-mode').getAttribute('aria-pressed'),'false');
+  assert.equal(get('chart-group-4').disabled,false);
+  assert.equal(get('chart-group-8').disabled,false);
+  assert.match(get('chart-mode-description').textContent,/16개 묶음, 묶음당 4개의 고정 생성 가격/);
+  assert.match(get('chart-candle-up-wicks').getAttribute('d'),/^M/);
+  assert.equal(get('order-result').hidden,false);
+  assert.strictEqual(get('order-result').children,firstReview);
+
+  get('chart-group-8').dispatch('click');
+  assert.match(get('chart-mode-description').textContent,/8개 묶음, 묶음당 8개의 고정 생성 가격/);
+  assert.equal(get('chart-group-8').getAttribute('aria-pressed'),'true');
+  assert.equal(get('order-result').hidden,false);
+
+  market('SOL').dispatch('click');
+  assert.equal(get('order-result').hidden,true,'only a market change invalidates review');
+  assert.match(get('chart-mode-description').textContent,/8개 묶음/);
+  assert.equal(get('chart-candle-layer').getAttribute('display'),'inline');
+  assert.ok(get('chart-candle-down-wicks').getAttribute('d').length>1);
+
+  get('chart-line-mode').dispatch('click');
+  assert.equal(get('chart-line-layer').getAttribute('display'),'inline');
+  assert.equal(get('chart-candle-layer').getAttribute('display'),'none');
+  assert.equal(get('chart-group-4').disabled,true);
+  assert.equal(get('chart-group-8').disabled,true);
+  assert.equal(get('chart-line-mode').getAttribute('aria-pressed'),'true');
+  assert.match(get('market-chart').getAttribute('aria-label'),/모의 가격 선 차트/);
+  assert.match(get('chart-line').getAttribute('d'),/^M/);
+  assert.notEqual(get('chart-line').getAttribute('d'),originalLine,'market change regenerates the sample line');
+  assert.match(get('chart-mode-description').textContent,/Line · MOCK_SAMPLE/);
+});

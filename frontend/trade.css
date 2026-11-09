@@ -452,3 +452,37 @@
   .trade-shell .market-metrics-symbol{padding:9px 11px}
   .trade-shell .metric-cell{padding:8px 10px}
 }
+
+
+/* UX-HL-06-B: chart controls distinguish interactive sample views from
+   unsupported real time intervals, volume and indicators. */
+.trade-shell .chart-heading{align-items:flex-start;flex-wrap:wrap;gap:8px}
+.trade-shell .chart-actions{
+  display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:5px;
+  min-width:0;max-width:100%;
+}
+.trade-shell .chart-mode-controls,.trade-shell .chart-group-controls,
+.trade-shell .chart-tool-unavailable{display:inline-flex;align-items:center;gap:3px;flex-wrap:wrap}
+.trade-shell .chart-tool{
+  color:#b2c6d5;border:1px solid #355064;background:#152531;border-radius:5px;
+  min-height:34px;padding:6px 9px;font-size:10px;white-space:nowrap;font-weight:650;
+}
+.trade-shell .chart-tool.active{background:#234a3e;color:#a2f8d7;border-color:#467f6b}
+.trade-shell .chart-tool:hover:not(:disabled){background:#2b4944;color:#e3fff4}
+.trade-shell .chart-tool:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.trade-shell .chart-tool:disabled{
+  cursor:not-allowed;background:#111c27;color:#8497a6;border-color:#2a3a49;
+}
+.trade-shell .chart-tool-unavailable{padding-left:6px;border-left:1px solid #34505e}
+.trade-shell .chart-unavailable-note{font-size:9px;color:#9bb0c1;align-self:center}
+.trade-shell .chart-mode-description{
+  margin:0;padding:7px 20px 10px;color:#a5b8c5;
+  font-size:10px;line-height:1.5;border-top:1px solid #24313e;
+}
+@media(max-width:760px){
+  .trade-shell .chart-heading{padding:11px 13px 6px}
+  .trade-shell .chart-actions{width:100%;justify-content:flex-start}
+  .trade-shell .chart-tool{font-size:10px;min-height:38px;padding:7px}
+  .trade-shell .chart-tool-unavailable{padding-left:0;border-left:0}
+  .trade-shell .chart-mode-description{padding-inline:13px}
+}

@@ -1,8 +1,9 @@
 import {MARKETS,FORMAT_USD,FORMAT_QTY,formatDemoUsdAmount,previewOrderEstimate,validPreviewQuantity,validPreviewLeverage,validPreviewLimitPrice,sampleChart,describeSampleChart} from './preview-model.mjs';
 import {createDemoOrderReview,renderDemoOrderReview} from './order-review.mjs';
+import {sampleCandles,sampleCandlePaths} from './sample-candles.mjs';
 
 const byId=(id)=>document.getElementById(id);
-const view={market:'BTC',side:'BUY',orderType:'MARKET'};
+const view={market:'BTC',side:'BUY',orderType:'MARKET',chartMode:'LINE',sampleGroup:4};
 const tickets={BTC:'₿',ETH:'◆',SOL:'◎'};
 const prices=new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 
@@ -85,7 +86,42 @@ function renderChart(){
     summary.changePercent>=0?'up':'down');
   byId('chart-value-label').textContent=FORMAT_USD.format(MARKETS[view.market].price);
   byId('chart-value-label').style.top=Math.max(4,Math.min(84,last[1]/284*100-4))+'%';
+  renderSampleCandleLayer(points,summary);
 }
+function renderSampleCandleLayer(points,summary){
+  // These bars are descriptive group summaries of 64 synthetic prices, not
+  // exchange OHLCV data. No fictional timestamp or volume is inferred.
+  const candles=sampleCandles(points,view.sampleGroup);
+  const paths=sampleCandlePaths(candles,{low:summary.low,high:summary.high});
+  for(const [id,key] of [
+    ['chart-candle-up-wicks','upWicks'],['chart-candle-down-wicks','downWicks'],
+    ['chart-candle-up-bodies','upBodies'],['chart-candle-down-bodies','downBodies'],
+  ])byId(id).setAttribute('d',paths[key]);
+  for(const id of ['chart-candle-up-bodies','chart-candle-down-bodies'])
+    byId(id).setAttribute('stroke-width',String(paths.bodyWidth));
+  const ohlc=view.chartMode==='OHLC';
+  // SVG <g> is not an HTMLElement: the .hidden property may be an expando.
+  // Use SVG-native display attributes to ensure actual browser visibility.
+  byId('chart-line-layer').setAttribute('display',ohlc?'none':'inline');
+  byId('chart-candle-layer').setAttribute('display',ohlc?'inline':'none');
+  byId('market-chart').setAttribute('aria-label',ohlc
+    ?'시장별 고정 합성 가격 Sample OHLC 차트 · 실제 시간봉 아님'
+    :'시장별 고정 모의 가격 선 차트 · 실제 시세 아님');
+  for(const [id,selected] of [
+    ['chart-line-mode',!ohlc],['chart-candle-mode',ohlc],
+    ['chart-group-4',view.sampleGroup===4],['chart-group-8',view.sampleGroup===8]
+  ]){
+    const btn=byId(id);
+    btn.setAttribute('aria-pressed',String(selected));
+    btn.classList.toggle('active',selected);
+  }
+  for(const id of ['chart-group-4','chart-group-8'])byId(id).disabled=!ohlc;
+  byId('chart-mode-description').textContent=ohlc
+    ?'Sample OHLC · MOCK_SAMPLE: '+candles.length+'개 묶음, 묶음당 '+view.sampleGroup+
+      '개의 고정 생성 가격으로 시가·최고·최저·종가를 계산했습니다. 거래소 시간봉·실제 시각·거래량·실거래 체결 데이터가 아닙니다.'
+    :'Line · MOCK_SAMPLE: 64개의 생성된 가격 점을 순서대로 연결했습니다. 실제 시간축·시간봉·거래량 데이터가 아닙니다.';
+}
+
 function renderBook(){
   const m=MARKETS[view.market];
   for(const [side,containerId,sign] of [['ask','asks',1],['bid','bids',-1]]){
@@ -275,6 +311,20 @@ byId('order-result').addEventListener('keydown',event=>{
     dismissDemoReview();
   }
 });
+for(const [mode,id] of [['LINE','chart-line-mode'],['OHLC','chart-candle-mode']]){
+  byId(id).addEventListener('click',()=>{
+    if(view.chartMode===mode)return;
+    view.chartMode=mode;
+    renderChart(); // never invalidate a review; changing visualization cannot place an order
+  });
+}
+for(const [groupSize,id] of [[4,'chart-group-4'],[8,'chart-group-8']]){
+  byId(id).addEventListener('click',()=>{
+    if(view.chartMode!=='OHLC'||view.sampleGroup===groupSize)return;
+    view.sampleGroup=groupSize;
+    renderChart();
+  });
+}
 document.querySelectorAll('[data-market]').forEach(b=>b.addEventListener('click',()=>{
   // Re-selecting the active market is not a market change. Preserve the user's
   // Limit draft, inline validation state and existing demo review.
