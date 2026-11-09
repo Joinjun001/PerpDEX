@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {MARKETS,FORMAT_USD,sampleChart,describeSampleChart} from './preview-model.mjs';
+import {initMarketDepthTabs} from './market-depth-tabs.js';
 
 /**
  * Real frontend/main.js event handlers executed against a deliberately narrow
@@ -1176,4 +1177,41 @@ test('UX-HL-06-B synthetic chart toggle changes only the chart and preserves ord
   assert.match(get('chart-line').getAttribute('d'),/^M/);
   assert.notEqual(get('chart-line').getAttribute('d'),originalLine,'market change regenerates the sample line');
   assert.match(get('chart-mode-description').textContent,/Line · MOCK_SAMPLE/);
+});
+
+
+test('UX-HL-06-C1 시장 변경은 숨겨진 호가/체결 데이터도 갱신하며 탭 상태와 주문 초안을 유지한다',async()=>{
+  const app=await boot(),id=app.id;
+  const tabs=initMarketDepthTabs(app.document);
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  const firstBookPrice=id('asks').children[0].children[0].textContent;
+  const firstTradePrice=id('recent-trades').children[0].children[0].textContent;
+  id('market-depth-tab-trades').dispatch('click');
+  assert.equal(tabs.selected,'trades');
+  assert.equal(id('market-depth-book').hidden,true);
+  assert.equal(id('market-depth-trades').hidden,false);
+  assert.equal(id('order-result').hidden,false,'tab switch must not invalidate review');
+  app.market('ETH').dispatch('click');
+  assert.equal(tabs.selected,'trades');
+  assert.equal(id('market-depth-book').hidden,true);
+  assert.equal(id('market-depth-trades').hidden,false);
+  assert.equal(id('order-result').hidden,true,'market switch invalidates stale preview');
+  assert.notEqual(id('asks').children[0].children[0].textContent,firstBookPrice);
+  assert.notEqual(id('recent-trades').children[0].children[0].textContent,firstTradePrice);
+  assert.equal(id('book-size-label').textContent,'Size (ETH)');
+  assert.equal(id('book-total-label').textContent,'Total (ETH)');
+  assert.equal(id('trade-size-label').textContent,'Size (ETH)');
+  assert.equal(id('asks').children.length,7);
+  assert.equal(id('bids').children.length,7);
+  assert.equal(id('recent-trades').children.length,9);
+  assert.match(id('book-spread').getAttribute('aria-label'),/ETH 합성 호가 스프레드/);
+  assert.ok(id('recent-trades').children.every(row=>/모의.*방향/.test(row.getAttribute('aria-label'))));
+  id('market-depth-tab-book').dispatch('click');
+  assert.equal(tabs.selected,'book');
+  assert.equal(id('market-depth-trades').hidden,true);
+  assert.equal(id('market-depth-book').hidden,false);
+  app.market('BTC').dispatch('click');
+  assert.equal(id('asks').children[0].children[0].textContent,firstBookPrice);
+  assert.equal(id('recent-trades').children[0].children[0].textContent,firstTradePrice);
 });

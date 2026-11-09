@@ -1,16 +1,16 @@
 /**
  * UX-HL-01-D1 — progressive mobile-only market-depth disclosure.
  *
- * Without JS, the button remains hidden and both sample panels stay visible.
- * CSS only collapses depth at mobile widths; desktop always shows both panels.
+ * Without JS, the button remains hidden and sample data panels stay visible.
+ * Mobile CSS hides the common surface only when the disclosure is collapsed;
+ * desktop still exposes the selected tab panel.
  */
 export function initMobileMarketDepth(root=document){
   const container=root.getElementById('market-depth');
   const toggle=root.getElementById('market-depth-toggle');
   const status=root.getElementById('market-depth-toggle-status');
-  const book=root.getElementById('market-depth-book');
-  const trades=root.getElementById('market-depth-trades');
-  if(!container||!toggle||!status||!book||!trades){
+  const surface=root.getElementById('market-depth-surface');
+  if(!container||!toggle||!status||!surface){
     throw new Error('Incomplete mobile market-depth markup');
   }
   // Show the control only AFTER it has a working event listener. If scripts

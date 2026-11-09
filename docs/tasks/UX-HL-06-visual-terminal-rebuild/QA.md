@@ -58,3 +58,25 @@
 - 로컬 Chromium Headless Shell의 실행 파일 확인. 일반 사용자(node)와 chromiumSandbox:true 설정으로 실행했으나 Chromium sandboxing failed 오류 발생.
 - 보안 우회 옵션을 사용하지 않았으며 1536/1280/768/390 및 200% 확대, 실제 클릭/포커스/스크린리더 인수는 미완료.
 - 최종 검증 결과: 프런트 전체 218/218 PASS, JS/HTML/변경 검사 별도 최종 확인.
+
+
+## 3회차 UX-HL-06-C1 — 2026-11-10
+
+### 구현 및 검증
+
+- frontend/trade.html, trade.css, market-depth-tabs.js, mobile-market-depth.js: market-depth-surface 중간열을 공통 영역으로 구성하여 기존 market-depth-book과 market-depth-trades를 유지한다.
+- JS 미실행 시 탭 바 숨김 + 두 영역 region으로 공개. 모듈 초기화 성공 후 탭 바 노출, 한 영역만 tabpanel로 표시하고 선택하지 않은 영역은 hidden 처리.
+- 클릭·ArrowLeft/Right·Home/End·Enter/Space, Tab 비간섭, aria-selected/aria-controls/aria-labelledby 및 roving tabindex를 신규 테스트로 점검. 실제 스크린리더 인수는 별도.
+- 모바일 접기 버튼은 공통 surface를 aria-controls로 가리키며 접기/펼치기 시 선택 탭을 보존. 760px 미디어쿼리에서만 접힌 surface 숨김.
+- 원본 main.js의 7개 Ask+7개 Bid 호가, 누적 깊이/스프레드와 9개 샘플 체결, 시장별 단위와 Side ARIA는 불변. 시장 변경 시 숨겨진 영역도 갱신되며 주문 미리보기와 독립됨을 통합 회귀 검증.
+- account-tabs.test.mjs의 전역 role=tab 카운트 단언을 계정 워크스페이스 내부 5개 탭 범위로 좁혀 타 컴포넌트 탭과 독립적으로 검증.
+- 프런트 테스트: 225/225 PASS (이전 218에서 신규 7건), JS/HTML/변경 검사 최종 커밋 전 재실행.
+
+### 실제 브라우저 제한
+
+- Chromium Headless Shell을 일반 사용자, chromiumSandbox:true 상태로 다시 기동했으나 브라우저 프로세스 초기화 실패. 보안 우회 옵션 사용하지 않음.
+- 1536/1280/768/390 너비, 200% 확대, 실제 키보드 포커스·모바일 터치·스크린리더 시각 인수는 미완료(A3·C2·F). 정적/가상 DOM 검사만 통과.
+
+### 다음 작업
+
+- UX-HL-06-C2: 호가 중간열 실제 시각 밀도·스프레드·모바일 접기/보조공학 인수. 브라우저 환경이 계속 제한되면 UX-HL-06-D1 주문 패널 정보 계층의 독립 구현을 진행.

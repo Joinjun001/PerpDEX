@@ -58,11 +58,14 @@ test('UX-HL-01-B: 5 unique ARIA tabs and associated panel headings exist',()=>{
     assert.match(markup,new RegExp('data-account-title="'+id+'"'));
     assert.match(markup,new RegExp('data-account-description="'+id+'"'));
   }
-  assert.equal((markup.match(/role="tab"/g)||[]).length,5);
-  assert.equal((markup.match(/role="tabpanel"/g)||[]).length,5);
-  assert.equal((markup.match(/aria-selected="true"/g)||[]).length,1);
-  assert.equal((markup.match(/id="account-tab-[^"]+"[^>]*tabindex="-1"/g)||[]).length,4);
-  assert.equal((markup.match(/role="tabpanel"[^>]*hidden/g)||[]).length,4);
+  // Scope invariants to the account workspace: market depth now has its
+  // own independent Order Book / Trades ARIA tabs.
+  const accountMarkup=markup.slice(markup.indexOf('<section class="bottom-grid" id="portfolio"'));
+  assert.equal((accountMarkup.match(/role="tab"/g)||[]).length,5);
+  assert.equal((accountMarkup.match(/role="tabpanel"/g)||[]).length,5);
+  assert.equal((accountMarkup.match(/aria-selected="true"/g)||[]).length,1);
+  assert.equal((accountMarkup.match(/id="account-tab-[^"]+"[^>]*tabindex="-1"/g)||[]).length,4);
+  assert.equal((accountMarkup.match(/role="tabpanel"[^>]*hidden/g)||[]).length,4);
 });
 test('UX-HL-01-B: tab content contains real column definitions, never fabricated rows',()=>{
   const headings=[

@@ -18,7 +18,7 @@ class Element{
 }
 function fixture(){
   const names=['market-depth','market-depth-toggle','market-depth-toggle-status',
-    'market-depth-book','market-depth-trades'];
+    'market-depth-surface'];
   const nodes=new Map(names.map(n=>[n,new Element()]));
   nodes.get('market-depth-toggle').hidden=true;
   return {nodes,root:{getElementById:id=>nodes.get(id)},
@@ -27,8 +27,9 @@ function fixture(){
 test('UX-HL-01-D1 initial DOM is progressive-enhancement-safe',()=>{
   assert.match(html,/id="market-depth"/);
   assert.match(html,/id="market-depth-toggle"[^>]*type="button"[^>]*hidden/);
-  assert.match(html,/aria-controls="market-depth-book market-depth-trades"/);
+  assert.match(html,/aria-controls="market-depth-surface"/);
   assert.match(html,/aria-expanded="true"/);
+  assert.match(html,/id="market-depth-surface"[^>]*class="panel market-depth-surface"/);
   assert.match(html,/id="market-depth-book"[^>]*class="panel orderbook-panel"/);
   assert.match(html,/id="market-depth-trades"[^>]*class="panel trade-log-panel"/);
   assert.match(html,/src="\.\/mobile-market-depth\.js"/);
@@ -64,7 +65,7 @@ test('UX-HL-01-D1 repeated click and programmatic state updates remain consisten
 });
 test('UX-HL-01-D1 missing markup aborts before exposing inert control',()=>{
   for(const missing of ['market-depth','market-depth-toggle','market-depth-toggle-status',
-    'market-depth-book','market-depth-trades']){
+    'market-depth-surface']){
     const f=fixture();
     f.nodes.delete(missing);
     assert.throws(()=>initMobileMarketDepth(f.root),/Incomplete mobile market-depth markup/);
@@ -80,11 +81,10 @@ test('UX-HL-01-D1 responsive CSS hides only at mobile breakpoint, never desktop'
   assert.match(appended,/\.market-depth-toggle:not\(\[hidden\]\)/);
   assert.match(appended,/min-height:44px/);
   assert.match(appended,/grid-column:1 \/ -1/);
-  assert.match(appended,/\.market-column\[data-mobile-collapsed="true"\]>\.orderbook-panel/);
-  assert.match(appended,/\.market-column\[data-mobile-collapsed="true"\]>\.trade-log-panel/);
+  assert.match(appended,/\.market-column\[data-mobile-collapsed="true"\]>\.market-depth-surface/);
   assert.match(appended,/display:none!important/);
   const outsideMobile=appended.slice(0,appended.indexOf('@media(max-width:760px)'));
-  assert.doesNotMatch(outsideMobile,/\.orderbook-panel|\.trade-log-panel/);
+  assert.doesNotMatch(outsideMobile,/\.market-depth-surface/);
   assert.match(css,/grid-template-areas:"chart" "ticket" "book"/);
 });
 test('UX-HL-01-D1 demo remains offline, accessible and keeps market and order UI',()=>{

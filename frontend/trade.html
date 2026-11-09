@@ -13,6 +13,7 @@
   <script defer type="module" src="./main.js"></script>
   <script defer type="module" src="./account-tabs.js"></script>
   <script defer type="module" src="./mobile-market-depth.js"></script>
+  <script defer type="module" src="./market-depth-tabs.js"></script>
 </head>
 <body>
   <div class="demo-banner" role="status"><span class="demo-banner-dot"></span><strong>SIMULATION PREVIEW</strong><span>모든 가격·유동성은 예시입니다. 실제 거래·지갑 연결·자금 이체는 불가능합니다.</span></div>
@@ -81,12 +82,19 @@
         </div>
         <div class="market-column" id="market-depth">
           <button class="market-depth-toggle" id="market-depth-toggle" type="button" hidden
-                  aria-controls="market-depth-book market-depth-trades" aria-expanded="true">
+                  aria-controls="market-depth-surface" aria-expanded="true">
             <span class="market-depth-toggle-title">모의 호가·최근 체결</span>
             <span id="market-depth-toggle-status">접기</span>
           </button>
-            <section id="market-depth-book" class="panel orderbook-panel" aria-labelledby="orderbook-title"><div class="panel-heading"><div><h2 id="orderbook-title">Order Book</h2><span class="small-label">SYNTHETIC LIQUIDITY</span></div><span class="panel-meta">USD</span></div><div class="book-header"><span>Price (USD)</span><span id="book-size-label">Size (BTC)</span><span id="book-total-label">Total (BTC)</span></div><div id="asks" class="book-rows" role="list" aria-label="BTC 합성 매도호가 목록 · 실제 주문장 아님"></div><div class="book-mid"><strong id="book-mid">$65,240.50</strong><span>SPREAD <output id="book-spread" aria-label="합성 호가 스프레드 미계산 · 실제 호가 아님">—</output> <small>MOCK</small></span></div><div id="bids" class="book-rows" role="list" aria-label="BTC 합성 매수호가 목록 · 실제 주문장 아님"></div><div class="book-footer">모의 호가 · 실제 거래 상대방 없음</div></section>
-            <section id="market-depth-trades" class="panel trade-log-panel" aria-labelledby="recent-title"><div class="panel-heading"><div><h2 id="recent-title">Recent Trades</h2><span class="small-label">GENERATED EXAMPLES</span></div><span class="panel-meta">MOCK</span></div><div class="book-header"><span>Price (USD)</span><span id="trade-size-label">Size (BTC)</span><span title="합성 예시 순번이며 실제 거래 체결 시간이 아닙니다">Sample #</span><span>Side</span></div><div id="recent-trades" class="trade-rows" role="list" aria-label="BTC 합성 최근 체결 예시 목록 · 실제 체결 기록 아님"></div><div class="book-footer">모의 체결 예시 · 실제 체결 시각·블록체인 기록 아님</div></section>
+          <div id="market-depth-surface" class="panel market-depth-surface">
+            <div id="market-depth-tablist" class="market-depth-tabs" role="tablist" aria-label="모의 시장 호가 및 체결" hidden>
+              <button id="market-depth-tab-book" class="market-depth-tab active" type="button" role="tab" aria-controls="market-depth-book" aria-selected="true" tabindex="0">Order Book</button>
+              <button id="market-depth-tab-trades" class="market-depth-tab" type="button" role="tab" aria-controls="market-depth-trades" aria-selected="false" tabindex="-1">Trades</button>
+              <span class="market-depth-sample-source">MOCK_SAMPLE</span>
+            </div>
+            <section id="market-depth-book" class="panel orderbook-panel" role="region" aria-labelledby="orderbook-title"><div class="panel-heading"><div><h2 id="orderbook-title">Order Book</h2><span class="small-label">SYNTHETIC LIQUIDITY</span></div><span class="panel-meta">USD</span></div><div class="book-header"><span>Price (USD)</span><span id="book-size-label">Size (BTC)</span><span id="book-total-label">Total (BTC)</span></div><div id="asks" class="book-rows" role="list" aria-label="BTC 합성 매도호가 목록 · 실제 주문장 아님"></div><div class="book-mid"><strong id="book-mid">$65,240.50</strong><span>SPREAD <output id="book-spread" aria-label="합성 호가 스프레드 미계산 · 실제 호가 아님">—</output> <small>MOCK</small></span></div><div id="bids" class="book-rows" role="list" aria-label="BTC 합성 매수호가 목록 · 실제 주문장 아님"></div><div class="book-footer">모의 호가 · 실제 거래 상대방 없음</div></section>
+            <section id="market-depth-trades" class="panel trade-log-panel" role="region" aria-labelledby="recent-title"><div class="panel-heading"><div><h2 id="recent-title">Recent Trades</h2><span class="small-label">GENERATED EXAMPLES</span></div><span class="panel-meta">MOCK</span></div><div class="book-header"><span>Price (USD)</span><span id="trade-size-label">Size (BTC)</span><span title="합성 예시 순번이며 실제 거래 체결 시간이 아닙니다">Sample #</span><span>Side</span></div><div id="recent-trades" class="trade-rows" role="list" aria-label="BTC 합성 최근 체결 예시 목록 · 실제 체결 기록 아님"></div><div class="book-footer">모의 체결 예시 · 실제 체결 시각·블록체인 기록 아님</div></section>
+          </div>
         </div>
         <aside class="panel order-panel" aria-labelledby="ticket-title">
           <div class="panel-heading order-heading"><div><h2 id="ticket-title">Place Order</h2><span class="small-label">LOCAL PREVIEW · NO EXECUTION</span></div><span class="demo-tag">DEMO</span></div>

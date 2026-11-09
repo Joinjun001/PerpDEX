@@ -245,8 +245,7 @@
   .trade-shell .market-depth-toggle #market-depth-toggle-status{
     color:var(--green);font-size:11px;white-space:nowrap;
   }
-  .trade-shell .market-column[data-mobile-collapsed="true"]>.orderbook-panel,
-  .trade-shell .market-column[data-mobile-collapsed="true"]>.trade-log-panel{
+  .trade-shell .market-column[data-mobile-collapsed="true"]>.market-depth-surface{
     display:none!important;
   }
 }
@@ -485,4 +484,45 @@
   .trade-shell .chart-tool{font-size:10px;min-height:38px;padding:7px}
   .trade-shell .chart-tool-unavailable{padding-left:0;border-left:0}
   .trade-shell .chart-mode-description{padding-inline:13px}
+}
+
+
+/* UX-HL-06-C1 — one coherent middle-rail surface; JS-free fallback shows
+   both panels, while the initialized tablist presents exactly one at a time. */
+.trade-shell .terminal-grid>.market-column{display:flex;flex-direction:column;min-width:0;gap:8px}
+.trade-shell .market-depth-surface{
+  display:flex;flex-direction:column;flex:1;min-width:0;min-height:0;
+  overflow:hidden;
+}
+.trade-shell .market-depth-tabs{
+  display:flex;align-items:stretch;gap:0;border-bottom:1px solid #2c4051;
+  background:#121e28;min-width:0;flex-wrap:wrap;
+}
+.trade-shell .market-depth-tabs[hidden],
+.trade-shell .market-depth-surface>.orderbook-panel[hidden],
+.trade-shell .market-depth-surface>.trade-log-panel[hidden]{display:none!important}
+.trade-shell .market-depth-tab{
+  appearance:none;background:transparent;border:0;border-bottom:2px solid transparent;
+  padding:12px 13px 10px;min-height:44px;color:#9eafbe;white-space:nowrap;
+  font-weight:700;font-size:11px;text-align:center;
+}
+.trade-shell .market-depth-tab:hover{background:#1b2e3a;color:#e3f7f0}
+.trade-shell .market-depth-tab[aria-selected="true"]{
+  color:#92f4d3;border-bottom-color:var(--green);background:#1a3030;
+}
+.trade-shell .market-depth-tab:focus-visible{
+  outline:2px solid var(--blue);outline-offset:-3px;border-radius:3px;
+}
+.trade-shell .market-depth-sample-source{
+  margin:auto 9px auto auto;font-size:8px;font-weight:750;
+  letter-spacing:.025em;color:#9fb6c6;
+}
+.trade-shell .market-depth-surface>.orderbook-panel,
+.trade-shell .market-depth-surface>.trade-log-panel{
+  border:0;border-radius:0;background:transparent;flex:1;
+  min-height:0;max-width:100%;overflow:visible;
+}
+@media(max-width:760px){
+  .trade-shell .terminal-grid>.market-column{display:flex;flex-direction:column}
+  .trade-shell .market-depth-tab{padding-inline:13px}
 }
