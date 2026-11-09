@@ -10,6 +10,7 @@ class FakeElement{
     this.classList={toggle:()=>{}};
   }
   setAttribute(name,value){this.attributes[name]=String(value);}
+  removeAttribute(name){delete this.attributes[name];}
   addEventListener(event,listener){this.listeners[event]=listener;}
   replaceChildren(...children){this.children=children;}
   focus(options){this.focused=true;this.focusOptions=options;}
@@ -38,7 +39,7 @@ function createFixture(width=210){
     });
     nodes.set('account-tab-'+id,tab);
     nodes.set('account-panel-'+id,panel);
-    for(const field of ['data-account-title','data-account-description','data-account-view']){
+    for(const field of ['data-account-title','data-account-description','data-account-view','data-account-state-label']){
       selectors.set('['+field+'="'+id+'"]',new FakeElement());
     }
     selectors.set('#account-panel-'+id+' tbody',new FakeElement());

@@ -13,6 +13,7 @@ class FakeElement {
     this.classList={toggle:(key,on)=>{this.classes.set(key,on);}};
     this.classes=new Map();}
   setAttribute(name,value){this.attributes[name]=value;}
+  removeAttribute(name){delete this.attributes[name];}
   getAttribute(name){return this.attributes[name];}
   addEventListener(name,callback){this.listeners[name]=callback;}
   focus(){this.focused=true;}
@@ -24,7 +25,7 @@ function fixture(){
   const byId=new Map(),selectors=new Map();
   for(const {id} of ACCOUNT_TABS){
     for(const prefix of ['account-tab-','account-panel-'])byId.set(prefix+id,new FakeElement());
-    for(const field of ['data-account-title','data-account-description','data-account-view']){
+    for(const field of ['data-account-title','data-account-description','data-account-view','data-account-state-label']){
       selectors.set('['+field+'="'+id+'"]',new FakeElement());
     }
     selectors.set('#account-panel-'+id+' tbody',new FakeElement());

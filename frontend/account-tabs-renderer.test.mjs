@@ -45,6 +45,7 @@ function fixture(){
   nodes.set('[data-account-title="'+id+'"]',new Element('strong'));
   nodes.set('[data-account-description="'+id+'"]',new Element('p'));
   nodes.set('[data-account-view="'+id+'"]',new Element('div'));
+  nodes.set('[data-account-state-label="'+id+'"]',new Element('span'));
   nodes.set('#account-panel-'+id+' tbody',new Element('tbody'));
   nodes.set('#account-panel-'+id+' table',new Element('table'));
  }
@@ -319,4 +320,50 @@ test('B2-B2-A all field projection lengths match actual HTML column counts',()=>
   const headers=[...tableBlock[1].matchAll(/<th scope="col">/g)].length;
   assert.equal(f.read(id,'body').children[0].children.length,headers,id);
  }
+});
+
+
+test('UX-HL-06-E1 visible state labels distinguish disconnected, loading, empty and error',()=>{
+  const f=fixture();
+  const label=tab=>f.root.querySelector('[data-account-state-label="'+tab+'"]');
+  const table=f.read('positions','table'), empty=f.read('positions','view');
+  assert.equal(renderAccountTabSnapshot(f.root,'positions',{state:'empty'}),'disconnected',
+    'unverified no-records claim must resolve to disconnected');
+  assert.equal(label('positions').textContent,'ACCOUNT NOT CONNECTED');
+  assert.equal(table.hidden,true);
+  for(const [state,expected] of [
+    ['loading','LOADING'],['empty','NO RECORDS'],['error','DATA UNAVAILABLE'],
+    ['disconnected','ACCOUNT NOT CONNECTED'],
+  ]){
+    const result=renderAccountTabSnapshot(f.root,'positions',{state},
+      {allowValidatedRecords:true});
+    assert.equal(result,state);
+    assert.equal(label('positions').textContent,expected);
+    assert.equal(empty.dataset.accountState,state);
+    assert.equal(table.hidden,true);
+    assert.equal(f.read('positions','body').children.length,0);
+  }
+});
+test('UX-HL-06-E1 successful ready hides state badge with empty view; invalid ready labels error',()=>{
+  const f=fixture();
+  const label=f.root.querySelector('[data-account-state-label="positions"]');
+  assert.equal(renderAccountTabSnapshot(f.root,'positions',
+    {state:'ready',records:[dataRow('positions')]},{allowValidatedRecords:true}),'ready');
+  assert.equal(label.textContent,'');
+  assert.equal(f.read('positions','view').hidden,true);
+  assert.equal(f.read('positions','table').hidden,false);
+  assert.equal(renderAccountTabSnapshot(f.root,'positions',
+    {state:'ready',records:[]},{allowValidatedRecords:true}),'error');
+  assert.equal(label.textContent,'DATA UNAVAILABLE');
+  assert.equal(f.read('positions','table').hidden,true);
+  assert.equal(f.read('positions','view').dataset.accountState,'error');
+  assert.equal(f.read('positions','body').children.length,0);
+});
+test('UX-HL-06-E1 missing account state label fails closed instead of losing provenance',()=>{
+  const f=fixture();
+  const original=f.root.querySelector;
+  f.root.querySelector=q=>q==='[data-account-state-label="positions"]'?undefined:original(q);
+  assert.throws(()=>renderAccountTabSnapshot(f.root,'positions',
+    {state:'ready',records:[dataRow('positions')]},{allowValidatedRecords:true}),
+    /Incomplete account table DOM/);
 });

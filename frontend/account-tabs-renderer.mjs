@@ -24,11 +24,12 @@ function elementsFor(root,tabId){
   const title=root.querySelector('[data-account-title="'+tabId+'"]');
   const description=root.querySelector('[data-account-description="'+tabId+'"]');
   const empty=root.querySelector('[data-account-view="'+tabId+'"]');
+  const stateLabel=root.querySelector('[data-account-state-label="'+tabId+'"]');
   const tbody=root.querySelector('#account-panel-'+tabId+' tbody');
   const table=root.querySelector('#account-panel-'+tabId+' table');
-  if(!title||!description||!empty||!tbody||!table)
+  if(!title||!description||!empty||!stateLabel||!tbody||!table)
     throw new Error('Incomplete account table DOM');
-  return {title,description,empty,tbody,table};
+  return {title,description,empty,stateLabel,tbody,table};
 }
 function clearRows(tbody){
   // replaceChildren() deletes old DOM nodes even if a new request fails.
@@ -52,6 +53,7 @@ function failReadySnapshot(els,tabId){
   els.title.textContent=view.title;
   els.description.textContent=view.description;
   els.empty.dataset.accountState='error';
+  els.stateLabel.textContent=view.label;
   return 'error';
 }
 
@@ -81,6 +83,9 @@ export function renderAccountTabSnapshot(
   els.empty.hidden=false;
   els.table.hidden=true;
   els.empty.dataset.accountState=state;
+  // Keep the visible status distinct from a successful empty query. A failed
+  // or disconnected query must never appear as "NO RECORDS".
+  els.stateLabel.textContent=state==='ready'?'':accountViewFor(tabId,state).label;
   if(state==='ready'){
     // Column keys are module-owned only; never use raw server-provided column names.
     // Build off-DOM so a malformed record cannot leave partial or stale account rows.

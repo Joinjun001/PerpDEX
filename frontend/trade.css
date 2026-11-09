@@ -898,3 +898,121 @@
     flex-wrap:wrap;
   }
 }
+
+
+/* UX-HL-06-E1 — account workspace hierarchy, not a connected account feed.
+ * The static page shows disconnected; only verified snapshots may show data. */
+.trade-shell .terminal-grid .account-panel{
+  min-width:0;overflow:hidden;background:#121f29;
+}
+.trade-shell .terminal-grid .account-heading{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:8px;padding:12px 16px 9px;
+}
+.trade-shell .terminal-grid .account-heading h2{
+  font-size:13px;line-height:1.45;letter-spacing:.01em;
+}
+.trade-shell .terminal-grid .account-heading .small-label{
+  color:#a3bac9;font-size:9px;line-height:1.5;
+}
+.trade-shell .terminal-grid .account-heading .pill-outline{
+  color:#c9d7df;border-color:#485e68;background:#202c35;
+  font-size:9px;line-height:1.4;padding:5px 9px;
+}
+.trade-shell .account-workspace-guide{
+  padding:0 16px 10px;margin:0;
+  color:#b3c6d2;font-size:10px;line-height:1.6;
+  overflow-wrap:anywhere;
+}
+.trade-shell .terminal-grid .account-tab-scroll{
+  scroll-padding-inline:13px;min-width:0;
+  background:#172632;border-bottom:1px solid #344956;
+}
+.trade-shell .terminal-grid .account-tablist{
+  padding:0 12px;gap:4px;
+}
+.trade-shell .terminal-grid .account-tab{
+  min-height:43px;padding:11px 13px 10px;
+  color:#b1c1ce;font-size:11px;font-weight:750;line-height:1.45;
+}
+.trade-shell .terminal-grid .account-tab[aria-selected="true"]{
+  background:#1b3332;color:#91f2ca;
+  border-bottom-color:var(--green);
+}
+.trade-shell .terminal-grid .account-tab:focus-visible{
+  outline:2px solid var(--blue);outline-offset:-3px;
+}
+.trade-shell .terminal-grid .account-tab-panel{min-width:0}
+.trade-shell .terminal-grid .account-table-scroll{
+  overscroll-behavior-x:contain;scrollbar-color:#456677 transparent;
+}
+.trade-shell .terminal-grid .account-table{
+  min-width:740px;width:100%;font-variant-numeric:tabular-nums;
+}
+.trade-shell .terminal-grid .account-table th{
+  padding:10px 13px;border-bottom:1px solid #344552;
+  font-size:10px;font-weight:750;color:#c0d1dc;
+  background:#1b2a35;text-align:left;white-space:nowrap;
+}
+.trade-shell .terminal-grid .account-table td{
+  padding:11px 13px;border-bottom:1px solid #283c49;
+  font-size:11px;color:#d9e5ec;white-space:nowrap;
+}
+.trade-shell .terminal-grid .account-table tbody tr:nth-child(even){
+  background:#172630;
+}
+.trade-shell .terminal-grid .account-table-hint{
+  padding:9px 16px;color:#c5d8e3;background:#1a303c;
+  font-size:10px;line-height:1.6;
+}
+.trade-shell .terminal-grid .account-table-hint[hidden]{display:none!important}
+.trade-shell .terminal-grid .account-table-scroll:focus-visible{
+  outline:2px solid var(--blue);outline-offset:-2px;
+}
+.trade-shell .terminal-grid .account-empty{
+  padding:17px 16px 22px;min-height:132px;gap:7px;
+}
+.trade-shell .terminal-grid .account-empty-symbol{
+  width:32px;height:32px;margin:0 0 2px;
+  border-color:#435966;color:#b1c7d2;background:#213441;font-size:20px;
+}
+.trade-shell .terminal-grid .account-state-label{
+  display:inline-flex;align-items:center;justify-content:center;
+  padding:4px 9px;border:1px solid #4b6270;
+  border-radius:20px;background:#21333e;color:#c3d8e5;
+  letter-spacing:.03em;font-weight:800;font-size:9px;line-height:1.4;
+}
+.trade-shell .terminal-grid .account-empty[data-account-state="loading"] .account-state-label{
+  background:#213549;border-color:#52738d;color:#d1e6fa;
+}
+.trade-shell .terminal-grid .account-empty[data-account-state="empty"] .account-state-label{
+  background:#213b31;border-color:#4f846a;color:#a3e9c4;
+}
+.trade-shell .terminal-grid .account-empty[data-account-state="error"] .account-state-label{
+  background:#402b35;border-color:#925968;color:#ffc2cb;
+}
+.trade-shell .terminal-grid .account-empty strong{
+  font-size:13px;line-height:1.5;color:#e2eef4;
+}
+.trade-shell .terminal-grid .account-empty p{
+  color:#b4c7d3;max-width:560px;font-size:11px;line-height:1.65;
+}
+.trade-shell .terminal-grid .account-footer-note{
+  padding:10px 16px;background:#15232e;
+  font-size:10px;line-height:1.55;color:#abbfcf;
+}
+@media(max-width:760px){
+  .trade-shell .terminal-grid .account-heading{padding:11px 13px 8px}
+  .trade-shell .account-workspace-guide{padding:0 13px 9px}
+  .trade-shell .terminal-grid .account-tablist{padding-inline:7px;gap:0}
+  .trade-shell .terminal-grid .account-tab{min-height:44px;padding:11px 12px;font-size:11px}
+  .trade-shell .terminal-grid .account-empty{padding:16px 13px 19px}
+  .trade-shell .terminal-grid .account-table-hint{padding:9px 13px}
+  .trade-shell .terminal-grid .account-table th{padding:10px 12px}
+  .trade-shell .terminal-grid .account-footer-note{padding:9px 13px}
+}
+@media(max-width:390px){
+  .trade-shell .terminal-grid .account-heading .pill-outline{font-size:8px}
+  .trade-shell .terminal-grid .account-tab{padding-inline:11px}
+  .trade-shell .terminal-grid .account-empty p{font-size:10.5px}
+}

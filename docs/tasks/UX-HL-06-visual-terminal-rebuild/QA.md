@@ -155,3 +155,27 @@
 ### 다음
 
 - UX-HL-06-E1: 하단 5개 기존 account tab과 읽기 상태·모바일 표 탐색의 정보 밀도 및 접근성 개선. 원장/실계정 데이터 없음, E2 새 잔고 탭 보류. 실브라우저 인수는 가용한 정상 샌드박스 환경 확보 후 처리.
+
+
+## 7회차 UX-HL-06-E1 — 2026-11-10
+
+### 진단 및 구현
+
+- 시작 Git: aa4df30, main...origin/main [ahead 7], clean. UX-HL-06 SPEC/TODO/QA/RESULT, PROJECT_STATE, ROADMAP, 참조 설계 및 실제 계정 탭/모델/렌더러/스크롤 안내와 HTML/CSS를 점검.
+- 기존 5개 Positions, Open Orders, Order History, Trade History, Funding History 탭 id, tabindex, aria-selected, arrow/Home/End 이동 및 가로 스크롤 위치 보존. Balances 등 신규 탭 없음.
+- trade.html: 5개 빈 상태용 ACCOUNT NOT CONNECTED 배지, 키보드 탭 이용 안내, 가로 탐색 region 및 기본 tabindex=-1 추가. JS 미실행/계정 검증 전 5개 표 hidden, tbody 전부 비어 있음.
+- account-tabs-renderer.mjs: 상태 배지 필수 DOM 계약. disconnected→ACCOUNT NOT CONNECTED, loading→LOADING, 인증 후 empty→NO RECORDS, error→DATA UNAVAILABLE. 검증되지 않은 ready/empty는 disconnected로 처리, 유효한 ready만 데이터 표 표시, 잘못된 ready는 error. 기존 검증/레코드 투영 게이트 불변.
+- account-table-scroll-hint.mjs: 원래의 모바일·선택됨·표 보임·overflow 조건 유지. 현재 왼쪽/중간/오른쪽 위치별 방향 안내, scroll/resize/보임 변경 반영. 숨김·데스크톱·종료 시 포커스/속성 해제.
+- trade.css: 5탭 밀도·강조·표 숫자·빈 상태/오류/로딩 배지, 반응형 탭 44px 목표, 표/키보드 스크롤 영역과 텍스트 대비. 지갑/RPC/실계정/주문 활성화 없음.
+
+### 검증·개발 중 조치
+
+- 신규 10건: renderer 상태 배지/잘못된 ready/필수 DOM 검사 3, table scroll 위치/실제 scroll/hidden+dispose 3, account workspace 기존 5탭/JS 없는 표 숨김/출처·게이트/반응형 ARIA 4.
+- 기존 FakeElement의 새 속성 제거 메서드 누락과 변경된 계정 헤더 문구로 최초 236/245 PASS. 테스트용 DOM 및 문구 기대값 수정 후 기준 245/245 PASS. 신규 10건 포함 전체 **255/255 PASS**. JS/HTML/중복 ID/CSP/Git 변경 최종 커밋 전 검사.
+- Renderer의 테스트 전용 검증된 ready 경로 유지; 공개 페이지에서는 실제 인증·계정 조회 활성화 없음.
+
+### 브라우저 한계 및 후속
+
+- 일반 사용자 및 chromiumSandbox:true의 Headless Shell 기동 재시도 결과 Chromium sandboxing failed. 보안 우회 옵션 사용 안 함.
+- 1536/1280/768/390, 200% 확대 및 실제 픽셀/클릭/키보드/스크린리더/표 스크롤 인수 A3/C2b/F1·F2 실브라우저 항목 미완료. 가상 DOM과 CSS 정적 테스트를 실제 브라우저 인수로 주장하지 않음.
+- 다음 독립 작업: UX-HL-06-F2a — 오프라인 상태, 키보드·ARIA·출처·미지원 기능의 정적/DOM 통합 감사와 결함 보완. E2 신뢰 계정 데이터 미충족으로 보류, F 실브라우저 인수 미완료 유지.

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {ACCOUNT_TABS} from './account-tabs-model.mjs';
-import {initAccountTableScrollHints,shouldShowAccountTableHint} from './account-table-scroll-hint.mjs';
+import {initAccountTableScrollHints,shouldShowAccountTableHint,accountTableScrollPosition} from './account-table-scroll-hint.mjs';
 
 const html=readFileSync(fileURLToPath(new URL('./trade.html',import.meta.url)),'utf8');
 const css=readFileSync(fileURLToPath(new URL('./trade.css',import.meta.url)),'utf8');
@@ -11,10 +11,14 @@ const css=readFileSync(fileURLToPath(new URL('./trade.css',import.meta.url)),'ut
 class E{
   constructor(id=''){
     this.id=id;this.hidden=false;this.tabIndex=-1;
-    this.scrollWidth=900;this.clientWidth=330;this.attributes={};
+    this.scrollWidth=900;this.clientWidth=330;this.scrollLeft=0;
+    this.attributes={};this.listeners={};
   }
   setAttribute(k,v){this.attributes[k]=String(v);}
   removeAttribute(k){delete this.attributes[k];}
+  addEventListener(k,fn){this.listeners[k]=fn;}
+  removeEventListener(k,fn){if(this.listeners[k]===fn)delete this.listeners[k];}
+  fire(k){this.listeners[k]?.();}
 }
 function fixture({mobile=true,selected='positions',tableVisible=true,overflow=true}={}){
   const nodes=new Map(),selectors=new Map(),callbacks={};
@@ -168,7 +172,7 @@ test('B1 HTML supplies five hidden hints and existing read-only empty tables',()
   }
   assert.equal((html.match(/class="account-table-hint" hidden/g)||[]).length,5);
   assert.equal((html.match(/<tbody><\/tbody>/g)||[]).length,5);
-  assert.match(html,/지갑 · 백엔드 미연결/);
+  assert.match(html,/ACCOUNT · UNAVAILABLE/);
   assert.match(html,/connect-src 'none'/);
 });
 test('B1 accessible visible hint has explicit label and keyboard focus styling',()=>{
@@ -178,4 +182,57 @@ test('B1 accessible visible hint has explicit label and keyboard focus styling',
   const script=readFileSync(fileURLToPath(new URL('./account-table-scroll-hint.mjs',import.meta.url)),'utf8');
   assert.doesNotMatch(script,/fetch\(|eth_requestAccounts|eth_sendTransaction|WebSocket|XMLHttpRequest/);
   assert.match(script,/attributeFilter:\['hidden'\]/);
+});
+
+
+test('UX-HL-06-E1 scroll position is finite, clamped and does not infer invisible data',()=>{
+  const v={scrollWidth:900,clientWidth:330,scrollLeft:0};
+  assert.equal(accountTableScrollPosition(v),'start');
+  assert.equal(accountTableScrollPosition({...v,scrollLeft:2}),'middle');
+  assert.equal(accountTableScrollPosition({...v,scrollLeft:250}),'middle');
+  assert.equal(accountTableScrollPosition({...v,scrollLeft:569.5}),'end');
+  assert.equal(accountTableScrollPosition({...v,scrollLeft:10000}),'end');
+  assert.equal(accountTableScrollPosition({...v,scrollLeft:-9}),'start');
+  for(const invalid of [
+    {scrollLeft:NaN},{clientWidth:0},{scrollWidth:330},{scrollWidth:331},
+    {scrollWidth:Infinity},{scrollLeft:undefined}
+  ])assert.equal(accountTableScrollPosition({...v,...invalid}),'none');
+});
+test('UX-HL-06-E1 trusted table mobile scroll updates start/middle/end hint without altering tab state',()=>{
+  const f=fixture(),ctl=initAccountTableScrollHints(f.root);
+  const x=f.row('positions');
+  assert.equal(x.hint.attributes['data-scroll-position'],'start');
+  assert.match(x.hint.textContent,/오른쪽/);
+  x.scroll.scrollLeft=230;x.scroll.fire('scroll');
+  assert.equal(x.hint.attributes['data-scroll-position'],'middle');
+  assert.match(x.hint.textContent,/양쪽/);
+  x.scroll.scrollLeft=570;x.scroll.fire('scroll');
+  assert.equal(x.hint.attributes['data-scroll-position'],'end');
+  assert.match(x.hint.textContent,/왼쪽/);
+  assert.equal(x.scroll.tabIndex,0);
+  assert.equal(x.hint.hidden,false);
+  for(const {id} of ACCOUNT_TABS.filter(t=>t.id!=='positions')){
+    assert.equal(f.row(id).hint.hidden,true);
+  }
+  ctl.dispose();
+});
+test('UX-HL-06-E1 disconnected/hidden table removes hint and listener after disposal',()=>{
+  const f=fixture({tableVisible:false}),ctl=initAccountTableScrollHints(f.root);
+  const x=f.row('positions');
+  assert.equal(x.hint.hidden,true);
+  assert.equal(x.scroll.tabIndex,-1);
+  assert.equal(x.hint.attributes['data-scroll-position'],undefined);
+  assert.equal(typeof x.scroll.listeners.scroll,'function');
+  x.table.hidden=false;
+  x.scroll.fire('scroll');
+  assert.equal(x.hint.attributes['data-scroll-position'],'start');
+  x.table.hidden=true;
+  x.scroll.fire('scroll');
+  assert.equal(x.hint.hidden,true);
+  assert.equal(x.hint.attributes['data-scroll-position'],undefined);
+  ctl.dispose();
+  assert.equal(x.scroll.listeners.scroll,undefined);
+  x.table.hidden=false;x.scroll.scrollLeft=530;
+  x.scroll.fire('scroll');
+  assert.equal(x.hint.hidden,true,'disposed listener may not expose account data');
 });

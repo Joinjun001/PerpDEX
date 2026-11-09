@@ -10,6 +10,24 @@ export function shouldShowAccountTableHint({mobile,selected,visible,scrollWidth,
     clientWidth>0&&scrollWidth>clientWidth+1;
 }
 
+// Bound the scroll position to a finite, non-negative range; no inferred
+// account data or direction based on missing table rows.
+export function accountTableScrollPosition({scrollWidth,clientWidth,scrollLeft}){
+  if(!Number.isFinite(scrollWidth)||!Number.isFinite(clientWidth)||
+     !Number.isFinite(scrollLeft)||clientWidth<=0||
+     scrollWidth<=clientWidth+1)return 'none';
+  const remaining=Math.max(0,scrollWidth-clientWidth);
+  if(scrollLeft<=1)return 'start';
+  if(scrollLeft>=remaining-1)return 'end';
+  return 'middle';
+}
+
+const SCROLL_GUIDANCE=Object.freeze({
+  start:'오른쪽에 숨겨진 열이 있습니다. 표에 포커스한 뒤 오른쪽 방향키로 탐색하세요.',
+  middle:'양쪽에 숨겨진 열이 있습니다. 표에 포커스한 뒤 좌우 방향키로 탐색하세요.',
+  end:'왼쪽에 숨겨진 열이 있습니다. 표에 포커스한 뒤 왼쪽 방향키로 돌아가세요.',
+});
+
 export function initAccountTableScrollHints(root=document){
   const view=root.defaultView??(typeof window!=='undefined'?window:null);
   const media=view?.matchMedia?.('(max-width: 760px)');
@@ -32,6 +50,15 @@ export function initAccountTableScrollHints(root=document){
         scrollWidth:container.scrollWidth,clientWidth:container.clientWidth,
       });
       hint.hidden=!show;
+      if(show){
+        const location=accountTableScrollPosition({
+          scrollWidth:container.scrollWidth,clientWidth:container.clientWidth,
+          scrollLeft:container.scrollLeft,
+        });
+        const direction=location==='none'?'start':location;
+        hint.textContent=SCROLL_GUIDANCE[direction];
+        hint.setAttribute('data-scroll-position',direction);
+      }else hint.removeAttribute('data-scroll-position');
       // Horizontal table scrolling must not produce inert keyboard tab stops
       // while the static account view is disconnected.
       container.tabIndex=show?0:-1;
@@ -40,6 +67,12 @@ export function initAccountTableScrollHints(root=document){
     }
   }
   const stop=[];
+  for(const {container} of entries){
+    if(typeof container.addEventListener==='function'){
+      container.addEventListener('scroll',update,{passive:true});
+      stop.push(()=>container.removeEventListener('scroll',update));
+    }
+  }
   if(view?.addEventListener){
     view.addEventListener('resize',update);
     stop.push(()=>view.removeEventListener('resize',update));

@@ -179,8 +179,9 @@
         <div class="panel account-panel">
           <div class="panel-heading account-heading">
             <div><h2>Account Activity</h2><span class="small-label">POSITIONS &amp; ORDERS · READ-ONLY PREVIEW</span></div>
-            <span class="pill-outline">지갑 · 백엔드 미연결</span>
+            <span class="pill-outline">ACCOUNT · UNAVAILABLE</span>
           </div>
+          <p class="account-workspace-guide" role="note">계정 조회 미연결 · ‘기록 없음’으로 판정하지 않습니다. 탭은 좌우 방향키·Home·End로 이동합니다.</p>
           <div class="account-tab-scroll"><div class="account-tablist" role="tablist" aria-label="계정 거래 현황">
           <button type="button" id="account-tab-positions" class="account-tab active" role="tab" aria-controls="account-panel-positions" aria-selected="true" tabindex="0">Positions</button>
           <button type="button" id="account-tab-open-orders" class="account-tab" role="tab" aria-controls="account-panel-open-orders" aria-selected="false" tabindex="-1">Open Orders</button>
@@ -190,60 +191,65 @@
           </div></div>
           <div class="account-panels">
           <section id="account-panel-positions" class="account-tab-panel" role="tabpanel" aria-labelledby="account-tab-positions" tabindex="0">
-            <div class="account-table-scroll"><table class="account-table" aria-label="Positions">
+            <div class="account-table-scroll" role="region" aria-label="positions 표 가로 탐색" tabindex="-1"><table class="account-table" hidden aria-label="Positions">
               <thead><tr><th scope="col">Market</th><th scope="col">Side</th><th scope="col">Size</th><th scope="col">Entry</th><th scope="col">Mark</th><th scope="col">Unrealized PnL</th><th scope="col">Margin</th><th scope="col">Liq. Price</th><th scope="col">Action</th></tr></thead>
               <tbody></tbody>
             </table></div>
             <p id="account-table-hint-positions" class="account-table-hint" hidden>표에 숨겨진 열이 있습니다. 표를 좌우로 스크롤해 확인하세요. 키보드에서는 표에 포커스한 뒤 좌우 방향키를 사용하세요.</p>
             <div class="account-empty" data-account-view="positions" role="status" aria-live="polite">
+              <span class="account-state-label" data-account-state-label="positions">ACCOUNT NOT CONNECTED</span>
               <span class="account-empty-symbol" aria-hidden="true">◇</span>
               <strong data-account-title="positions">지갑이 연결되지 않았습니다</strong>
               <p data-account-description="positions">Positions을 조회할 수 없습니다. 지갑 및 테스트넷 백엔드 연결 전까지 계정 데이터를 표시하지 않습니다.</p>
             </div>
           </section>
           <section id="account-panel-open-orders" class="account-tab-panel" role="tabpanel" aria-labelledby="account-tab-open-orders" tabindex="0" hidden>
-            <div class="account-table-scroll"><table class="account-table" aria-label="Open Orders">
+            <div class="account-table-scroll" role="region" aria-label="open-orders 표 가로 탐색" tabindex="-1"><table class="account-table" hidden aria-label="Open Orders">
               <thead><tr><th scope="col">Market</th><th scope="col">Side</th><th scope="col">Type</th><th scope="col">Price</th><th scope="col">Original</th><th scope="col">Filled</th><th scope="col">Remaining</th><th scope="col">Status</th><th scope="col">Action</th></tr></thead>
               <tbody></tbody>
             </table></div>
             <p id="account-table-hint-open-orders" class="account-table-hint" hidden>표에 숨겨진 열이 있습니다. 표를 좌우로 스크롤해 확인하세요. 키보드에서는 표에 포커스한 뒤 좌우 방향키를 사용하세요.</p>
             <div class="account-empty" data-account-view="open-orders" role="status" aria-live="polite">
+              <span class="account-state-label" data-account-state-label="open-orders">ACCOUNT NOT CONNECTED</span>
               <span class="account-empty-symbol" aria-hidden="true">◇</span>
               <strong data-account-title="open-orders">지갑이 연결되지 않았습니다</strong>
               <p data-account-description="open-orders">Open Orders을 조회할 수 없습니다. 지갑 및 테스트넷 백엔드 연결 전까지 계정 데이터를 표시하지 않습니다.</p>
             </div>
           </section>
           <section id="account-panel-order-history" class="account-tab-panel" role="tabpanel" aria-labelledby="account-tab-order-history" tabindex="0" hidden>
-            <div class="account-table-scroll"><table class="account-table" aria-label="Order History">
+            <div class="account-table-scroll" role="region" aria-label="order-history 표 가로 탐색" tabindex="-1"><table class="account-table" hidden aria-label="Order History">
               <thead><tr><th scope="col">Market</th><th scope="col">Side</th><th scope="col">Type</th><th scope="col">Price</th><th scope="col">Quantity</th><th scope="col">Filled</th><th scope="col">Status</th><th scope="col">Time</th></tr></thead>
               <tbody></tbody>
             </table></div>
             <p id="account-table-hint-order-history" class="account-table-hint" hidden>표에 숨겨진 열이 있습니다. 표를 좌우로 스크롤해 확인하세요. 키보드에서는 표에 포커스한 뒤 좌우 방향키를 사용하세요.</p>
             <div class="account-empty" data-account-view="order-history" role="status" aria-live="polite">
+              <span class="account-state-label" data-account-state-label="order-history">ACCOUNT NOT CONNECTED</span>
               <span class="account-empty-symbol" aria-hidden="true">◇</span>
               <strong data-account-title="order-history">지갑이 연결되지 않았습니다</strong>
               <p data-account-description="order-history">Order History을 조회할 수 없습니다. 지갑 및 테스트넷 백엔드 연결 전까지 계정 데이터를 표시하지 않습니다.</p>
             </div>
           </section>
           <section id="account-panel-trade-history" class="account-tab-panel" role="tabpanel" aria-labelledby="account-tab-trade-history" tabindex="0" hidden>
-            <div class="account-table-scroll"><table class="account-table" aria-label="Trade History">
+            <div class="account-table-scroll" role="region" aria-label="trade-history 표 가로 탐색" tabindex="-1"><table class="account-table" hidden aria-label="Trade History">
               <thead><tr><th scope="col">Market</th><th scope="col">Side</th><th scope="col">Fill Price</th><th scope="col">Fill Size</th><th scope="col">Fee</th><th scope="col">Time</th></tr></thead>
               <tbody></tbody>
             </table></div>
             <p id="account-table-hint-trade-history" class="account-table-hint" hidden>표에 숨겨진 열이 있습니다. 표를 좌우로 스크롤해 확인하세요. 키보드에서는 표에 포커스한 뒤 좌우 방향키를 사용하세요.</p>
             <div class="account-empty" data-account-view="trade-history" role="status" aria-live="polite">
+              <span class="account-state-label" data-account-state-label="trade-history">ACCOUNT NOT CONNECTED</span>
               <span class="account-empty-symbol" aria-hidden="true">◇</span>
               <strong data-account-title="trade-history">지갑이 연결되지 않았습니다</strong>
               <p data-account-description="trade-history">Trade History을 조회할 수 없습니다. 지갑 및 테스트넷 백엔드 연결 전까지 계정 데이터를 표시하지 않습니다.</p>
             </div>
           </section>
           <section id="account-panel-funding-history" class="account-tab-panel" role="tabpanel" aria-labelledby="account-tab-funding-history" tabindex="0" hidden>
-            <div class="account-table-scroll"><table class="account-table" aria-label="Funding History">
+            <div class="account-table-scroll" role="region" aria-label="funding-history 표 가로 탐색" tabindex="-1"><table class="account-table" hidden aria-label="Funding History">
               <thead><tr><th scope="col">Market</th><th scope="col">Funding Rate</th><th scope="col">Position Size</th><th scope="col">Payment</th><th scope="col">Time</th></tr></thead>
               <tbody></tbody>
             </table></div>
             <p id="account-table-hint-funding-history" class="account-table-hint" hidden>표에 숨겨진 열이 있습니다. 표를 좌우로 스크롤해 확인하세요. 키보드에서는 표에 포커스한 뒤 좌우 방향키를 사용하세요.</p>
             <div class="account-empty" data-account-view="funding-history" role="status" aria-live="polite">
+              <span class="account-state-label" data-account-state-label="funding-history">ACCOUNT NOT CONNECTED</span>
               <span class="account-empty-symbol" aria-hidden="true">◇</span>
               <strong data-account-title="funding-history">지갑이 연결되지 않았습니다</strong>
               <p data-account-description="funding-history">Funding History을 조회할 수 없습니다. 지갑 및 테스트넷 백엔드 연결 전까지 계정 데이터를 표시하지 않습니다.</p>
