@@ -1,7 +1,7 @@
 # PerpDEX 거래 터미널 화면 구현 명세 — Hyperliquid 구조 레퍼런스
 
 - 작성일: 2026-11-10
-- 상태: **UX-HL-06-A1/A2·B1·C1·C2a 로컬 구현 / C2b·A3·F 브라우저 인수 미완료 / 배포 미수행**
+- 상태: **UX-HL-06-A1/A2·B1·C1·C2a·D1 로컬 구현 / C2b·A3·F 브라우저 인수 미완료 / 배포 미수행**
 - 화면 레퍼런스: 사용자가 2026-11-10 제공한 Hyperliquid 거래 화면 스크린샷(약 1541×930). 이미지의 실제 수치·상표·코드·리소스는 복제하지 않는다.
 - 적용 대상: `frontend/trade.html`, `frontend/styles.css`, `frontend/main.js` 및 기존 프런트엔드 모델·조회 계약.
 - 연계 작업: `docs/tasks/UX-HL-06-visual-terminal-rebuild/` · 기존 `UX-HL-01~05`의 기능/안전 게이트를 변경하지 않는다.

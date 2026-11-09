@@ -1215,3 +1215,32 @@ test('UX-HL-06-C1 시장 변경은 숨겨진 호가/체결 데이터도 갱신�
   assert.equal(id('asks').children[0].children[0].textContent,firstBookPrice);
   assert.equal(id('recent-trades').children[0].children[0].textContent,firstTradePrice);
 });
+
+
+test('UX-HL-06-D1 moved order review preserves preview/escape/limit/market contracts',async()=>{
+  const app=await boot(),id=app.id;
+  assert.equal(id('preview-order').disabled,false);
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  assert.equal(id('order-result').didFocus,true);
+  assert.match(id('order-result').children[2].textContent,/실제 주문 아님/);
+  let escape=id('order-result').dispatch('keydown',{key:'Escape'});
+  assert.equal(escape.defaultPrevented,true);
+  assert.equal(id('order-result').hidden,true);
+  assert.equal(id('preview-order').didFocus,true);
+  id('limit-type').dispatch('click');
+  assert.equal(id('limit-price-field').hidden,false);
+  id('limit-price').value='100.00';
+  id('limit-price').dispatch('input');
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  app.market('SOL').dispatch('click');
+  assert.equal(id('order-result').hidden,true);
+  assert.equal(id('limit-price').value,'148.75');
+  // This fake DOM deliberately does not parse literal HTML child text.
+  // UNAVAILABLE copy is asserted in ux-hl-06-order-rail.test.mjs; here confirm
+  // no event handler replaced the unavailable status with account numbers.
+  for(const name of ['available-margin','reserved-margin','position-margin'])
+    assert.equal(id(name).textContent,'');
+  assert.equal(id('reduce-only').disabled,true);
+});

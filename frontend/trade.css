@@ -652,3 +652,154 @@
   .trade-shell .market-depth-surface .book-header{font-size:10px}
   .trade-shell .market-depth-surface .book-side-label small{font-size:8px}
 }
+
+
+/* UX-HL-06-D1 — input -> MOCK estimate -> review CTA -> account/risk.
+ * All declarations are scoped to the offline ticket; no execution semantics. */
+.trade-shell .terminal-grid>.order-panel{
+  min-width:0;overflow:visible;
+}
+.trade-shell .terminal-grid>.order-panel .order-heading{
+  padding:13px 14px 11px;align-items:center;min-width:0;
+}
+.trade-shell .terminal-grid>.order-panel .order-heading h2{
+  font-size:14px;line-height:1.35;margin-bottom:3px;
+}
+.trade-shell .terminal-grid>.order-panel .order-heading .small-label{
+  font-size:9px;line-height:1.35;color:#afc4d1;letter-spacing:.02em;
+}
+.trade-shell .ticket-status-strip{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  gap:3px 8px;padding:7px 14px;min-width:0;
+  border-bottom:1px solid #30404c;background:#182b32;
+  color:#b7d5ca;font-size:9px;font-weight:750;line-height:1.5;
+}
+.trade-shell .ticket-status-strip span:last-child{color:#bbc7d2}
+.trade-shell .terminal-grid>.order-panel .side-tabs{
+  gap:6px;padding:12px 14px 0;
+}
+.trade-shell .terminal-grid>.order-panel .side-tab{
+  min-height:42px;padding:10px 3px;font-size:11px;white-space:nowrap;
+}
+.trade-shell .terminal-grid>.order-panel .order-type-row{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  padding-bottom:9px;margin:11px 14px 10px;gap:6px;
+}
+.trade-shell .terminal-grid>.order-panel .order-type-tab{
+  min-height:36px;min-width:60px;font-size:11px;
+}
+.trade-shell .terminal-grid>.order-panel form{
+  display:block;padding:0 14px;min-width:0;
+}
+.trade-shell .ticket-section-label{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  gap:2px 8px;margin:0 0 11px;padding-bottom:7px;
+  border-bottom:1px solid #344553;font-size:9px;
+  letter-spacing:.035em;line-height:1.4;
+}
+.trade-shell .ticket-section-label strong{color:#d2e7ef;font-size:10px}
+.trade-shell .ticket-section-label span{color:#a7bdcb;letter-spacing:0}
+.trade-shell .terminal-grid>.order-panel form>label{
+  margin-bottom:7px;font-size:11px;color:#c9dce5;
+}
+.trade-shell .terminal-grid>.order-panel .input-shell{
+  height:44px;min-width:0;padding-inline:11px;border-radius:7px;
+}
+.trade-shell .terminal-grid>.order-panel .input-shell input{
+  font-size:17px;font-variant-numeric:tabular-nums;
+}
+.trade-shell .terminal-grid>.order-panel .price-help{
+  margin:5px 0 0;color:#9aafc0;line-height:1.5;font-size:10px;
+}
+.trade-shell .terminal-grid>.order-panel .quick-amounts{
+  margin-top:7px;gap:5px;
+}
+.trade-shell .terminal-grid>.order-panel .quick-amounts button{
+  min-width:0;min-height:36px;font-size:11px;font-weight:750;
+}
+.trade-shell .terminal-grid>.order-panel .limit-price-field{margin:13px 0 10px}
+.trade-shell .terminal-grid>.order-panel .limit-price-field label{
+  margin-bottom:7px;font-size:11px;
+}
+.trade-shell .terminal-grid>.order-panel .leverage-label{
+  margin-top:15px;
+}
+.trade-shell .terminal-grid>.order-panel .leverage-input{
+  margin:15px 0 10px;
+}
+.trade-shell .ticket-estimate-heading{
+  margin:13px 0 0;padding-bottom:8px;
+}
+.trade-shell .terminal-grid>.order-panel .summary-box{
+  display:flex;gap:0;padding:0 11px;margin:8px 0 0;
+  border-radius:7px;background:#182c32;border-color:#355149;
+}
+.trade-shell .terminal-grid>.order-panel .summary-box>div{
+  display:flex;align-items:baseline;justify-content:space-between;
+  flex-wrap:wrap;gap:5px 8px;min-width:0;
+  padding:8px 0;border-bottom:1px solid #2f4549;
+  font-size:10px;line-height:1.45;
+}
+.trade-shell .terminal-grid>.order-panel .summary-box>div:nth-child(3){
+  padding-top:10px;border-top:1px solid #47705d;
+}
+.trade-shell .terminal-grid>.order-panel .summary-box>div:last-child{border-bottom:0}
+.trade-shell .terminal-grid>.order-panel .summary-box span{color:#b3c5d1}
+.trade-shell .terminal-grid>.order-panel .summary-box strong{
+  min-width:0;font-size:11px;text-align:right;overflow-wrap:anywhere;
+  white-space:normal;font-variant-numeric:tabular-nums;
+}
+.trade-shell .terminal-grid>.order-panel .summary-box>div:nth-child(3) strong{
+  font-size:16px;font-weight:800;color:#9df1cc;
+}
+.trade-shell .ticket-preview-disclaimer{
+  color:#c1d9cd;font-size:10px;line-height:1.45;margin:10px 0 0;
+}
+.trade-shell .terminal-grid>.order-panel .submit-order{
+  min-height:48px;margin-top:9px;padding:12px 14px;font-size:12px;
+}
+.trade-shell .terminal-grid>.order-panel .order-result{
+  margin:11px 0 0;scroll-margin-top:12px;
+}
+.trade-shell .ticket-secondary-status{
+  padding:13px 0 0;margin-top:14px;border-top:1px solid #314452;
+}
+.trade-shell .ticket-risk-heading{margin:0 0 7px}
+.trade-shell .terminal-grid>.order-panel .account-margin-status{
+  margin:7px 0;padding:10px;background:#14232d;
+}
+.trade-shell .terminal-grid>.order-panel .account-margin-list{margin-top:7px}
+.trade-shell .terminal-grid>.order-panel .account-margin-row{
+  padding:6px 0;gap:8px;
+}
+.trade-shell .terminal-grid>.order-panel .account-margin-help{
+  margin:7px 0 0;line-height:1.5;
+}
+.trade-shell .terminal-grid>.order-panel .reduce-only-option{
+  padding:9px 10px;margin:9px 0 0;
+}
+.trade-shell .terminal-grid>.order-panel .reduce-only-help{
+  margin-top:6px;font-size:10px;line-height:1.5;
+}
+.trade-shell .terminal-grid>.order-panel .order-warning{
+  margin:10px 0 16px;font-size:10px;line-height:1.5;
+}
+.trade-shell .terminal-grid>.order-panel .ticket-foot{
+  margin-top:auto;flex-wrap:wrap;gap:6px;padding:11px 14px;
+  font-size:10px;
+}
+@media(max-width:760px){
+  .trade-shell .terminal-grid>.order-panel .order-heading{padding:13px 15px}
+  .trade-shell .ticket-status-strip{padding-inline:15px}
+  .trade-shell .terminal-grid>.order-panel .side-tabs{padding-inline:15px}
+  .trade-shell .terminal-grid>.order-panel .order-type-row{margin-inline:15px}
+  .trade-shell .terminal-grid>.order-panel form{padding-inline:15px}
+  .trade-shell .terminal-grid>.order-panel .side-tab{min-height:44px}
+  .trade-shell .terminal-grid>.order-panel .order-type-tab{min-height:44px}
+  .trade-shell .terminal-grid>.order-panel .quick-amounts button{min-height:44px}
+}
+@media(max-width:360px){
+  .trade-shell .ticket-status-strip{gap:2px 8px;font-size:8px}
+  .trade-shell .ticket-section-label{font-size:8px}
+  .trade-shell .terminal-grid>.order-panel .order-type-row{gap:5px}
+}

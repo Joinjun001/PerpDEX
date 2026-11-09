@@ -51,3 +51,13 @@
 - 신규 테스트 5개 포함 프런트 전체 230/230 PASS. Chromium 샌드박스 초기화 실패로 C2b/A3/F 시각·보조공학 검증 미완료.
 - 이번 로컬 구현 완료: UX-HL-06-C2a. 남은 인수: C2b. 다음 독립 작업: UX-HL-06-D1.
 - 원격 push·배포·실자금·운영 DB·실 RPC·자격증명·실거래 활성화 없음.
+
+
+## 5회차 — UX-HL-06-D1 로컬 구현
+
+- 입력/참고 비용/검토 CTA를 계정 미연결 상태보다 우선하는 우측 Order Preview 정보 계층과 반응형 밀도 스타일 구성.
+- MARKET/LIMIT, LONG/SHORT, Quantity, Limit Price, Leverage의 기존 id/이벤트·제약 불변. Limit Price 입력과 수량의 순서를 재배치하고 Preview 결과를 CTA 직후로 이동.
+- Reference MOCK_SAMPLE와 Account UNAVAILABLE 상태의 별도 노출, 실제 주문·지갑 서명·자금 이체 없음 고지, 요약의 수수료/펀딩 미설정 상태 유지.
+- 새로운 검사 5건을 포함한 프런트 전체 235/235 PASS. Chromium 샌드박스 실패로 A3/C2b/F 시각·보조공학 인수는 미완료, 정적 검사만으로 완료 판정하지 않음.
+- 이번 로컬 작업 완료: UX-HL-06-D1. 다음 독립 구현: UX-HL-06-D2.
+- Push/배포/운영 RPC·DB/지갑·실자금/실거래 작업 없음.

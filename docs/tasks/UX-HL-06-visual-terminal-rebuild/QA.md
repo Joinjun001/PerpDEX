@@ -103,3 +103,27 @@
 ### 후속
 
 - 환경이 허용되면 C2b/A3/F 시각 검증. 동일한 샌드박스 실패가 지속되는 동안은 다음 독립 구현 UX-HL-06-D1 주문 패널 밀도·정보 계층 개선을 진행.
+
+
+## 5회차 UX-HL-06-D1 — 2026-11-10
+
+### 실제 구현·계약
+
+- 시작 로컬 Git 상태 clean, 최신 커밋 709ddff.
+- frontend/trade.html: Order Preview 헤더, REFERENCE · MOCK_SAMPLE / ACCOUNT · UNAVAILABLE 출처 표시. Long/Short·Market/Limit → 수량/빠른 수량 → (Limit 선택 시) 가격 → 모의 배율 → 참고 가격/Notional/Indicative Margin → DEMO Preview CTA → 검토 결과 순으로 DOM 자체 순서를 변경.
+- 금액과 계정 위험이 혼동되지 않게 Account & Risk/UNAVAILABLE 섹션(Available/Reserved/Position 및 비활성 Reduce Only)은 실제 검토 CTA 다음의 명시적 별도 읽기 영역으로 유지. 이 위치 변경은 기능 활성화가 아니라 상태 표시의 분리다.
+- 실제 검토 결과 DOM(order-result)을 CTA 직후 동일 form 내에 배치해 생성 직후 키보드 포커스/읽기 순서를 보존. 검토 내 닫기 버튼은 기존 type=button 사용. 주문 서버/서명/지갑 전송 API 무변경.
+- No-JS 기본 Preview CTA disabled, 예측 금액 —, Limit 입력 hidden/disabled, Reduce Only disabled, 인증 계정 금액 —, Fees/Funding Not configured. Indicative margin의 위치 안내 문장을 변경된 DOM 순서에 맞춰 수정.
+- frontend/trade.css: 오른쪽 레일의 Source strip, Side/Type 버튼, 촘촘한 입력·비용 요약, CTA 최소 48px, 위험 상태 섹션, 모바일 760/360px 키보드·터치 크기 개선.
+- 새 ux-hl-06-order-rail.test.mjs 정적/구조·데이터 출처·무JS·반응형 검사 4건, order-interactions.test.mjs에서 실제 main.js 핸들러의 Preview→Esc→Limit→시장 변경/계정 비활성 회귀 1건 추가.
+
+### 검증 결과 및 한계
+
+- 개발 중 신규 이벤트 테스트는 실제 앱 결함이 아닌 FakeDOM의 초기 HTML 자식 텍스트 미파싱 때문에 234/235 PASS. 계정 텍스트의 존재는 정적 HTML 검사, 이벤트 핸들러는 가상 DOM 동작 검사로 나누어 정정했다. 최종 전체 프런트 235/235 PASS, 실패 0개.
+- JS/HTML/CSP/중복 DOM ID 및 Git 변경 검사는 커밋 전 최종 점검.
+- Chromium Headless Shell을 일반 사용자, chromiumSandbox:true로 실행해도 Chromium sandboxing failed; 샌드박스 비활성화/우회 없이 종료. A3/C2b/F 실화면 1536/1280/768/390/200% 확대, 실제 화면 키보드/터치/스크린리더 검증 미완료.
+- 미연결 계정 데이터를 실제 0이나 실잔액으로 바꾸지 않고, 기존 M5~M9·실거래 게이트/원격 push/배포 제한 유지.
+
+### 다음 미완료 작업
+
+- UX-HL-06-D2: Available/Position/Margin/Risk 출처/미지원 옵션의 정보 명료성·독립 회귀 보강. D1 화면의 실제 반응형/스크린리더 인수는 A3/F와 함께 보류.
