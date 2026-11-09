@@ -1244,3 +1244,84 @@ test('UX-HL-06-D1 moved order review preserves preview/escape/limit/market contr
     assert.equal(id(name).textContent,'');
   assert.equal(id('reduce-only').disabled,true);
 });
+
+
+test('UX-HL-06-D2 Market/Limit mode updates source badges without changing account UNAVAILABLE',async()=>{
+  const app=await boot(),id=app.id;
+  assert.equal(id('ticket-price-source').textContent,'REFERENCE · MOCK_SAMPLE');
+  assert.equal(id('ticket-price-source').dataset.source,'MOCK_SAMPLE');
+  assert.equal(id('preview-estimate-source').textContent,'MOCK_SAMPLE · 참고용');
+  assert.equal(id('preview-price-label').textContent,'Reference price (MOCK)');
+  assert.equal(id('preview-order').disabled,false);
+  const initialMargin=id('margin').textContent;
+  id('limit-type').dispatch('click');
+  assert.equal(id('ticket-price-source').textContent,'LIMIT PRICE · MOCK_DEFAULT');
+  assert.equal(id('ticket-price-source').dataset.source,'MOCK_DEFAULT');
+  assert.equal(id('preview-estimate-source').textContent,'MOCK_DEFAULT · 참고용');
+  assert.equal(id('preview-price-label').textContent,'Limit Price (user input)');
+  assert.equal(id('preview-order').disabled,false);
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').children[1].children[3].children[1].textContent,
+    '가상 기준가 자동 입력 Limit Price');
+  id('limit-price').value='25000.50';
+  id('limit-price').dispatch('input');
+  assert.equal(id('ticket-price-source').textContent,'LIMIT PRICE · USER_INPUT');
+  assert.equal(id('ticket-price-source').dataset.source,'USER_INPUT');
+  assert.equal(id('preview-estimate-source').textContent,'USER_INPUT · 참고용');
+  assert.equal(id('reference-price').textContent,'$25,000.50');
+  assert.notEqual(id('margin').textContent,initialMargin);
+  assert.equal(id('ticket-price-source').dataset.source,'USER_INPUT');
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  assert.equal(id('order-result').children[1].children[3].children[1].textContent,
+    '사용자 입력 Limit Price');
+  id('market-type').dispatch('click');
+  assert.equal(id('order-result').hidden,true);
+  assert.equal(id('ticket-price-source').textContent,'REFERENCE · MOCK_SAMPLE');
+  assert.equal(id('ticket-price-source').dataset.source,'MOCK_SAMPLE');
+  assert.equal(id('preview-estimate-source').textContent,'MOCK_SAMPLE · 참고용');
+  assert.equal(id('preview-price-label').textContent,'Reference price (MOCK)');
+  assert.equal(id('margin').textContent,initialMargin);
+  for(const key of ['available-margin','reserved-margin','position-margin',
+    'fee-estimate-unavailable','funding-payment-unavailable','liquidation-price-unavailable']){
+    assert.equal(id(key).textContent,'','Fake DOM does not parse static UNAVAILABLE HTML for '+key);
+  }
+  assert.equal(id('reduce-only').disabled,true);
+});
+
+test('UX-HL-06-D2 invalid Limit input cannot appear as verified pricing',async()=>{
+  const app=await boot(),id=app.id;
+  id('limit-type').dispatch('click');
+  id('limit-price').value='invalid';
+  id('limit-price').dispatch('input');
+  assert.equal(id('ticket-price-source').dataset.source,'USER_INPUT');
+  assert.equal(id('reference-price').textContent,'—');
+  assert.equal(id('margin').textContent,'—');
+  assert.equal(id('preview-order').disabled,true);
+  assert.equal(id('limit-price').getAttribute('aria-invalid'),'true');
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,true);
+  assert.equal(id('limit-price').didFocus,true);
+  app.market('SOL').dispatch('click');
+  assert.equal(id('ticket-price-source').textContent,'LIMIT PRICE · MOCK_DEFAULT');
+  assert.equal(id('ticket-price-source').dataset.source,'MOCK_DEFAULT');
+  assert.equal(id('reference-price').textContent,'$148.75');
+  assert.equal(id('preview-order').disabled,false);
+});
+
+
+test('UX-HL-06-D2 the same market preserves a user-edited Limit price and its source',async()=>{
+  const app=await boot(),id=app.id;
+  id('limit-type').dispatch('click');
+  assert.equal(id('ticket-price-source').dataset.source,'MOCK_DEFAULT');
+  id('limit-price').value='60000.50';
+  id('limit-price').dispatch('input');
+  assert.equal(id('ticket-price-source').dataset.source,'USER_INPUT');
+  app.market('BTC').dispatch('click');
+  assert.equal(id('limit-price').value,'60000.50','same market must not replace Limit draft');
+  assert.equal(id('ticket-price-source').dataset.source,'USER_INPUT');
+  app.market('ETH').dispatch('click');
+  assert.equal(id('limit-price').value,'3405.20','new market resets to synthetic seed');
+  assert.equal(id('ticket-price-source').dataset.source,'MOCK_DEFAULT');
+  assert.equal(id('preview-estimate-source').textContent,'MOCK_DEFAULT · 참고용');
+});

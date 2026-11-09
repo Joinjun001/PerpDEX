@@ -127,3 +127,31 @@
 ### 다음 미완료 작업
 
 - UX-HL-06-D2: Available/Position/Margin/Risk 출처/미지원 옵션의 정보 명료성·독립 회귀 보강. D1 화면의 실제 반응형/스크린리더 인수는 A3/F와 함께 보류.
+
+
+## 6회차 UX-HL-06-D2 — 2026-11-10
+
+### 출처·위험 표시 구현
+
+- 시작 Git 상태: main clean, 기준 커밋 09b1eba. 읽은 파일: SPEC/TODO/QA/RESULT, PROJECT_STATE, ROADMAP, Hyperliquid architecture/UX reference, trade.html, trade.css, main.js, preview-model.mjs 및 관련 회귀 테스트.
+- Market 모드는 REFERENCE · MOCK_SAMPLE, 실제 모의 주문 검토에도 동일한 가격 출처가 전달됨. Limit 최초 자동 설정 가격은 LIMIT PRICE · MOCK_DEFAULT, 사용자가 Limit 필드를 편집하면 LIMIT PRICE · USER_INPUT 출처를 표시. 선택 시장 변경 시 기존 MOCK 가격으로 Limit 기본값이 초기화되고 출처도 MOCK_DEFAULT로 복원. 같은 시장 재선택은 편집값과 출처를 유지.
+- 미리보기 금액은 여전히 기존 previewOrderEstimate 함수로만 계산. Indicative margin(모의 명목가치÷모의 배율)은 초기/유지증거금·실제 가용 잔고·청산 위험이 아니라고 명시.
+- Available/Reserved/Position Margin 3개는 여전히 — 미연결 상태. 새로운 Execution & Risk 읽기 영역에서 Trading Fee — 미설정, Funding Payment — 미연결, Liquidation Price — 미산출 표시. 숫자 0을 의미하지 않는다는 경고와 검증되지 않은 위험 데이터의 선행 조건 표시.
+- Reduce Only 입력 disabled 유지. TP/SL, Cross/Unified, TWAP/Chase의 미구현 상태를 네이티브 details/summary 안내로 추가(새로운 거래 조작 UI는 생성하지 않음).
+- 자금 사용, 실제 RPC, API 호출, 지갑 서명, 주문 실행, 백엔드 로직, 기존 계정 렌더러 변경 없음.
+
+### 검증 범위와 중간 오류
+
+- 신규 ux-hl-06-risk-source.test.mjs 5건: 데이터 출처, 데이터 미연결과 0 구분, 참고 증거금 수식, 미지원 기능/네트워크 안전, 키보드·모바일 CSS 상태.
+- order-interactions.test.mjs 신규 3건: 실제 main.js 테스트 DOM에서 Market/Limit 초기 MOCK_DEFAULT 및 USER_INPUT 전환, 기존 주문 리뷰 무효화/금액 계산, 비정상 Limit 입력 거절, 동일 시장 재선택과 타 시장 전환 출처 보존/초기화.
+- 테스트 작성 중 새 테스트의 문자열에 ASCII 인용 부호 미이스케이프가 있어 SyntaxError 1건 발생. 테스트 이름을 수정한 뒤 회귀 재실행 완료.
+- 전체 테스트는 최종 **245/245 PASS** (기존 235, 신규 10), JS 문법/HTMLParser·고유 ID·CSP 및 git diff 검사 별도 최종 확인.
+
+### Chromium 실브라우저 검사
+
+- 프로젝트 내 Headless Shell을 일반 사용자와 chromiumSandbox:true 설정으로 기동 재시도했으나 Chromium sandboxing failed 오류가 다시 발생. --no-sandbox / chromiumSandbox:false는 사용하지 않음.
+- 1536×960, 1280×800, 768×1024, 390×844, 200% 확대·실제 focus/키보드/스크린리더·스크롤 인수는 A3/C2b/F와 함께 **미완료**. Mock DOM / CSS 정적 테스트를 실제 화면 검증으로 간주하지 않음.
+
+### 다음
+
+- UX-HL-06-E1: 하단 5개 기존 account tab과 읽기 상태·모바일 표 탐색의 정보 밀도 및 접근성 개선. 원장/실계정 데이터 없음, E2 새 잔고 탭 보류. 실브라우저 인수는 가용한 정상 샌드박스 환경 확보 후 처리.

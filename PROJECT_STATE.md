@@ -7,6 +7,7 @@
 - 기준: 실제 소스 코드와 Git 상태를 최우선으로 판단
 - 현재 마일스톤: **M5 — Perpetual Futures 초기·유지증거금/레버리지 위험 엔진 (로컬 모의 구현)**
 - 현재 TASK: **M5-T3-C3-C2-B2-B2 — 승인된 전용 PostgreSQL 실제 다중 세션·role·트리거 실 인수 (Next; B2-B1 로컬 트리거 카탈로그 검사 완료, 실 PG 미실행)**
+- **UX-HL-06-D2 로컬 구현 (2026-11-10):** Market MOCK_SAMPLE / Limit MOCK_DEFAULT→USER_INPUT 표시, 시장 변경에 따른 출처 초기화와 동일 시장 재선택 보존. 모의 Indicative margin·계정 3종 미연결·Fee/Funding/Liquidation 미제공 구분, Reduce Only disabled와 미지원 거래 옵션 안내. 프런트 신규 10건 포함 245/245 PASS. Chromium sandbox 초기화 실패로 A3/C2b/F 실제 화면 인수 미완료. 다음 E1, M5~M9 선행 조건과 원격 push/배포·실거래 금지 유지.
 - **UX-HL-06-D1 로컬 구현 (2026-11-10):** 우측 Order Preview에서 Side/Type·수량/Limit/Leverage → MOCK 비용 → Preview CTA → Review → 계정·위험 UNAVAILABLE 순으로 DOM/시각 계층 개선. 가격 출처 REFERENCE MOCK_SAMPLE, 계정 미연결 표시, no-JS 비활성 상태 및 기존 검토/키보드 계약 유지. 신규 5건 포함 프런트 235/235 PASS. Chromium sandbox 실패로 A3/C2b/F 실화면 인수 미완료. 다음 D2, M5~M9/실거래·원격 push/배포 금지 유지.
 - **UX-HL-06-C2a 로컬 구현 (2026-11-10):** ASK/BID 합성 호가·Reference/Spread(MOCK) 구분, 3열 숫자 정렬·누적 깊이 강조·가독성 및 1330/760/360px CSS 보강. 기존 누적 깊이/스프레드/ARIA·탭·모바일 접기·주문/계정 불변, 신규 5개 포함 프런트 230/230 PASS. Chromium Headless Shell 샌드박스 실패로 C2b/A3/F 인수 미완료. 다음 독립 D1, 실거래/원격 push/배포 제한 유지.
 - **UX-HL-06-C1 로컬 구현 (2026-11-10):** 가상 호가/체결을 Order Book/Trades 접근성 탭으로 통합하고 무JS 노출, ARIA 키보드·모바일 공통 접기 연동 구현. 7 Ask/7 Bid 누적 깊이·합성 스프레드·9개 가상 체결과 시장 변경·주문/계정 계약 회귀 포함 프런트 225/225 PASS. Chromium 샌드박스 초기화 실패로 A3/C2/F 실화면 인수 미완료, 다음 C2·독립 D1. M5~M9/실거래·원격 push·배포 금지 유지.

@@ -101,7 +101,7 @@
         </div>
         <aside class="panel order-panel" aria-labelledby="ticket-title">
           <div class="panel-heading order-heading"><div><h2 id="ticket-title">Order Preview</h2><span class="small-label">LOCAL PREVIEW · NO EXECUTION</span></div><span class="demo-tag">DEMO</span></div>
-          <div class="ticket-status-strip" role="note" aria-label="주문 미리보기 데이터 출처"><span>REFERENCE · MOCK_SAMPLE</span><span>ACCOUNT · UNAVAILABLE</span></div>
+          <div class="ticket-status-strip" role="note" aria-label="주문 미리보기 데이터 출처"><span id="ticket-price-source" data-source="MOCK_SAMPLE" aria-live="polite">REFERENCE · MOCK_SAMPLE</span><span>ACCOUNT · UNAVAILABLE</span></div>
           <div class="side-tabs" role="group" aria-label="주문 방향"><button id="buy-tab" type="button" class="side-tab buy active" aria-pressed="true">Long / Buy</button><button id="sell-tab" type="button" class="side-tab sell" aria-pressed="false">Short / Sell</button></div>
           <div class="order-type-row"><span>Order type <small>· DEMO</small></span>
             <div class="order-type-tabs" role="group" aria-label="모의 주문 유형">
@@ -119,13 +119,14 @@
             <div id="limit-price-field" class="limit-price-field" hidden>
               <label for="limit-price">Limit Price <span>USD · DEMO</span></label>
               <div class="input-shell"><input id="limit-price" name="limitPrice" type="text" inputmode="decimal" value="65240.50" autocomplete="off" spellcheck="false" aria-describedby="limit-price-help" maxlength="13" disabled><span>USD</span></div>
-              <p id="limit-price-help" class="price-help">주문 체결에 사용되지 않는 입력 가격입니다. 소수점 2자리까지 입력할 수 있습니다.</p>
+              <p id="limit-price-help" class="price-help">초기 값은 MOCK_SAMPLE 기준 가격의 자동 입력값이며, 수정 후 USER_INPUT으로 표시합니다. 실제 주문 체결에 사용되지 않습니다. 소수점 2자리까지 입력할 수 있습니다.</p>
               <p id="limit-price-error" class="price-error" role="alert" hidden>0.01~1,000,000,000 USD 사이의 올바른 Limit Price를 입력하세요.</p>
             </div>
             <div class="leverage-label"><label for="leverage">Leverage</label><output id="leverage-output">3×</output></div><input class="leverage-input" id="leverage" type="range" min="1" max="10" step="1" value="3" aria-label="모의 레버리지" aria-describedby="leverage-help"><p id="leverage-error" class="price-error" role="alert" hidden>모의 레버리지는 1~10 사이의 정수만 허용됩니다.</p><div class="leverage-ticks"><span>1×</span><span>3×</span><span>5×</span><span>10×</span></div>
             <p id="leverage-help" class="price-help">모의 레버리지 1~10×. 실제 위험 엔진과 연결되지 않습니다.</p>
-            <div class="ticket-section-label ticket-estimate-heading"><strong>PREVIEW ESTIMATE</strong><span>MOCK_SAMPLE · 참고용</span></div>
+            <div class="ticket-section-label ticket-estimate-heading"><strong>PREVIEW ESTIMATE</strong><span id="preview-estimate-source">MOCK_SAMPLE · 참고용</span></div>
             <div class="summary-box"><div><span id="preview-price-label">Reference price (MOCK)</span><strong id="reference-price">—</strong></div><div><span>Notional (demo)</span><strong id="notional">—</strong></div><div><span>Indicative margin</span><strong id="margin">—</strong></div><div><span>Fee / Funding</span><strong class="text-muted">Not configured</strong></div></div>
+            <p id="preview-margin-note" class="preview-margin-note">Indicative margin은 모의 명목가치 ÷ 모의 레버리지의 단순 참고 계산입니다. 실제 이용 가능 잔고·초기/유지증거금·청산 위험을 검증하지 않습니다.</p>
             <p class="ticket-preview-disclaimer" role="note">모의 주문 검토만 생성합니다. 실제 주문·지갑 서명·자금 이체 없음.</p>
             <button id="preview-order" class="submit-order buy-submit" type="submit" disabled>Preview Long Order <span>↗</span></button>
             <div id="order-result" class="order-result" hidden role="status" aria-live="polite" aria-label="모의 주문 검토 결과" tabindex="-1"></div>
@@ -143,6 +144,18 @@
                 </dl>
                 <p id="account-margin-help" class="account-margin-help">지갑 및 인증된 계정·증거금 조회 API가 미연결 상태입니다. 실제 잔액이나 주문 가능 금액을 표시하지 않습니다. 위의 Indicative margin은 입력 기반 MOCK 미리보기이며 사용 가능한 증거금이 아닙니다.</p>
               </section>
+              <section class="risk-metrics-status" aria-labelledby="risk-metrics-title" aria-describedby="risk-metrics-help" data-source="UNAVAILABLE">
+                <div class="risk-metrics-heading">
+                  <h3 id="risk-metrics-title">Execution &amp; Risk</h3>
+                  <span class="risk-metrics-source">UNAVAILABLE</span>
+                </div>
+                <dl class="risk-metrics-list">
+                  <div class="risk-metrics-row"><dt>Trading Fee</dt><dd id="fee-estimate-unavailable">— <small>미설정</small></dd></div>
+                  <div class="risk-metrics-row"><dt>Funding Payment</dt><dd id="funding-payment-unavailable">— <small>미연결</small></dd></div>
+                  <div class="risk-metrics-row"><dt>Liquidation Price</dt><dd id="liquidation-price-unavailable">— <small>미산출</small></dd></div>
+                </dl>
+                <p id="risk-metrics-help" class="risk-metrics-help">수수료 정책·펀딩 데이터·실제 포지션과 위험 엔진 검증이 없어 예상 비용과 청산가를 제공하지 않습니다. 값이 표시되지 않는 것은 0을 의미하지 않습니다.</p>
+              </section>
               <div class="reduce-only-option" role="group" aria-labelledby="reduce-only-label">
                 <div class="reduce-only-row">
                   <input id="reduce-only" name="reduceOnly" type="checkbox" disabled aria-describedby="reduce-only-help">
@@ -151,6 +164,10 @@
                 </div>
                 <p id="reduce-only-help" class="reduce-only-help">포지션·잔량 검증 API 미연결: 보유 포지션 감소만 허용하는 주문 정책을 확인할 수 없어 사용 불가합니다. 실제 주문·서명은 실행되지 않습니다.</p>
               </div>
+              <details class="risk-capability-details">
+                <summary>미지원 거래 기능과 위험 정보 안내</summary>
+                <p>TP/SL, Cross/Unified Margin, TWAP/Chase 및 자동 청산가 계산은 제공되지 않습니다. 서버 검증과 실계정·테스트넷 연동 전까지 사용할 수 없으며, 현재 화면은 주문 검토 전용입니다.</p>
+              </details>
             </div>
             <noscript><p class="order-warning" role="note">JavaScript가 비활성화되어 모의 주문 미리보기를 실행할 수 없습니다. 실제 주문은 어떤 경우에도 전송되지 않습니다.</p></noscript>
             <p class="order-warning">이 버튼은 주문을 전송하지 않습니다. 입력값으로 미리보기만 생성하며 수수료·청산·실제 위험을 계산하지 않습니다.</p>

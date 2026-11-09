@@ -4,14 +4,18 @@
  */
 import {FORMAT_USD,formatDemoUsdAmount,previewOrderEstimate} from './preview-model.mjs';
 
-export function createDemoOrderReview({market,side,orderType,quantity,leverage,limitPrice}){
+export function createDemoOrderReview({market,side,orderType,quantity,leverage,limitPrice,limitPriceOrigin='USER_INPUT'}){
   if(side!=='BUY'&&side!=='SELL')throw new RangeError('Unsupported preview side');
+  if(limitPriceOrigin!=='USER_INPUT'&&limitPriceOrigin!=='MOCK_DEFAULT')
+    throw new RangeError('Unsupported Limit price source');
   const value=previewOrderEstimate({market,orderType,quantity,leverage,limitPrice});
   const rows=Object.freeze([
     Object.freeze({label:'방향',value:side==='BUY'?'Long / Buy':'Short / Sell'}),
     Object.freeze({label:'주문 유형',value:value.orderType==='MARKET'?'Market · DEMO':'Limit · DEMO'}),
     Object.freeze({label:'마켓',value:value.market+'-USD-PERP'}),
-    Object.freeze({label:'가격 출처',value:value.orderType==='MARKET'?'MOCK Reference':'사용자 입력 Limit Price'}),
+    Object.freeze({label:'가격 출처',value:value.orderType==='MARKET'
+      ?'MOCK Reference'
+      :limitPriceOrigin==='MOCK_DEFAULT'?'가상 기준가 자동 입력 Limit Price':'사용자 입력 Limit Price'}),
     Object.freeze({label:'가격',value:FORMAT_USD.format(value.price)}),
     Object.freeze({label:'수량',value:String(value.quantity)+' '+value.market}),
     Object.freeze({label:'레버리지',value:String(value.leverage)+'× (모의)'}),

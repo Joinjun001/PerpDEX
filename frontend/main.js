@@ -3,7 +3,7 @@ import {createDemoOrderReview,renderDemoOrderReview} from './order-review.mjs';
 import {sampleCandles,sampleCandlePaths} from './sample-candles.mjs';
 
 const byId=(id)=>document.getElementById(id);
-const view={market:'BTC',side:'BUY',orderType:'MARKET',chartMode:'LINE',sampleGroup:4};
+const view={market:'BTC',side:'BUY',orderType:'MARKET',chartMode:'LINE',sampleGroup:4,limitPriceEdited:false};
 const tickets={BTC:'₿',ETH:'◆',SOL:'◎'};
 const prices=new Intl.NumberFormat('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 
@@ -48,6 +48,8 @@ function updateMarket(){
   sampleChange.textContent=(change>=0?'+':'−')+Math.abs(change).toFixed(2)+'%';
   sampleChange.className=change>=0?'positive':'negative';
   byId('limit-price').value=m.price.toFixed(2);
+  // A market change restores the seeded MOCK limit default, not a user quote.
+  view.limitPriceEdited=false;
   byId('quantity-unit').textContent=m.symbol;
   byId('input-unit').textContent=m.symbol;
   byId('book-size-label').textContent='Size ('+m.symbol+')';
@@ -223,6 +225,15 @@ function renderTicket(){
   // assistive technology. Attach it only while validation actually fails.
   byId('quantity').setAttribute('aria-describedby',
     'quantity-help'+(badQuantity?' quantity-error':''));
+  // A Limit form starts with a MOCK_SAMPLE seeded value, and becomes
+  // USER_INPUT only after an actual edit event. Neither is a live quote.
+  const priceSource=isLimit?(view.limitPriceEdited?'USER_INPUT':'MOCK_DEFAULT'):'MOCK_SAMPLE';
+  const source=byId('ticket-price-source');
+  source.textContent=isLimit
+    ?(view.limitPriceEdited?'LIMIT PRICE · USER_INPUT':'LIMIT PRICE · MOCK_DEFAULT')
+    :'REFERENCE · MOCK_SAMPLE';
+  source.dataset.source=priceSource;
+  byId('preview-estimate-source').textContent=priceSource+' · 참고용';
   byId('preview-price-label').textContent=isLimit?'Limit Price (user input)':'Reference price (MOCK)';
 
   const button=byId('preview-order');
@@ -279,6 +290,7 @@ function displayOrderPreview(event){
       market:view.market,side:view.side,orderType:view.orderType,
       quantity:byId('quantity').value,leverage:byId('leverage').value,
       limitPrice:byId('limit-price').value,
+      limitPriceOrigin:view.limitPriceEdited?'USER_INPUT':'MOCK_DEFAULT',
     });
     panel.classList.remove('error');
     renderDemoOrderReview(panel,document,review,{onClose:dismissDemoReview});
@@ -350,6 +362,7 @@ for(const [type,id] of [['MARKET','market-type'],['LIMIT','limit-type']]){
   });
 }
 const onLimitPriceEdit=()=>{
+  view.limitPriceEdited=true;
   const price=byId('limit-price').value;
   // Only a currently visible Limit review with an unchanged valid price
   // survives equivalent formatting edits (e.g. 60000.50 -> 60000.5).
