@@ -345,3 +345,110 @@
 .trade-shell .chart-value-label[data-trend="down"]{
   border-color:#84434e;background:#40252d;color:#ff9ba6;
 }
+
+
+/* UX-HL-06-A — compact trading workspace, with the account panel beneath
+   chart and depth, while the order ticket owns the independent right rail. */
+.trade-shell .topbar{height:58px;padding-inline:18px;gap:20px}
+.trade-shell .topbar .brand-symbol{width:30px;height:30px;font-size:19px;border-radius:8px}
+.trade-shell .topbar .brand-name{font-size:18px}
+.trade-shell .topbar .main-nav{margin:0 auto 0 12px;gap:24px}
+.trade-shell .topbar .main-nav a{font-size:12px}
+.trade-shell .topbar .top-actions{gap:14px}
+.trade-shell .main-content{padding-inline:18px}
+.trade-shell .workspace-heading{padding:10px 2px 9px}
+.trade-shell .workspace-heading>div{gap:11px}
+.trade-shell .workspace-heading .workspace-label{font-size:9px}
+.trade-shell .workspace-heading h1{font-size:13px}
+.trade-shell .workspace-about{padding:5px 9px;font-size:10px}
+.trade-shell .market-strip{min-height:58px;margin-bottom:8px;border-radius:7px}
+.trade-shell .market-strip .strip-heading{width:125px;padding:10px 15px;font-size:10px}
+.trade-shell .market-strip .market-option{padding:7px 13px;gap:8px}
+.trade-shell .market-strip .coin{width:28px;height:28px;font-size:16px}
+.trade-shell .market-strip .market-option b{font-size:11px}
+.trade-shell .market-strip .market-price{margin-top:2px;font-size:10px}
+.trade-shell .market-strip .market-change{font-size:10px}
+.trade-shell .market-metrics{margin-bottom:8px;border-radius:7px}
+.trade-shell .market-metrics-symbol{padding:9px 13px;gap:3px}
+.trade-shell .market-metrics-symbol strong{font-size:12px}
+.trade-shell .market-metrics-symbol>span{font-size:9px}
+.trade-shell .metric-cell{padding:10px 12px;gap:4px}
+.trade-shell .metric-cell dt{font-size:9px}
+.trade-shell .metric-cell dd{font-size:11px}
+.trade-shell .terminal-grid{
+  grid-template-columns:minmax(0,1fr) minmax(218px,19%) minmax(280px,21%);
+  grid-template-areas:"chart book ticket" "account account ticket";
+  grid-template-rows:minmax(0,auto) minmax(230px,auto);
+  gap:8px;
+}
+.trade-shell .terminal-grid>.chart-column{grid-area:chart}
+.trade-shell .terminal-grid>.market-column{grid-area:book;gap:8px}
+.trade-shell .terminal-grid>.order-panel{grid-area:ticket}
+.trade-shell .terminal-grid>.bottom-grid{
+  grid-area:account;grid-template-columns:minmax(0,1fr);
+  margin:0;min-width:0;
+}
+.trade-shell .terminal-grid .panel{border-radius:7px}
+.trade-shell .chart-panel .chart-wrap{min-height:260px;height:330px}
+.trade-shell .terminal-grid>.order-panel{min-height:0}
+.trade-shell .bottom-grid .account-heading{padding:12px 16px}
+.trade-shell .account-tab{padding-block:11px 10px}
+.trade-shell .account-empty{min-height:132px;padding-block:16px 20px}
+.trade-shell .visually-hidden{
+  position:absolute;clip:rect(0,0,0,0);clip-path:inset(50%);
+  width:1px;height:1px;overflow:hidden;white-space:nowrap;
+}
+@media(min-width:1071px) and (max-width:1330px){
+  .trade-shell .market-metrics{grid-template-columns:165px minmax(0,1fr)}
+  .trade-shell .market-metrics-values{grid-template-columns:repeat(6,minmax(0,1fr))}
+  .trade-shell .metric-cell:nth-child(4){border-left:1px solid #263544}
+  .trade-shell .metric-cell:nth-child(n+4){border-top:0}
+}
+@media(max-width:1070px){
+  .trade-shell .terminal-grid{
+    grid-template-columns:minmax(0,1fr) minmax(285px,33%);
+    grid-template-areas:"chart ticket" "book ticket" "account account";
+    grid-template-rows:auto auto auto;
+  }
+  .trade-shell .terminal-grid>.bottom-grid{grid-area:account}
+  .trade-shell .market-strip .strip-heading{width:auto}
+  .trade-shell .chart-panel .chart-wrap{min-height:245px;height:270px}
+}
+@media(max-width:760px){
+  .trade-shell .terminal-grid{
+    grid-template-columns:minmax(0,1fr);
+    grid-template-areas:"chart" "ticket" "book" "account";
+    grid-template-rows:auto;
+  }
+  .trade-shell .terminal-grid>.market-column{grid-area:book}
+  .trade-shell .market-metrics-values{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:650px){
+  .trade-shell .topbar{height:auto;min-height:60px;flex-wrap:wrap;gap:0 10px;padding:7px 12px 0}
+  .trade-shell .topbar .main-nav{
+    display:flex;order:3;width:100%;height:39px;min-width:0;
+    margin:3px 0 0;gap:20px;overflow-x:auto;
+  }
+  .trade-shell .topbar .main-nav a{min-height:39px;font-size:11px}
+  .trade-shell .topbar .top-actions{margin-left:auto}
+  .trade-shell .topbar .network-indicator{display:none}
+  .trade-shell .main-content{padding-inline:12px}
+  .trade-shell .workspace-heading{padding-block:10px}
+  .trade-shell .workspace-about{display:none}
+  .trade-shell .market-strip{display:block}
+  .trade-shell .market-strip .strip-heading{
+    padding:6px 10px;border-right:0;border-bottom:1px solid var(--border);
+    width:auto;flex-direction:row;align-items:center;gap:8px;
+  }
+  .trade-shell .market-strip .strip-heading span{margin:0}
+  .trade-shell .market-strip .market-option{padding:9px 7px;gap:4px}
+  .trade-shell .market-strip .coin{width:24px;height:24px;font-size:15px}
+  .trade-shell .market-strip .market-price{font-size:9px}
+  .trade-shell .chart-panel .chart-wrap{min-height:195px;height:225px}
+}
+@media(max-width:390px){
+  .trade-shell .topbar .wallet-btn{height:32px;padding-inline:8px;font-size:10px}
+  .trade-shell .topbar .wallet-btn span{display:none}
+  .trade-shell .market-metrics-symbol{padding:9px 11px}
+  .trade-shell .metric-cell{padding:8px 10px}
+}

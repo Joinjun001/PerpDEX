@@ -6,7 +6,6 @@ import {fileURLToPath} from 'node:url';
 const read=name=>readFileSync(fileURLToPath(new URL('./'+name,import.meta.url)),'utf8');
 const html=read('trade.html');
 const css=read('trade.css');
-const base=read('styles.css');
 
 test('UX-HL-01-S1 mobile portfolio shortcut targets existing account section without script',()=>{
   assert.match(html,/id="portfolio"/);
@@ -14,8 +13,8 @@ test('UX-HL-01-S1 mobile portfolio shortcut targets existing account section wit
   assert.match(html,/<a class="workspace-portfolio-link" href="#portfolio">계정 현황[^<]*<\/a>/);
   assert.match(html,/connect-src 'none'/);
 });
-test('UX-HL-01-S1 hidden desktop shortcut becomes a touch-accessible mobile link',()=>{
-  assert.match(base,/@media\(max-width:650px\)[\s\S]*?\.topbar \.main-nav\{display:none\}/);
+test('UX-HL-01-S1 계정 단축 링크는 모바일에서 활성화되고 거래 내비게이션도 유지된다',()=>{
+  assert.match(css, /\.topbar \.main-nav\{\s*display:flex;order:3;width:100%/);
   assert.match(css,/\.workspace-portfolio-link\{display:none\}/);
   const rule=css.match(/@media\(max-width:650px\)\{[^}]*\}/g)?.join('')??'';
   assert.match(rule,/\.workspace-portfolio-link/);
