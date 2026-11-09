@@ -4,6 +4,8 @@
 상태: **제품 레퍼런스 확정 / UX-HL-01-A 로컬 완료, 5개 계정 탭 B1 구현, 실계정/테스트넷 연동 미구현**
 최종 목표: Ethereum Sepolia 테스트넷 BTC-USD-PERP 무기한 선물 거래 MVP.
 
+> **2026-11-10 화면 구체화:** 사용자 제공 거래 화면을 바탕으로 실제 구현 영역·비율·반응형·상태·검증 조건을 `docs/architecture/HYPERLIQUID-TRADE-SCREEN-SPEC.md`에 상세화했습니다. 신규 계획 TASK는 `docs/tasks/UX-HL-06-visual-terminal-rebuild/`이며 구현·배포 완료로 간주하지 않습니다. 기존 UX-HL-01~05 및 M5~M9 선행 게이트를 유지합니다.
+
 ## 기본 원칙
 
 - Hyperliquid를 **가장 중요한 거래 UX 레퍼런스**로 삼는다. 핵심은 거래 화면의 정보 밀도, 사용자 흐름, 포지션·잔고·위험 정보 표시다.

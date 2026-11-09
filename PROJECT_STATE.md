@@ -7,6 +7,7 @@
 - 기준: 실제 소스 코드와 Git 상태를 최우선으로 판단
 - 현재 마일스톤: **M5 — Perpetual Futures 초기·유지증거금/레버리지 위험 엔진 (로컬 모의 구현)**
 - 현재 TASK: **M5-T3-C3-C2-B2-B2 — 승인된 전용 PostgreSQL 실제 다중 세션·role·트리거 실 인수 (Next; B2-B1 로컬 트리거 카탈로그 검사 완료, 실 PG 미실행)**
+- **거래 UI 상세 설계 추가 (2026-11-10):** 사용자 제공 Hyperliquid 거래 화면 기반 구조·레이아웃·데이터 출처·반응형·접근성·인수 조건을 `docs/architecture/HYPERLIQUID-TRADE-SCREEN-SPEC.md`에 명세하고 UX-HL-06(A~F) 계획 TASK/SPEC/TODO/QA/RESULT를 신설. **문서 작성만 완료, 소스 수정·테스트·배포 미수행**. 기존 M5 현재 TASK와 UX-HL-01~05 완료/대기 상태, 지갑/실거래/운영 배포 제한 유지.
 - **최종 제품 목표 (2026-10-25): M9 Sepolia 테스트넷 Perpetual Futures 거래 MVP.** 실가치 없는 테스트 전용 ERC-20, MetaMask 지갑, EIP-712 signed 주문, Long/Short 포지션, M8 선물 담보 잠금·검증 정산, 테스트 토큰 출금까지 E2E 구현한다. M5~M8은 선행 안전 게이트로 유지한다. GitHub Pages는 현재 Simulation Preview이며 테스트넷 거래 기능과 미연결. 세부 목표·인수 기준: docs/releases/SEPOLIA-TESTNET-TRADING-MVP.md. Sepolia 컨트랙트 배포·트랜잭션·테스트 ETH 사용·실제 API 공개는 별도 승인 전 실행하지 않는다. 현재 기존 TASK의 상태를 제품 방향 변경만으로 완료 처리하지 않는다.
 - **병렬 UX TASK (2026-10-25): UX-HL-01-A/B1/B2-B1/B2-B2-A/B2-B2-B1 로컬 완료.** 정적 3열 거래 UI·ARIA 5탭·안전한 조회 계약/렌더러 + 외부 인증 콜백 전제의 오프라인 read flow. 기존 GET /api/orders는 계정별 소유권 인증 없음 → 실 UI에 미연결. frontend 55/55 및 기존 backend 주문 read HTTP 6/6 PASS. 다음 B2-B2-B2는 실제 계정 read API/지갑 인증 의존, 독립 작업 UX-HL-01-C는 브라우저 접근성 인수. M5 backend current task 및 배포/실거래 제한 유지.
 - **병렬 주문 UX TASK (2026-10-25): UX-HL-02-A/B1/B2-A 로컬 완료.** Market/Limit·Long/Short DEMO 미리보기/9항목 리뷰, 실제 main.js 이벤트 DOM 통합 7건 및 잘못된 submit의 수량/Limit 입력 focus 보완. 프런트 79/79 PASS, JS/TS 검사 PASS. 브라우저 미가용으로 B2-B 실제 viewport/스크린리더 인수는 미완료. 계정 API/지갑·실거래 미연결, M5 current TASK 및 push/배포 제한 불변.

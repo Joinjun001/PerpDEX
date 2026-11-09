@@ -44,6 +44,13 @@
 
 PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성은 **Hyperliquid**를 주요 참고 제품으로 삼는다. 정보 계층·주문 조작 편의성·포지션/주문 이력 통합을 참고하되 브랜드·원본 화면·코드를 복제하지 않는다. P0: 시장 정보 헤더, 차트/호가/주문 3열 터미널, 포지션/현재 주문/이력 하단 탭, Market/Limit 티켓. 자세한 구현 우선순위 및 안전 기준: `docs/architecture/HYPERLIQUID-UX-REFERENCE.md`. Sepolia 기반 오프체인 아키텍처를 Hyperliquid 자체 L1과 동등하다고 표현하지 않는다.
 
+### 첨부 거래 화면 기반 터미널 리빌드 계획 (2026-11-10)
+
+- **UX-HL-06 (Planned / 문서만 완료):** 사용자가 제공한 Hyperliquid 거래 화면의 정보 구조를 참고해, PerpDEX의 3열 차트/호가/주문과 하단 계정 패널을 밀도 높은 데스크톱 거래 워크스페이스로 정비한다. 1536px 기준 차트 약 60~64%, 오더북 18~21%, 주문 티켓 18~22%; 모바일에서는 시장→차트→주문→호가→계정 순서. 레퍼런스 수치·상표·리소스 복제 및 실제 거래 기능 활성화 금지.
+- **구현 순서:** 06-A 레이아웃/시장 바 → 06-B 차트/샘플 표현 → 06-C 호가/최근 거래 탭 → 06-D 주문 패널/위험 수치 출처 → 06-E 계정 하단 워크스페이스 → 06-F Chromium 반응형/접근성 인수. 각 단계는 독립 구현·테스트·문서 갱신을 요구한다.
+- **안전 게이트:** `MOCK_SAMPLE` / `UNAVAILABLE` / `VERIFIED_TESTNET`를 혼동하지 않고, Cross·Unified·TP/SL·TWAP·Chase·실지갑·실주문 등은 사전 조건 없이 활성화하지 않는다. 기존 UX-HL-01~05의 상태와 M5 활성 TASK는 그대로 유지한다.
+- **문서:** `docs/architecture/HYPERLIQUID-TRADE-SCREEN-SPEC.md`, `docs/tasks/UX-HL-06-visual-terminal-rebuild/{SPEC,TODO,QA,RESULT}.md`.
+
 ### Hyperliquid UX TASK 진행
 
 - **UX-HL-01-A (Local Completed)**: 차트·호가/최근 체결·주문 폼 3열 터미널, 반응형 시장 정보 바, 고정 MOCK reference/change와 미연결 Mark/Oracle/Funding/OI 구분. 프런트 테스트 15/15 PASS. 문서: docs/tasks/UX-HL-01-terminal-layout/.
