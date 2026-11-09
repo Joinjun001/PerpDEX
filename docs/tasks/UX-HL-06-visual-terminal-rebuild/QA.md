@@ -211,3 +211,27 @@
 
 - F3a: 현재 통과한 오프라인 근거와 브라우저 인수 미완료 항목을 매트릭스로 대조하고, 릴리스 준비 상태/누락된 사용성 인수 증거를 문서로 고정. 실제 브라우저 인수를 통과했다고 표시하지 않음.
 - B2 실 OHLCV/거래량 및 E2 Balances는 신뢰 출처 미확보로 미구현 유지.
+
+
+## 9회차 UX-HL-06-F3a — 2026-11-10
+
+### 감사 범위와 재검증
+
+- 시작 Git clean / 기준 `4f082d8` / `main...origin/main [ahead 9]`. `git log -13 --oneline`과 각 작업 커밋의 `git show --name-only`로 A1/A2(`3446d6f`), B1(`413e5b5`), C1(`309d9f1`), C2a(`709ddff`), D1(`09b1eba`), D2(`aa4df30`), E1(`bdbe07b`), F2a(`4f082d8`)를 대조.
+- 구현 소스와 대표 회귀 파일을 확인하여 `ACCEPTANCE-MATRIX.md`에 기능별 커밋·데이터 출처·인수 상태와 실제 릴리스 차단 조건을 명세.
+- 수정 대상의 신규 독립 소스 결함은 재현되지 않음. 이번 회차에는 임의의 기능 추가나 기존 기능 리팩터링을 수행하지 않고 문서만 갱신.
+- 전체 프런트엔드 `node --test frontend/*.test.mjs`: **261/261 PASS**, 실패 0, 27개 테스트 파일. JavaScript 문법, HTMLParser 구조·중복 ID·CSP·5개 숨김 계정 표, `git diff --check`는 최종 커밋 전 재검증.
+- `docs/releases/SEPOLIA-TESTNET-TRADING-MVP.md`와 `PROJECT_STATE.md`의 M5 검증 미완료, M6/M7 위험 정책, M8 담보 잠금·정산, M9 지갑/체결/출금 E2E·운영 승인 게이트를 확인.
+
+### 브라우저·접근성 미완료 (오프라인 PASS와 별도)
+
+- 일반 사용자 `chromiumSandbox:true`의 Chromium Headless Shell 재실행은 `Chromium sandboxing failed!` 로 페이지 렌더링 전에 실패. 보안 우회 미사용.
+- 1536×960, 1280×800, 768×1024, 390×844 및 200% 확대, 실제 수평 오버플로/클리핑/CTA 가시성, 북/계정 표 탐색, 키보드 기본 동작/스크린리더 검수에 대한 증거가 없음.
+- A3, C2b, F1, F2b **미완료**; F3a 문서 정리만 완료. 최종 F3 판정은 **미완료**.
+- `MOCK_SAMPLE`/`MOCK_DEFAULT`/`USER_INPUT`/`UNAVAILABLE`은 로컬 화면/모델 상태만 가리킴. `VERIFIED_TESTNET` 공급자 인수가 완료됐다는 뜻 아님.
+
+### 후속/차단
+
+- 신규 파일 `docs/tasks/UX-HL-06-visual-terminal-rebuild/ACCEPTANCE-MATRIX.md`에 증거 매트릭스, 범위 제한, 재개 조건, 테스트넷 선행 단계와 승인 제한을 기록.
+- 안전한 브라우저 환경에서 A3/C2b/F1/F2b 인수를 수행하고 발견된 결함만 회귀한 후 최종 F3 판정 가능. B2/E2는 신뢰된 데이터 공급자 없어서 보류.
+- 원격 push, 실제 배포, 자격증명, 운영 DB, 실 RPC, 실제 자금/거래, 테스트넷 서명·트랜잭션 미실행.

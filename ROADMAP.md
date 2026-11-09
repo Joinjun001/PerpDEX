@@ -55,6 +55,7 @@ PerpDEX의 핵심 거래 UI·사용자 흐름·주문 및 위험 정보 구성�
 - **UX-HL-06-D2 (로컬 구현, 2026-11-10):** 주문 가격 출처 MOCK_SAMPLE/MOCK_DEFAULT/USER_INPUT 정확화, 계정 증거금 3종·Fees/Funding/Liquidation Price 미연결 명시 및 비활성 옵션 안내. 신규 10건 포함 프런트 245/245 PASS. Chromium sandbox 실패로 A3/C2b/F 인수 미완료. 다음 E1.
 - **UX-HL-06-E1 (로컬 구현, 2026-11-10):** 기존 5개 account tab 미연결/인증 후 정상 빈 조회/로딩/실패 구분 배지, 기본 표 비노출, 가로 넘침 시 스크롤 방향·모바일 접근성 개선. 신규 10건 포함 프런트 255/255 PASS. Chromium sandbox 실패로 A3/C2b/F 인수 미완료. 다음 F2a 오프라인 접근성 통합 점검, E2 보류.
 - **UX-HL-06-F2a (오프라인 감사, 2026-11-10):** 시장·차트·Order Book/Trades·주문 검토·계정 5탭의 키보드/ARIA/출처 통합 검사와 Limit 출처 변경 후 과거 리뷰 무효화 결함 수정. 신규 6건 포함 프런트 261/261 PASS. Chromium sandbox 실패로 A3/C2b/F1/F2b 인수 미완료; 다음 F3a 오프라인 증거/릴리스 게이트 정리.
+- **UX-HL-06-F3a (근거/릴리스 게이트 감사, 2026-11-10):** `docs/tasks/UX-HL-06-visual-terminal-rebuild/ACCEPTANCE-MATRIX.md`에 A1/A2·B1·C1·C2a·D1/D2·E1·F2a 실커밋/소스/테스트/출처 추적, M5~M9·B2/E2 선행 게이트와 실제 브라우저 잔여 인수 정리. 프런트 261/261 PASS. 샌드박스 Chromium 불가로 A3/C2b/F1/F2b 및 최종 F3 미완료. 다음은 안전한 브라우저 환경의 실제 인수, 별도 승인 없는 배포 금지.
 - **구현 순서:** 06-A 레이아웃/시장 바 → 06-B 차트/샘플 표현 → 06-C 호가/최근 거래 탭 → 06-D 주문 패널/위험 수치 출처 → 06-E 계정 하단 워크스페이스 → 06-F Chromium 반응형/접근성 인수. 각 단계는 독립 구현·테스트·문서 갱신을 요구한다.
 - **안전 게이트:** `MOCK_SAMPLE` / `UNAVAILABLE` / `VERIFIED_TESTNET`를 혼동하지 않고, Cross·Unified·TP/SL·TWAP·Chase·실지갑·실주문 등은 사전 조건 없이 활성화하지 않는다. 기존 UX-HL-01~05의 상태와 M5 활성 TASK는 그대로 유지한다.
 - **문서:** `docs/architecture/HYPERLIQUID-TRADE-SCREEN-SPEC.md`, `docs/tasks/UX-HL-06-visual-terminal-rebuild/{SPEC,TODO,QA,RESULT}.md`.
