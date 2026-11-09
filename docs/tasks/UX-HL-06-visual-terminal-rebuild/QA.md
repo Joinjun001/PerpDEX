@@ -179,3 +179,35 @@
 - 일반 사용자 및 chromiumSandbox:true의 Headless Shell 기동 재시도 결과 Chromium sandboxing failed. 보안 우회 옵션 사용 안 함.
 - 1536/1280/768/390, 200% 확대 및 실제 픽셀/클릭/키보드/스크린리더/표 스크롤 인수 A3/C2b/F1·F2 실브라우저 항목 미완료. 가상 DOM과 CSS 정적 테스트를 실제 브라우저 인수로 주장하지 않음.
 - 다음 독립 작업: UX-HL-06-F2a — 오프라인 상태, 키보드·ARIA·출처·미지원 기능의 정적/DOM 통합 감사와 결함 보완. E2 신뢰 계정 데이터 미충족으로 보류, F 실브라우저 인수 미완료 유지.
+
+
+## 8회차 UX-HL-06-F2a — 2026-11-10
+
+### 시작 상태 및 감사 대상
+
+- Git 기준: bdbe07b / clean / main...origin/main [ahead 8]. PROJECT_STATE, ROADMAP, UX-HL-06 SPEC/TODO/QA/RESULT, 설계 레퍼런스와 market-picker, chart, market-depth-tabs, mobile-market-depth, order-preview/review, account-tabs 및 오프라인 account renderer/hint의 소스·테스트 점검.
+- 시장: aria-pressed 전환, 합성 시세 aria-label/실제 시세 아님 명시, aria-live 선택 계약 알림. Market picker에 그룹 레이블 추가.
+- 차트: Line/OHLC aria-pressed, 4/8 그룹 enable/disable, SVG-native display, 생성 가격의 출처, 실제 시간축/Volume/Indicators 비활성 확인.
+- 호가: Book/Trades 탭 roving tabindex, Arrow/Home/End, 모바일 접기, 시장 변경 시 가상 호가/체결 재계산, 선택 탭 보존. 모의 가상 깊이/스프레드 유지.
+- 주문: Mock reference, Limit 자동 MOCK_DEFAULT, Limit 직접 USER_INPUT, 금액 미리보기·리뷰의 출처 일치 및 비활성 계정·수수료·펀딩/청산가 확인.
+- 계정: 5개 탭만 제공, 조회 전 hidden 빈 테이블, disconnected != 조회 성공 후 empty, keyboard focus/overflow hint 및 인증 전 데이터 불허 확인.
+
+### 실제 수정된 독립 결함
+
+- 이전에는 자동 입력 MOCK_DEFAULT 가격으로 리뷰를 생성한 뒤 같은 숫자로 Limit Price를 편집하면 상단 출처만 USER_INPUT으로 바뀌고 과거 리뷰의 MOCK_DEFAULT 출처가 유지될 수 있었음.
+- frontend/main.js에서 검토 시점의 Limit price origin을 보존하고, 현재 사용자 편집 출처와 다르면 숫자가 같더라도 과거 리뷰를 hidden 처리함. 기존 USER_INPUT에서 동등한 숫자 서식 변경 시에는 기존 리뷰 유지, Escape 키로 검토 닫기/Preview 버튼 focus 복귀 유지.
+- Limit 가격 레이블은 기본값일 때 Limit Price (MOCK default), 사용자 편집 이후 Limit Price (user input)으로 표시. frontend/trade.html에 시장 그룹의 접근성 이름과 선택 시장 aria-live/atomic 설명을 명시.
+- 기존 거래 계산, authenticated record 계약, 실제 데이터/RPC/결제/지갑 및 미지원 옵션의 비활성 상태 불변.
+
+### 실행 검증과 한계
+
+- frontend/order-interactions.test.mjs 실제 main.js 이벤트 기반 신규 2건: 같은 숫자의 출처 변경/기존 Review 무효화/후속 재검토/키보드 Escape 포커스 복귀, 그리고 차트/Book·Trades 키보드 탐색과 주문 검토 독립성·시장 변경 무효화 및 MOCK 호가 동기화.
+- frontend/ux-hl-06-f2a-offline-audit.test.mjs 신규 4건: 시장/차트 ARIA, 호가·모바일 탭/무JS 복구, 계정 5탭/검증 없는 표 숨김, 출처·CSP·비활성 거래 게이트 정적 교차 검증. 기존 가격 레이블/출처 정적 테스트는 변경된 정확한 계약에 맞춰 갱신.
+- 프런트 전체 **261/261 PASS** (기준 255/255 + 신규 6). JS 문법, HTML 파싱, 중복 DOM ID/CSP, Git 변경 검사는 최종 커밋 전에 다시 확인.
+- 일반 사용자 chromiumSandbox:true에서 보존된 Headless Shell 실행 재시도: Chromium sandboxing failed. --no-sandbox/chromiumSandbox:false 미사용. 실제 브라우저 화면·터치·스크린리더·폭 1536/1280/768/390 및 200% 확대 인수 미완료.
+- **완료 판정은 F2a 오프라인 접근성/동작 감사에 한정**; A3, C2b, F1, F2b 브라우저 인수/최종 F3 확정은 미완료.
+
+### 후속
+
+- F3a: 현재 통과한 오프라인 근거와 브라우저 인수 미완료 항목을 매트릭스로 대조하고, 릴리스 준비 상태/누락된 사용성 인수 증거를 문서로 고정. 실제 브라우저 인수를 통과했다고 표시하지 않음.
+- B2 실 OHLCV/거래량 및 E2 Balances는 신뢰 출처 미확보로 미구현 유지.

@@ -234,7 +234,9 @@ function renderTicket(){
     :'REFERENCE · MOCK_SAMPLE';
   source.dataset.source=priceSource;
   byId('preview-estimate-source').textContent=priceSource+' · 참고용';
-  byId('preview-price-label').textContent=isLimit?'Limit Price (user input)':'Reference price (MOCK)';
+  byId('preview-price-label').textContent=isLimit
+    ?(view.limitPriceEdited?'Limit Price (user input)':'Limit Price (MOCK default)')
+    :'Reference price (MOCK)';
 
   const button=byId('preview-order');
   button.className='submit-order '+(sideBuy?'buy-submit':'sell-submit');
@@ -281,6 +283,7 @@ function dismissDemoReview(){
 }
 let reviewedQuantity=null;
 let reviewedLimitPrice=null;
+let reviewedLimitPriceOrigin=null;
 let reviewedLeverage=null;
 function displayOrderPreview(event){
   event.preventDefault();
@@ -296,6 +299,8 @@ function displayOrderPreview(event){
     renderDemoOrderReview(panel,document,review,{onClose:dismissDemoReview});
     reviewedQuantity=Number(byId('quantity').value);
     reviewedLimitPrice=view.orderType==='LIMIT'?Number(byId('limit-price').value):null;
+    reviewedLimitPriceOrigin=view.orderType==='LIMIT'
+      ?(view.limitPriceEdited?'USER_INPUT':'MOCK_DEFAULT'):null;
     reviewedLeverage=Number(byId('leverage').value);
   }catch{
     // A keyboard-triggered form submission can occur even when the preview
@@ -367,7 +372,8 @@ const onLimitPriceEdit=()=>{
   // Only a currently visible Limit review with an unchanged valid price
   // survives equivalent formatting edits (e.g. 60000.50 -> 60000.5).
   const unchanged=view.orderType==='LIMIT'&&!byId('order-result').hidden&&
-    validPreviewLimitPrice(price)&&Number(price)===reviewedLimitPrice;
+    validPreviewLimitPrice(price)&&Number(price)===reviewedLimitPrice&&
+    reviewedLimitPriceOrigin==='USER_INPUT';
   renderTicket();
   if(!unchanged)byId('order-result').hidden=true;
 };

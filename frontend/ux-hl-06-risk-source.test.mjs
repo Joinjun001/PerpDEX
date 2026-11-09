@@ -18,7 +18,10 @@ test('UX-HL-06-D2: 가격 출처는 초기 MOCK 상태와 Limit 사용자 입력
   assert.match(js,/LIMIT PRICE · MOCK_DEFAULT/);
   assert.match(js,/LIMIT PRICE · USER_INPUT/);
   assert.match(js,/byId\('preview-estimate-source'\)\.textContent=priceSource\+' · 참고용'/);
-  assert.match(js,/byId\('preview-price-label'\)\.textContent=isLimit\?'Limit Price \(user input\)':'Reference price \(MOCK\)'/);
+  assert.match(js,/byId\('preview-price-label'\)\.textContent=isLimit/);
+  assert.match(js,/'Limit Price \(MOCK default\)'/);
+  assert.match(js,/'Limit Price \(user input\)'/);
+  assert.match(js,/'Reference price \(MOCK\)'/);
   assert.match(ticket,/초기 값은 MOCK_SAMPLE 기준 가격의 자동 입력값이며, 수정 후 USER_INPUT으로 표시합니다/);
 });
 test('UX-HL-06-D2: 세 가지 계정 증거금과 세 가지 위험 지표는 숫자가 아닌 미연결 상태를 표시한다',()=>{

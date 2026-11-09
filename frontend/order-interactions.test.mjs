@@ -211,7 +211,7 @@ test('B2-A Market/Limit and Long/Short simulated button clicks update ARIA and q
   assert.equal(id('limit-price').disabled,false);
   assert.equal(id('limit-type').getAttribute('aria-pressed'),'true');
   assert.equal(id('market-type').getAttribute('aria-pressed'),'false');
-  assert.equal(id('preview-price-label').textContent,'Limit Price (user input)');
+  assert.equal(id('preview-price-label').textContent,'Limit Price (MOCK default)');
   id('sell-tab').dispatch('click');
   assert.equal(id('sell-tab').getAttribute('aria-pressed'),'true');
   assert.equal(id('buy-tab').getAttribute('aria-pressed'),'false');
@@ -1258,7 +1258,7 @@ test('UX-HL-06-D2 Market/Limit mode updates source badges without changing accou
   assert.equal(id('ticket-price-source').textContent,'LIMIT PRICE · MOCK_DEFAULT');
   assert.equal(id('ticket-price-source').dataset.source,'MOCK_DEFAULT');
   assert.equal(id('preview-estimate-source').textContent,'MOCK_DEFAULT · 참고용');
-  assert.equal(id('preview-price-label').textContent,'Limit Price (user input)');
+  assert.equal(id('preview-price-label').textContent,'Limit Price (MOCK default)');
   assert.equal(id('preview-order').disabled,false);
   id('order-form').dispatch('submit');
   assert.equal(id('order-result').children[1].children[3].children[1].textContent,
@@ -1268,6 +1268,7 @@ test('UX-HL-06-D2 Market/Limit mode updates source badges without changing accou
   assert.equal(id('ticket-price-source').textContent,'LIMIT PRICE · USER_INPUT');
   assert.equal(id('ticket-price-source').dataset.source,'USER_INPUT');
   assert.equal(id('preview-estimate-source').textContent,'USER_INPUT · 참고용');
+  assert.equal(id('preview-price-label').textContent,'Limit Price (user input)');
   assert.equal(id('reference-price').textContent,'$25,000.50');
   assert.notEqual(id('margin').textContent,initialMargin);
   assert.equal(id('ticket-price-source').dataset.source,'USER_INPUT');
@@ -1324,4 +1325,66 @@ test('UX-HL-06-D2 the same market preserves a user-edited Limit price and its so
   assert.equal(id('limit-price').value,'3405.20','new market resets to synthetic seed');
   assert.equal(id('ticket-price-source').dataset.source,'MOCK_DEFAULT');
   assert.equal(id('preview-estimate-source').textContent,'MOCK_DEFAULT · 참고용');
+});
+
+
+test('UX-HL-06-F2a seeded MOCK_DEFAULT review is invalidated when an equivalent Limit value becomes USER_INPUT',async()=>{
+  const app=await boot(),id=app.id;
+  id('limit-type').dispatch('click');
+  assert.equal(id('preview-price-label').textContent,'Limit Price (MOCK default)');
+  assert.equal(id('ticket-price-source').dataset.source,'MOCK_DEFAULT');
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  assert.equal(id('order-result').didFocus,true);
+  assert.equal(id('order-result').children[1].children[3].children[1].textContent,
+    '가상 기준가 자동 입력 Limit Price');
+  const before=Number(id('limit-price').value);
+  id('limit-price').value=before.toFixed(2);
+  id('limit-price').dispatch('input');
+  assert.equal(id('ticket-price-source').dataset.source,'USER_INPUT');
+  assert.equal(id('preview-price-label').textContent,'Limit Price (user input)');
+  assert.equal(id('order-result').hidden,true,
+    'same numeric price but changed provenance must invalidate stale review');
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  assert.equal(id('order-result').children[1].children[3].children[1].textContent,
+    '사용자 입력 Limit Price');
+  id('limit-price').value=String(before);
+  id('limit-price').dispatch('input');
+  assert.equal(id('order-result').hidden,false,
+    'same numeric value and unchanged USER_INPUT provenance preserves review');
+  const escape=id('order-result').dispatch('keydown',{key:'Escape'});
+  assert.equal(escape.defaultPrevented,true);
+  assert.equal(id('order-result').hidden,true);
+  assert.equal(id('preview-order').didFocus,true);
+});
+
+test('UX-HL-06-F2a chart and depth keyboard views preserve review; changing market invalidates it',async()=>{
+  const app=await boot(),id=app.id;
+  const depth=initMarketDepthTabs(app.document);
+  id('order-form').dispatch('submit');
+  assert.equal(id('order-result').hidden,false);
+  const originalPrice=id('asks').children[0].children[0].textContent;
+  id('chart-candle-mode').dispatch('click');
+  id('chart-group-8').dispatch('click');
+  assert.equal(id('chart-candle-mode').getAttribute('aria-pressed'),'true');
+  assert.equal(id('chart-group-8').getAttribute('aria-pressed'),'true');
+  assert.match(id('market-chart').getAttribute('aria-label'),/Sample OHLC/);
+  assert.equal(id('order-result').hidden,false);
+  const keyboard=id('market-depth-tab-book').dispatch('keydown',{key:'ArrowRight'});
+  assert.equal(keyboard.defaultPrevented,true);
+  assert.equal(depth.selected,'trades');
+  assert.equal(id('market-depth-tab-trades').getAttribute('aria-selected'),'true');
+  assert.equal(id('market-depth-book').hidden,true);
+  assert.equal(id('market-depth-trades').hidden,false);
+  assert.equal(id('order-result').hidden,false);
+  app.market('ETH').dispatch('click');
+  assert.equal(id('order-result').hidden,true,'market switch must hide stale review');
+  assert.equal(depth.selected,'trades','market switch must not reset depth keyboard tab');
+  assert.equal(id('market-stats-symbol').textContent,'ETH-USD-PERP');
+  assert.notEqual(id('asks').children[0].children[0].textContent,originalPrice);
+  assert.match(id('chart-mode-description').textContent,/Sample OHLC.*MOCK_SAMPLE/);
+  assert.equal(id('ticket-price-source').dataset.source,'MOCK_SAMPLE');
+  assert.equal(id('reduce-only').disabled,true);
+  assert.equal(id('preview-order').disabled,false);
 });

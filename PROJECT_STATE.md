@@ -7,6 +7,7 @@
 - 기준: 실제 소스 코드와 Git 상태를 최우선으로 판단
 - 현재 마일스톤: **M5 — Perpetual Futures 초기·유지증거금/레버리지 위험 엔진 (로컬 모의 구현)**
 - 현재 TASK: **M5-T3-C3-C2-B2-B2 — 승인된 전용 PostgreSQL 실제 다중 세션·role·트리거 실 인수 (Next; B2-B1 로컬 트리거 카탈로그 검사 완료, 실 PG 미실행)**
+- **UX-HL-06-F2a 오프라인 통합 감사 (2026-11-10):** 시장/차트/호가·모바일/주문/계정 5탭 ARIA·MOCK/UNAVAILABLE·숨김·키보드 회귀. Limit 기본 가격과 동일한 숫자를 사용자가 편집했을 때 출처가 바뀌고도 이전 리뷰가 남던 결함 수정; Market picker 그룹·선택 시장 live announcement 추가. 신규 6건 포함 프런트 261/261 PASS. Chromium sandbox 실패로 A3/C2b/F1/F2b 실제 브라우저/스크린리더 인수 미완료. 다음 F3a 오프라인 완료/잔여 인수 매트릭스. 원격 push·배포/실거래 제한 유지.
 - **UX-HL-06-E1 로컬 구현 (2026-11-10):** 하단 5개 계정 탭 유지, disconnected/loading/인증 후 empty/error 배지 구분, JS 없는 기본 표 숨김, 실제 표 가로 넘침 시 방향별 모바일 안내 및 키보드/ARIA 회귀. 신규 10건 포함 프런트 255/255 PASS. Chromium sandbox 실패로 A3/C2b/F 화면 인수 미완료. 다음 F2a 오프라인 통합·접근성 감사, E2 신뢰 조회 게이트 미충족. 원격 push/배포·실거래 금지 유지.
 - **UX-HL-06-D2 로컬 구현 (2026-11-10):** Market MOCK_SAMPLE / Limit MOCK_DEFAULT→USER_INPUT 표시, 시장 변경에 따른 출처 초기화와 동일 시장 재선택 보존. 모의 Indicative margin·계정 3종 미연결·Fee/Funding/Liquidation 미제공 구분, Reduce Only disabled와 미지원 거래 옵션 안내. 프런트 신규 10건 포함 245/245 PASS. Chromium sandbox 초기화 실패로 A3/C2b/F 실제 화면 인수 미완료. 다음 E1, M5~M9 선행 조건과 원격 push/배포·실거래 금지 유지.
 - **UX-HL-06-D1 로컬 구현 (2026-11-10):** 우측 Order Preview에서 Side/Type·수량/Limit/Leverage → MOCK 비용 → Preview CTA → Review → 계정·위험 UNAVAILABLE 순으로 DOM/시각 계층 개선. 가격 출처 REFERENCE MOCK_SAMPLE, 계정 미연결 표시, no-JS 비활성 상태 및 기존 검토/키보드 계약 유지. 신규 5건 포함 프런트 235/235 PASS. Chromium sandbox 실패로 A3/C2b/F 실화면 인수 미완료. 다음 D2, M5~M9/실거래·원격 push/배포 금지 유지.
