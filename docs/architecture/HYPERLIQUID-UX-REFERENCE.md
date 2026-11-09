@@ -4,7 +4,7 @@
 상태: **제품 레퍼런스 확정 / UX-HL-01-A 로컬 완료, 5개 계정 탭 B1 구현, 실계정/테스트넷 연동 미구현**
 최종 목표: Ethereum Sepolia 테스트넷 BTC-USD-PERP 무기한 선물 거래 MVP.
 
-> **2026-11-10 화면 구체화:** 사용자 제공 거래 화면의 영역·비율·반응형·상태·검증 조건을 `docs/architecture/HYPERLIQUID-TRADE-SCREEN-SPEC.md`에 상세화했습니다. `docs/tasks/UX-HL-06-visual-terminal-rebuild/`의 A1/A2, B1(Line/Sample OHLC 전환), C1(Order Book/Trades 탭·모바일 접기 연계)은 로컬 구현·회귀 검증 중이며 실제 브라우저 인수(A3/F)는 미완료입니다. 실제 시간봉·거래량·지표는 데이터 출처 미검증으로 disabled입니다. UX-HL-01~05 및 M5~M9 선행 게이트를 유지합니다.
+> **2026-11-10 화면 구체화:** 사용자 제공 거래 화면의 영역·비율·반응형·상태·검증 조건을 `docs/architecture/HYPERLIQUID-TRADE-SCREEN-SPEC.md`에 상세화했습니다. `docs/tasks/UX-HL-06-visual-terminal-rebuild/`의 A1/A2, B1(Line/Sample OHLC 전환), C1(Order Book/Trades 탭·모바일 접기 연계), C2a(합성 호가 숫자·스프레드 가독성)는 로컬 구현·회귀 검증 중이며 실제 브라우저 인수(A3/F)는 미완료입니다. 실제 시간봉·거래량·지표는 데이터 출처 미검증으로 disabled입니다. UX-HL-01~05 및 M5~M9 선행 게이트를 유지합니다.
 
 ## 기본 원칙
 

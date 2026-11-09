@@ -80,3 +80,26 @@
 ### 다음 작업
 
 - UX-HL-06-C2: 호가 중간열 실제 시각 밀도·스프레드·모바일 접기/보조공학 인수. 브라우저 환경이 계속 제한되면 UX-HL-06-D1 주문 패널 정보 계층의 독립 구현을 진행.
+
+
+## 4회차 UX-HL-06-C2a — 2026-11-10
+
+### 로컬 구현과 데이터 출처
+
+- 기준 로컬 커밋 309d9f1, 최초 Git 작업 트리 clean.
+- frontend/trade.html: 기존 asks/bids/book-mid/book-spread/recent-trades ID와 계산 계약 보존. 매도·매수 라벨 ASKS/BIDS · MOCK_SAMPLE 추가.
+- 기존 reference는 REFERENCE · MOCK, 계산된 spread는 SPREAD + MOCK으로 별도 강조하고 최우선 합성 매도−매수라는 근거를 노출. JS 미실행 시 spread — 및 미계산 접근성 이름 유지.
+- frontend/trade.css: 공통 3열 숫자 Grid (1.35/1/1), tabular 숫자, 행간·폰트·대비, 누적 깊이 그라데이션 및 1330/760/360px 브레이크포인트를 보강.
+- 기존 7개 Ask/7개 Bid, 9개 최근 거래, 시장/스프레드·누적 깊이 계산, 모바일 접기/ARIA 탭 및 주문/계정 로직 변경 없음.
+- 신규 ux-hl-06-depth-visual.test.mjs 5개: MOCK 표시/DOM ID, 공통 열·숫자/깊이 스타일, spread 계산·ARIA, 반응형/접기 보존, 명목 대비 계산.
+- 프런트 회귀 230/230 PASS (기준 225 + 신규 5), JavaScript 문법·HTML 파싱·Git 변경 검사는 커밋 전 최종 재검증.
+
+### 실제 브라우저 제약
+
+- 일반 사용자 node 권한 및 chromiumSandbox:true로 보존된 Chromium Headless Shell을 재실행했지만 Chromium sandboxing failed 오류 재현. 우회 옵션 사용 안 함.
+- 1536/1280/768/390 및 200% 확대, 실제 픽셀·overflow·터치/스크린리더 검증은 미완료. 정적 CSS와 색상 계산 결과를 실제 시각 인수로 주장하지 않음.
+- 따라서 완료 단위는 C2a 코드/정적/회귀로 한정. C2b/A3/F 실브라우저 인수 보류.
+
+### 후속
+
+- 환경이 허용되면 C2b/A3/F 시각 검증. 동일한 샌드박스 실패가 지속되는 동안은 다음 독립 구현 UX-HL-06-D1 주문 패널 밀도·정보 계층 개선을 진행.

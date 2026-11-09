@@ -526,3 +526,129 @@
   .trade-shell .terminal-grid>.market-column{display:flex;flex-direction:column}
   .trade-shell .market-depth-tab{padding-inline:13px}
 }
+
+
+/* UX-HL-06-C2 — explicit book-side labels, legible tabular depth and a
+ * separated calculated MOCK spread. No additional market data is implied. */
+.trade-shell .market-depth-surface{
+  --depth-pad:12px;
+  --depth-cols:minmax(0,1.35fr) minmax(0,1fr) minmax(0,1fr);
+  --depth-gap:6px;
+}
+.trade-shell .market-depth-surface .panel-heading{
+  padding:11px var(--depth-pad) 9px;
+  gap:6px;
+}
+.trade-shell .market-depth-surface .panel-heading h2{font-size:12px;line-height:1.35}
+.trade-shell .market-depth-surface .panel-heading .small-label{
+  display:block;font-size:9px;line-height:1.5;letter-spacing:.03em;color:#a6bbc9;
+}
+.trade-shell .market-depth-surface .book-header,
+.trade-shell .market-depth-surface .book-row{
+  grid-template-columns:var(--depth-cols);
+  column-gap:var(--depth-gap);
+  padding-inline:var(--depth-pad);
+  min-width:0;
+}
+.trade-shell .market-depth-surface .book-header{
+  padding-top:9px;padding-bottom:9px;
+  font-size:10px;line-height:1.3;color:#a6bccd;
+  background:#182734;border-bottom:1px solid #2e4453;
+}
+.trade-shell .market-depth-surface .book-header span{min-width:0}
+.trade-shell .market-depth-surface .book-rows,
+.trade-shell .market-depth-surface .trade-rows{padding:0;min-width:0}
+.trade-shell .market-depth-surface .book-row{
+  padding-block:6px;min-height:29px;align-items:center;
+  font-size:11.5px;line-height:1.4;font-weight:650;white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1;
+}
+.trade-shell .market-depth-surface .book-row>span{
+  min-width:0;white-space:nowrap;
+}
+.trade-shell .market-depth-surface .book-row>span:not(:first-child){color:#d8e4ed}
+.trade-shell .market-depth-surface .book-row>span:first-child{font-weight:750}
+.trade-shell .market-depth-surface .book-row::before{
+  inset:2px 0 2px auto;
+  border-radius:3px 0 0 3px;
+  background:linear-gradient(90deg,transparent,#bc56612e);
+}
+.trade-shell .market-depth-surface .book-row.bid::before{
+  background:linear-gradient(90deg,transparent,#2ca7862b);
+}
+.trade-shell .market-depth-surface .book-row:nth-child(even){background-color:#17222d}
+.trade-shell .market-depth-surface .book-side-label{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:8px;padding:8px var(--depth-pad) 5px;
+  font-size:10px;line-height:1.2;font-weight:800;letter-spacing:.025em;
+}
+.trade-shell .market-depth-surface .book-side-label small{
+  font-size:8px;color:#a2b5c2;font-weight:600;letter-spacing:0;
+}
+.trade-shell .market-depth-surface .ask-label{color:#ff99a3}
+.trade-shell .market-depth-surface .bid-label{color:#6ee6bb}
+.trade-shell .market-depth-surface .book-mid{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  gap:9px;margin:9px 0 7px;padding:12px var(--depth-pad);
+  border-block:1px solid #41606b;
+  background:#1c313a;
+}
+.trade-shell .market-depth-surface .book-mid-reference,
+.trade-shell .market-depth-surface .book-mid-spread{
+  display:flex;flex-direction:column;gap:4px;min-width:0;
+}
+.trade-shell .market-depth-surface .book-mid-reference strong{
+  color:#e5f7ef;font-size:14px;font-weight:800;
+  font-variant-numeric:tabular-nums;
+}
+.trade-shell .market-depth-surface .book-mid .mid-label{
+  color:#afc5d2;font-size:9px;font-weight:750;letter-spacing:.02em;
+}
+.trade-shell .market-depth-surface .book-mid-spread{text-align:right}
+.trade-shell .market-depth-surface .book-mid-spread>span:first-child{
+  color:#a3bac7;font-size:9px;font-weight:800;white-space:nowrap;
+}
+.trade-shell .market-depth-surface .book-mid output{
+  color:#f6e7bd;font-size:13px;font-weight:850;margin-left:4px;
+  font-variant-numeric:tabular-nums;
+}
+.trade-shell .market-depth-surface .book-mid small{
+  color:#c5d0be;font-size:8px;letter-spacing:.01em;
+}
+.trade-shell .market-depth-surface .spread-description{
+  color:#aebfcc;font-size:9px;white-space:nowrap;
+}
+.trade-shell .market-depth-surface .book-footer{
+  margin-top:10px;padding:10px var(--depth-pad);
+  color:#a2b5c5;font-size:10px;line-height:1.45;
+}
+.trade-shell .market-depth-surface .trade-log-panel .book-header,
+.trade-shell .market-depth-surface .trade-log-panel .trade-row{
+  grid-template-columns:minmax(0,1.2fr) minmax(0,.85fr) minmax(0,.75fr) minmax(0,.55fr);
+  column-gap:4px;
+}
+.trade-shell .market-depth-surface .trade-row{
+  padding-block:9px;min-height:34px;
+}
+.trade-shell .market-depth-surface .trade-side{font-size:10px;font-weight:800}
+@media(max-width:1330px){
+  .trade-shell .market-depth-surface{--depth-pad:9px;--depth-gap:4px}
+  .trade-shell .market-depth-surface .book-row{font-size:11px}
+  .trade-shell .market-depth-surface .book-mid{gap:5px}
+  .trade-shell .market-depth-surface .book-mid-reference strong{font-size:13px}
+  .trade-shell .market-depth-surface .book-mid output{font-size:12px}
+}
+@media(max-width:760px){
+  .trade-shell .market-depth-surface{--depth-pad:clamp(12px,4vw,18px);--depth-gap:8px}
+  .trade-shell .market-depth-surface .book-row{font-size:12px;min-height:33px}
+  .trade-shell .market-depth-surface .book-header{font-size:11px}
+  .trade-shell .market-depth-surface .book-mid-reference strong{font-size:15px}
+  .trade-shell .market-depth-surface .book-mid output{font-size:14px}
+}
+@media(max-width:360px){
+  .trade-shell .market-depth-surface{--depth-pad:9px;--depth-gap:4px}
+  .trade-shell .market-depth-surface .book-row{font-size:11px}
+  .trade-shell .market-depth-surface .book-header{font-size:10px}
+  .trade-shell .market-depth-surface .book-side-label small{font-size:8px}
+}
